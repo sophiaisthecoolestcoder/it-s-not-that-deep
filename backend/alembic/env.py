@@ -1,10 +1,24 @@
 from logging.config import fileConfig
+import os
+import sys
+
 from sqlalchemy import engine_from_config, pool
 from alembic import context
+from dotenv import load_dotenv
+
+# Make backend package importable when Alembic is launched from venv Scripts on Windows.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+
 from app.database import Base
 from app.models import Employee, Guest  # noqa: F401
 
 config = context.config
+# Prefer DATABASE_URL from .env for Alembic execution.
+database_url = os.getenv("DATABASE_URL")
+if database_url:
+    config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
+
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 

@@ -6,16 +6,17 @@ const BASE_URL = Platform.select({
   default: 'http://localhost:8000/api',
 });
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+function request<T>(path: string, options?: RequestInit): Promise<T> {
+  return fetch(`${BASE_URL}${path}`, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
+  }).then((res) => {
+    if (!res.ok) {
+      throw new Error(`API error ${res.status}: ${res.statusText}`);
+    }
+    if (res.status === 204) return undefined as T;
+    return res.json() as Promise<T>;
   });
-  if (!res.ok) {
-    throw new Error(`API error ${res.status}: ${res.statusText}`);
-  }
-  if (res.status === 204) return undefined as T;
-  return res.json();
 }
 
 export const api = {
