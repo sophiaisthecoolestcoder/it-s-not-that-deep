@@ -42,4 +42,11 @@ export const api = {
 
   // Health
   health: () => request<{ status: string }>('/health'),
+
+  // LLM Assistant
+  askAssistant: (question: string) =>
+    request<{ question: string; answer: string }>('/llm/ask', {
+      method: 'POST',
+      body: JSON.stringify({ question }),
+    }),
 };

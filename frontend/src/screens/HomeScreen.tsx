@@ -24,7 +24,11 @@ type Guest = {
   nationality?: string;
 };
 
-export default function HomeScreen() {
+interface HomeScreenProps {
+  onNavigateToChat?: () => void;
+}
+
+export default function HomeScreen(props: HomeScreenProps) {
   const [activeView, setActiveView] = useState<'employees' | 'guests' | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [guests, setGuests] = useState<Guest[]>([]);
@@ -88,6 +92,14 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.cardRow}>
+        <TouchableOpacity style={[styles.card, styles.chatCard]} onPress={props.onNavigateToChat}>
+          <Text style={styles.cardIcon}>🤖</Text>
+          <Text style={styles.cardTitle}>Assistant</Text>
+          <Text style={styles.cardCaption}>AI-Anfragen</Text>
+        </TouchableOpacity>
+      </View>
+
       {loading ? <ActivityIndicator style={styles.loader} color={colors.forest} /> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -129,7 +141,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
     paddingHorizontal: 24,
-    paddingTop: 80,
+    paddingTop: 60,
   },
   header: {
     alignItems: 'center',
@@ -162,6 +174,7 @@ const styles = StyleSheet.create({
   cardRow: {
     flexDirection: 'row',
     gap: 16,
+    marginBottom: 16,
   },
   card: {
     flex: 1,
@@ -220,5 +233,8 @@ const styles = StyleSheet.create({
     ...typography.caption,
     marginTop: 4,
     color: colors.textSecondary,
+  },
+  chatCard: {
+    flex: 0.5,
   },
 });

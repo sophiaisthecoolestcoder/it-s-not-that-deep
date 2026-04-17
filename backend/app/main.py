@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import employees, guests
+from app.routers import employees, guests, llm
 
 app = FastAPI(
     title="Bleiche Resort & Spa",
@@ -18,6 +18,7 @@ app.add_middleware(
 
 app.include_router(employees.router, prefix="/api")
 app.include_router(guests.router, prefix="/api")
+app.include_router(llm.router, prefix="/api")
 
 
 @app.get("/api/health")
