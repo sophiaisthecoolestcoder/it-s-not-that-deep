@@ -1,0 +1,2 @@
+bash run-frontend.sh
+bash run-backend.sh
