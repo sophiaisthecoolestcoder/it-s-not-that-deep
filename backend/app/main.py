@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import employees, guests, llm
+from app.routers import employees, guests, llm, auth, offers, belegung
 
 app = FastAPI(
     title="Bleiche Resort & Spa",
     description="Hotel management system for Bleiche Resort & Spa, Spreewald",
-    version="0.1.0",
+    version="0.2.0",
 )
 
 app.add_middleware(
@@ -16,8 +16,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router, prefix="/api")
 app.include_router(employees.router, prefix="/api")
 app.include_router(guests.router, prefix="/api")
+app.include_router(offers.router, prefix="/api")
+app.include_router(belegung.router, prefix="/api")
 app.include_router(llm.router, prefix="/api")
 
 

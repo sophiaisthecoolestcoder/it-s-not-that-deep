@@ -1,5 +1,5 @@
+// Bleiche Resort & Spa brand palette (exact match of legacy React tailwind config).
 export const colors = {
-  // Old bleiche-resort palette (warm earth + charcoal)
   brand50: '#faf6f1',
   brand100: '#f5ede3',
   brand200: '#EEE5DA',
@@ -10,6 +10,7 @@ export const colors = {
   brand700: '#6d5234',
   brand800: '#503c26',
   brand900: '#3a2b1b',
+  brand950: '#251c11',
 
   dark50: '#f5f5f5',
   dark100: '#ececec',
@@ -21,26 +22,29 @@ export const colors = {
   dark700: '#2d2d2d',
   dark800: '#222222',
   dark900: '#1a1a1a',
+  dark950: '#111111',
 
-  // Legacy aliases for existing code
+  white: '#FFFFFF',
+  background: '#faf6f1',
+  card: '#FFFFFF',
+  belSection: '#b0b0b0',
+  belHeader: '#e8e8e8',
+  belBorder: '#c0c0c0',
+  belSoftBorder: '#d4d4d4',
+  tableHeaderBg: '#faf0ea',
+
+  textPrimary: '#3a3a3a',
+  textSecondary: '#787978',
+  textMuted: '#a5a6a6',
+
+  error: '#C0392B',
+  success: '#27AE60',
+
+  // Legacy aliases kept so older RN code keeps compiling.
   forest: '#8B6A43',
   sage: '#787978',
   gold: '#C2A98C',
   cream: '#EEE5DA',
   warmGray: '#dedede',
   charcoal: '#3a3a3a',
-
-  // Surfaces
-  white: '#FFFFFF',
-  background: '#faf6f1',
-  card: '#FFFFFF',
-
-  // Text aliases
-  textPrimary: '#3a3a3a',
-  textSecondary: '#787978',
-  textMuted: '#a5a6a6',
-
-  // Semantic
-  error: '#C0392B',
-  success: '#27AE60',
 } as const;

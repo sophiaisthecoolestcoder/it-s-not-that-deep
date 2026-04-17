@@ -2,15 +2,14 @@
 
 from typing import Any, Dict, Optional
 
-from sqlalchemy.orm import Session
-
 from app.database import SessionLocal
 from app.models.employee import Employee, EmployeeRole
 from app.models.guest import Guest
+from app.models.offer import Offer, OfferStatus
+from app.models.belegung import DailyBriefing
 
 
 def list_guests(limit: int = 10, nationality: Optional[str] = None) -> Dict[str, Any]:
-    """List guests with optional nationality filter."""
     session = SessionLocal()
     try:
         query = session.query(Guest)
@@ -35,7 +34,6 @@ def list_guests(limit: int = 10, nationality: Optional[str] = None) -> Dict[str,
 
 
 def get_guest_by_name(name: str) -> Dict[str, Any]:
-    """Find guest(s) by partial name."""
     session = SessionLocal()
     try:
         guests = (
@@ -65,7 +63,6 @@ def get_guest_by_name(name: str) -> Dict[str, Any]:
 
 
 def list_employees(limit: int = 10, role: Optional[str] = None) -> Dict[str, Any]:
-    """List employees with optional role filter."""
     session = SessionLocal()
     try:
         query = session.query(Employee)
@@ -95,7 +92,6 @@ def list_employees(limit: int = 10, role: Optional[str] = None) -> Dict[str, Any
 
 
 def get_employee_by_role(role: str) -> Dict[str, Any]:
-    """Find employees by role."""
     session = SessionLocal()
     try:
         try:
@@ -121,7 +117,6 @@ def get_employee_by_role(role: str) -> Dict[str, Any]:
 
 
 def search_guest_notes(keyword: str) -> Dict[str, Any]:
-    """Find guests by keyword in notes."""
     session = SessionLocal()
     try:
         guests = (
@@ -133,11 +128,7 @@ def search_guest_notes(keyword: str) -> Dict[str, Any]:
         return {
             "count": len(guests),
             "guests": [
-                {
-                    "id": g.id,
-                    "name": f"{g.first_name} {g.last_name}",
-                    "notes": g.notes,
-                }
+                {"id": g.id, "name": f"{g.first_name} {g.last_name}", "notes": g.notes}
                 for g in guests
             ],
         }
@@ -145,12 +136,68 @@ def search_guest_notes(keyword: str) -> Dict[str, Any]:
         session.close()
 
 
+def list_offers(limit: int = 10, status: Optional[str] = None) -> Dict[str, Any]:
+    session = SessionLocal()
+    try:
+        query = session.query(Offer).order_by(Offer.created_at.desc())
+        if status:
+            try:
+                status_enum = OfferStatus[status.upper()]
+                query = query.filter(Offer.status == status_enum)
+            except KeyError:
+                return {"error": f"Unknown status '{status}'"}
+        offers = query.limit(max(1, min(limit, 50))).all()
+        return {
+            "count": len(offers),
+            "offers": [
+                {
+                    "id": o.id,
+                    "client": f"{o.first_name} {o.last_name}",
+                    "arrival": o.arrival_date.isoformat() if o.arrival_date else None,
+                    "departure": o.departure_date.isoformat() if o.departure_date else None,
+                    "room": o.room_category,
+                    "total_price": o.total_price,
+                    "status": o.status.value,
+                }
+                for o in offers
+            ],
+        }
+    finally:
+        session.close()
+
+
+def list_daily_briefings(limit: int = 10) -> Dict[str, Any]:
+    session = SessionLocal()
+    try:
+        rows = (
+            session.query(DailyBriefing)
+            .order_by(DailyBriefing.date.desc())
+            .limit(max(1, min(limit, 60)))
+            .all()
+        )
+        return {
+            "count": len(rows),
+            "days": [
+                {
+                    "date": r.date.isoformat(),
+                    "arrivals": len((r.data or {}).get("arrivals", [])),
+                    "stayers": len((r.data or {}).get("stayers", [])),
+                    "updated_at": r.updated_at.isoformat() if r.updated_at else None,
+                }
+                for r in rows
+            ],
+        }
+    finally:
+        session.close()
+
+
 def get_all_tool_functions() -> Dict[str, Any]:
-    """Return all available tool functions."""
     return {
         "list_guests": list_guests,
         "get_guest_by_name": get_guest_by_name,
         "list_employees": list_employees,
         "get_employee_by_role": get_employee_by_role,
         "search_guest_notes": search_guest_notes,
+        "list_offers": list_offers,
+        "list_daily_briefings": list_daily_briefings,
     }

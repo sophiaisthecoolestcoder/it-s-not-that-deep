@@ -7,6 +7,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
+    publicPath: '/',
   },
   resolve: {
     alias: {
@@ -23,13 +24,17 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: [
-              '@babel/preset-env',
+              ['@babel/preset-env', { targets: { esmodules: true } }],
               ['@babel/preset-react', { runtime: 'automatic' }],
               '@babel/preset-typescript',
             ],
             plugins: ['react-native-web'],
           },
         },
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        type: 'asset/resource',
       },
     ],
   },
@@ -42,5 +47,9 @@ module.exports = {
     port: 3000,
     hot: true,
     open: true,
+    static: {
+      directory: path.resolve(__dirname, 'web'),
+    },
+    historyApiFallback: true,
   },
 };
