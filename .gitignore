@@ -1,0 +1,28 @@
+# Python
+backend/venv/
+__pycache__/
+*.pyc
+*.pyo
+backend/.env
+
+# Node
+frontend/node_modules/
+frontend/.metro-health-check*
+
+# iOS
+frontend/ios/Pods/
+frontend/ios/build/
+
+# Android
+frontend/android/.gradle/
+frontend/android/app/build/
+frontend/android/build/
+*.apk
+*.aab
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store

@@ -1,0 +1,45 @@
+// Bleiche Resort & Spa — Database Schema (DBML)
+// This file must always reflect the current database structure.
+// Update it whenever migrations change the schema.
+
+Project bleiche_hotel {
+  database_type: 'PostgreSQL'
+  Note: 'Hotel management system for Bleiche Resort & Spa, Spreewald'
+}
+
+Enum employeerole {
+  manager
+  receptionist
+  housekeeper
+  spa_therapist
+  chef
+  waiter
+  concierge
+  maintenance
+  admin
+}
+
+Table employees {
+  id integer [pk, increment]
+  first_name varchar(100) [not null]
+  last_name varchar(100) [not null]
+  email varchar(255) [not null, unique, note: 'indexed']
+  phone varchar(30)
+  role employeerole [not null]
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+Table guests {
+  id integer [pk, increment]
+  first_name varchar(100) [not null]
+  last_name varchar(100) [not null]
+  email varchar(255) [not null, unique, note: 'indexed']
+  phone varchar(30)
+  date_of_birth date
+  address text
+  nationality varchar(100)
+  notes text
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
