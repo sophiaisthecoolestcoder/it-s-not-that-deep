@@ -12,7 +12,7 @@ from app.llm.tools import get_all_tool_functions
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "mixtral-8x7b-32768")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
 SYSTEM_PROMPT = (
     "You are a helpful Bleiche Resort & Spa assistant. You have access to tools to "
