@@ -22,7 +22,7 @@ export default function ChatScreen() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -32,27 +32,29 @@ export default function ChatScreen() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
     setLoading(true);
 
-    try {
-      const response = await api.askAssistant(input);
-      const assistantMessage: Message = {
-        id: `${Date.now()}-assistant`,
-        role: 'assistant',
-        content: response.answer,
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      const errorMessage: Message = {
-        id: `${Date.now()}-error`,
-        role: 'assistant',
-        content: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setLoading(false);
-    }
+    api.askAssistant(currentInput)
+      .then((response) => {
+        const assistantMessage: Message = {
+          id: `${Date.now()}-assistant`,
+          role: 'assistant',
+          content: response.answer,
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+        setLoading(false);
+      })
+      .catch((error) => {
+        const errorMessage: Message = {
+          id: `${Date.now()}-error`,
+          role: 'assistant',
+          content: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+        setLoading(false);
+      });
   };
 
   return (
