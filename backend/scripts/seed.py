@@ -33,9 +33,9 @@ ROOMS: list[tuple[str, str, str]] = (
 def seed():
     session = SessionLocal()
     try:
-        # Admin
-        admin_username = os.getenv("BLEICHE_ADMIN_USER", "admin")
-        admin_password = os.getenv("BLEICHE_ADMIN_PASS", "bleiche2026")
+        # Default admin user (change password after first login)
+        admin_username = "admin"
+        admin_password = "bleiche2026"
         if not session.query(User).filter(User.username == admin_username).first():
             admin = User(
                 username=admin_username,
@@ -43,31 +43,23 @@ def seed():
                 role=EmployeeRole.ADMIN,
             )
             session.add(admin)
-            print(f"[seed] created admin user '{admin_username}' with password '{admin_password}'")
+            print(f"[seed] created admin user '{admin_username}' (change password after first login)")
         else:
             print(f"[seed] admin user '{admin_username}' already exists")
 
-        # Receptionist demo user
-        recep_user = os.getenv("BLEICHE_RECEP_USER", "rezeption")
-        recep_pass = os.getenv("BLEICHE_RECEP_PASS", "rezeption")
-        if not session.query(User).filter(User.username == recep_user).first():
-            session.add(User(
-                username=recep_user,
-                password_hash=hash_password(recep_pass),
-                role=EmployeeRole.RECEPTIONIST,
-            ))
-            print(f"[seed] created receptionist user '{recep_user}' with password '{recep_pass}'")
-
-        # Housekeeping demo user (limited assistant access)
-        hk_user = os.getenv("BLEICHE_HK_USER", "hausdame")
-        hk_pass = os.getenv("BLEICHE_HK_PASS", "hausdame")
-        if not session.query(User).filter(User.username == hk_user).first():
-            session.add(User(
-                username=hk_user,
-                password_hash=hash_password(hk_pass),
-                role=EmployeeRole.HOUSEKEEPER,
-            ))
-            print(f"[seed] created housekeeper user '{hk_user}' with password '{hk_pass}'")
+        # Default demo users
+        demo_users = [
+            ("rezeption", "rezeption", EmployeeRole.RECEPTIONIST),
+            ("hausdame", "hausdame", EmployeeRole.HOUSEKEEPER),
+        ]
+        for username, password, role in demo_users:
+            if not session.query(User).filter(User.username == username).first():
+                session.add(User(
+                    username=username,
+                    password_hash=hash_password(password),
+                    role=role,
+                ))
+                print(f"[seed] created {role.value} user '{username}'")
 
         # Rooms
         existing = {r.number for r in session.query(Room).all()}

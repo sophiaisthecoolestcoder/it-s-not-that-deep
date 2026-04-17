@@ -10,12 +10,14 @@ import {
 } from 'react-native';
 import { api } from '../../api/client';
 import { useToast } from '../../components/ui/Toast';
+import { useI18n } from '../../i18n/I18nContext';
 import type { StaffMember } from '../../types/belegung';
 import { colors } from '../../theme/colors';
 import { fonts } from '../../theme/typography';
 
 export default function StaffManagerScreen() {
   const { addToast } = useToast();
+  const { t } = useI18n();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState('');
@@ -69,7 +71,7 @@ export default function StaffManagerScreen() {
     <View style={s.root}>
       {/* Header */}
       <View style={s.topBar}>
-        <Text style={s.pageTitle}>Mitarbeiter verwalten</Text>
+        <Text style={s.pageTitle}>{t('staff.title')}</Text>
         <Text style={s.subtitle}>Diese Namen stehen in der Belegungsliste zur Auswahl</Text>
       </View>
 

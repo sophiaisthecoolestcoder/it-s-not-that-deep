@@ -8,13 +8,16 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { useAuth } from '../auth/AuthContext';
+import { useI18n } from '../i18n/I18nContext';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/typography';
 
 export default function LoginScreen() {
   const { login } = useAuth();
+  const { t } = useI18n();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +28,7 @@ export default function LoginScreen() {
     setLoading(true);
     setError('');
     login(username.trim(), password)
-      .catch((e: Error) => setError(e.message || 'Anmeldung fehlgeschlagen'))
+      .catch((e: Error) => setError(e.message || 'Login failed'))
       .finally(() => setLoading(false));
   };
 
@@ -37,9 +40,13 @@ export default function LoginScreen() {
       <View style={s.card}>
         {/* Brand header */}
         <View style={s.brandArea}>
-          <View style={s.brandMark} />
+          <Image
+            source={{ uri: '/assets/bleiche-logo-text.png' }}
+            style={s.brandMark}
+            resizeMode="contain"
+          />
           <Text style={s.brandTitle}>Bleiche Resort & Spa</Text>
-          <Text style={s.brandSub}>Operations Workspace</Text>
+          <Text style={s.brandSub}>{t('login.workspace')}</Text>
         </View>
 
         <View style={s.divider} />
@@ -47,7 +54,7 @@ export default function LoginScreen() {
         {/* Form */}
         <View style={s.form}>
           <View style={s.field}>
-            <Text style={s.label}>Benutzername</Text>
+            <Text style={s.label}>{t('login.username')}</Text>
             <TextInput
               style={s.input}
               value={username}
@@ -61,7 +68,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={s.field}>
-            <Text style={s.label}>Passwort</Text>
+            <Text style={s.label}>{t('login.password')}</Text>
             <TextInput
               style={s.input}
               value={password}
@@ -84,7 +91,7 @@ export default function LoginScreen() {
             {loading ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text style={s.btnText}>Anmelden</Text>
+              <Text style={s.btnText}>{t('login.signIn')}</Text>
             )}
           </TouchableOpacity>
         </View>

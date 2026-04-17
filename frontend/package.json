@@ -11,13 +11,16 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-clipboard/clipboard": "^1.16.3",
     "@react-native/new-app-screen": "0.85.1",
     "highlight.js": "^11.11.1",
+    "html2canvas": "^1.4.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
     "react-native": "0.85.1",
     "react-native-safe-area-context": "^5.5.2",
+    "react-native-svg": "^15.15.4",
     "react-native-web": "^0.21.2",
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.1"

@@ -1,111 +1,71 @@
-# Architecture Overview — Bleiche Resort & Spa Hotel Software
+# Architecture Overview
 
-## Monorepo Structure
+This file is the short entry point for the active Bleiche codebase.
 
-```
-bleiche-it's not so deep!!!/
-├── backend/          # Python FastAPI server
-├── frontend/         # React Native mobile app
-├── docs/             # Documentation
-└── CLAUDE.md         # AI assistant project context
-```
+If you need implementation detail, use the deeper docs in this folder:
 
-## Backend
+- [Platform decisions](platform-decisions.md)
+- [Backend architecture](backend.md)
+- [Frontend architecture](frontend.md)
+- [Database guide](database.md)
+- [LLM integration](llm-integration.md)
+- [Offers workflow](offers.md)
+- [Belegung workflow](belegung.md)
+- [Operations guide](operations.md)
 
-### Technology Stack
+## System Shape
 
-| Layer        | Technology      | Rationale                                                                 |
-|-------------|-----------------|---------------------------------------------------------------------------|
-| Framework   | FastAPI         | Async-capable, auto-generates OpenAPI docs, strong type validation via Pydantic |
-| ORM         | SQLAlchemy 2.0  | Mature, battle-tested ORM with excellent PostgreSQL support               |
-| Migrations  | Alembic         | First-party SQLAlchemy migration tool, supports auto-generation           |
-| Database    | PostgreSQL 18   | ACID-compliant, robust ENUM support, ideal for relational hotel data      |
-| Validation  | Pydantic v2     | Schema validation with EmailStr, date types, and from_attributes support  |
+The active codebase is a monorepo with two production applications:
 
-### API Design
+- `backend/` is the authoritative FastAPI + PostgreSQL service.
+- `frontend/` is the React Native client that runs on web, iOS, and Android.
 
-- RESTful JSON API under `/api/` prefix
-- Full CRUD for employees and guests
-- CORS enabled for mobile client access
-- Health check endpoint at `/api/health`
-- Pagination via `skip` and `limit` query parameters
+The backend owns persistence, authorization, offer export, and assistant tool execution.
+The frontend owns navigation, rendering, localization, clipboard actions, and export UX.
 
-### Project Layout
+## Main Request Flows
 
-```
-backend/
-├── app/
-│   ├── main.py          # FastAPI app, middleware, router registration
-│   ├── database.py      # Engine, session, Base, get_db dependency
-│   ├── models/          # SQLAlchemy ORM models
-│   │   ├── employee.py  # Employee model with EmployeeRole enum
-│   │   └── guest.py     # Guest model
-│   ├── routers/         # API route handlers
-│   │   ├── employees.py # /api/employees CRUD
-│   │   └── guests.py    # /api/guests CRUD
-│   └── schemas/         # Pydantic request/response schemas
-│       ├── employee.py  # EmployeeCreate, EmployeeRead, EmployeeUpdate
-│       └── guest.py     # GuestCreate, GuestRead, GuestUpdate
-├── alembic/             # Database migration scripts
-├── alembic.ini          # Alembic configuration
-├── requirements.txt     # Python dependencies
-└── .env                 # Database connection string (not committed)
-```
+### Login Flow
 
-## Frontend
+1. The user logs in through the frontend.
+2. The backend issues a JWT.
+3. The frontend stores the token and fetches `GET /api/auth/me`.
+4. The UI uses the returned role and module list to decide which screens to show.
 
-### Technology Stack
+### Offer Flow
 
-| Layer      | Technology     | Rationale                                                    |
-|-----------|----------------|--------------------------------------------------------------|
-| Framework | React Native   | Cross-platform mobile (iOS/Android) from a single codebase  |
-| Language  | TypeScript     | Type safety, better IDE support, fewer runtime errors         |
+1. The user opens the offer editor or the assistant creates an offer through the tool layer.
+2. The backend validates the payload and writes the offer to PostgreSQL.
+3. The frontend renders the list/editor and can export the offer as HTML.
 
-### Design System
+### Belegung Flow
 
-The UI follows the **Bleiche Resort & Spa** brand identity:
+1. The user edits or reviews a daily briefing in the occupancy screens.
+2. The backend stores one row per date with a JSONB payload.
+3. The assistant can read daily briefing summaries and link back to the editor.
 
-- **Color palette**: Forest greens (#2C3E2D), sage (#6B7F5E), gold accents (#B8975A), warm cream backgrounds (#FAF8F5)
-- **Typography**: Light weights, generous letter-spacing, uppercase labels — reflecting the luxury spa aesthetic
-- **Components**: Card-based layout with subtle shadows, minimal borders
+### Chat Flow
 
-### Project Layout
+1. The frontend sends the full visible conversation thread with each assistant request.
+2. The backend injects authenticated user context and role permissions into the prompt.
+3. The model can answer directly or call tools.
+4. The backend returns structured object references for the frontend to render.
 
-```
-frontend/
-├── src/
-│   ├── api/
-│   │   └── client.ts      # API client with typed fetch wrapper
-│   ├── screens/
-│   │   └── HomeScreen.tsx  # Main dashboard screen
-│   └── theme/
-│       ├── colors.ts       # Brand color palette
-│       ├── typography.ts   # Text style definitions
-│       └── index.ts        # Theme barrel export
-├── App.tsx                 # Root component
-└── package.json
-```
+## What Changed From The Old Docs
 
-## Database
+The historical SPA docs in the nested `bleiche-resort/` directory describe an older local-storage-based stack.
 
-### Design Decisions
+The active codebase now uses:
 
-1. **PostgreSQL ENUM for roles**: Using a native PostgreSQL ENUM type (`employeerole`) for the employee role column. This enforces valid values at the database level, is more storage-efficient than a VARCHAR check constraint, and maps cleanly to Python's `enum.Enum`.
+- FastAPI instead of the old SPA-only plan,
+- PostgreSQL-backed persistence,
+- assistant tool calling,
+- localization,
+- native/web-friendly clipboard and export helpers,
+- and explicit user-context threading for the chat.
 
-2. **Separate employees and guests tables**: Rather than a single "person" table with a type discriminator, employees and guests are separate tables because they have fundamentally different attributes (roles vs. booking-related fields) and will diverge further as the system grows.
+## Documentation Rule
 
-3. **Timestamps on all tables**: Both tables include `created_at` and `updated_at` with timezone-aware server defaults for audit trails.
+If the code changes, update the relevant file in `docs/` immediately.
 
-4. **Email as unique index**: Both tables enforce unique emails and index them for fast lookups during check-in and login flows.
-
-5. **Nullable optional fields**: Fields like phone, address, and notes are nullable to allow partial registration — a guest can be added at check-in with minimal data and enriched later.
-
-## Decisions Log
-
-| Decision | Choice | Alternatives Considered | Reason |
-|----------|--------|------------------------|--------|
-| Monorepo | Single repo, two top-level dirs | Separate repos | Simplifies CI, shared docs, atomic cross-stack changes |
-| API prefix | `/api/` | No prefix | Clean separation if a web frontend is added later |
-| Employee roles | PostgreSQL ENUM | Lookup table, VARCHAR | Type safety, storage efficiency, simple enough for a fixed set |
-| Migration tool | Alembic | Raw SQL, Django-style | First-party SQLAlchemy support, auto-generation |
-| Mobile framework | React Native | Flutter, native | JavaScript ecosystem, large community, cross-platform |
+The docs are part of the codebase, not an afterthought.

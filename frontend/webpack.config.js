@@ -19,12 +19,13 @@ module.exports = {
     rules: [
       {
         test: /\.[jt]sx?$/,
-        exclude: /node_modules\/(?!react-native-safe-area-context)/,
+        // Keep node_modules out of Babel on all OS path styles.
+        exclude: /node_modules[\\/](?!react-native-safe-area-context[\\/])/, 
         use: {
           loader: 'babel-loader',
           options: {
             presets: [
-              ['@babel/preset-env', { targets: { esmodules: true } }],
+              ['@babel/preset-env', { targets: { esmodules: true }, modules: false }],
               ['@babel/preset-react', { runtime: 'automatic' }],
               '@babel/preset-typescript',
             ],

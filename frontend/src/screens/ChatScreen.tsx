@@ -14,108 +14,25 @@ import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
+import { useRouter } from '../navigation/Router';
+import { useI18n } from '../i18n/I18nContext';
+import { useToast } from '../components/ui/Toast';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/typography';
+import { CHAT_THEME, CHAT_HIGHLIGHT_CSS, CHAT_MARKDOWN_CSS } from '../theme/chat';
+import { CopyIcon, ReloadIcon } from '../components/chat/ChatIcons';
 import { ROLE_LABELS } from '../types/auth';
-
-// Inline highlight.js theme (github-style, brand-tinted)
-const HIGHLIGHT_CSS = `
-.hljs { background: #f6f2ee; color: #3a3a3a; padding: 0; }
-.hljs-keyword, .hljs-selector-tag { color: #8B6A43; font-weight: 600; }
-.hljs-string, .hljs-attr { color: #6d5234; }
-.hljs-number, .hljs-literal { color: #b09570; }
-.hljs-comment { color: #a5a6a6; font-style: italic; }
-.hljs-title, .hljs-section { color: #503c26; font-weight: 600; }
-.hljs-variable, .hljs-template-variable { color: #8B6A43; }
-.hljs-built_in { color: #6d5234; }
-.hljs-type { color: #b09570; }
-`;
-
-// Markdown component styles injected once into <head>
-const MARKDOWN_CSS = `
-.md-body { font-family: "Noto Sans", Arial, sans-serif; font-size: 14px; line-height: 1.65; color: #3a3a3a; }
-.md-body p { margin: 0 0 10px; }
-.md-body p:last-child { margin-bottom: 0; }
-.md-body h1, .md-body h2, .md-body h3, .md-body h4 {
-  font-family: "Noto Serif", Georgia, serif;
-  color: #6d5234;
-  margin: 14px 0 6px;
-  font-weight: 500;
-  line-height: 1.3;
-}
-.md-body h1 { font-size: 20px; }
-.md-body h2 { font-size: 17px; }
-.md-body h3 { font-size: 15px; }
-.md-body h4 { font-size: 14px; }
-.md-body ul, .md-body ol { margin: 0 0 10px 0; padding-left: 22px; }
-.md-body li { margin-bottom: 3px; }
-.md-body li > p { margin: 0; }
-.md-body strong { font-weight: 600; color: #3a3a3a; }
-.md-body em { font-style: italic; }
-.md-body del { text-decoration: line-through; color: #787978; }
-.md-body blockquote {
-  margin: 8px 0;
-  padding: 8px 14px;
-  border-left: 3px solid #C2A98C;
-  background: #faf6f1;
-  color: #535353;
-  font-style: italic;
-}
-.md-body blockquote p { margin: 0; }
-.md-body code {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
-  background: #f6f2ee;
-  border: 1px solid #EEE5DA;
-  padding: 1px 5px;
-  border-radius: 2px;
-  color: #6d5234;
-}
-.md-body pre {
-  background: #f6f2ee;
-  border: 1px solid #EEE5DA;
-  padding: 12px 14px;
-  margin: 8px 0;
-  overflow-x: auto;
-  border-radius: 2px;
-}
-.md-body pre code {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 12.5px;
-  color: inherit;
-}
-.md-body table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 8px 0;
-  font-size: 13px;
-}
-.md-body th {
-  background: #faf0ea;
-  border: 1px solid #EEE5DA;
-  padding: 6px 10px;
-  text-align: left;
-  font-weight: 600;
-  color: #6d5234;
-}
-.md-body td {
-  border: 1px solid #EEE5DA;
-  padding: 5px 10px;
-}
-.md-body tr:nth-child(even) td { background: #faf6f1; }
-.md-body a { color: #8B6A43; text-decoration: underline; }
-.md-body hr { border: none; border-top: 1px solid #EEE5DA; margin: 12px 0; }
-.md-body input[type="checkbox"] { margin-right: 6px; }
-`;
+import type { AssistantObjectRef } from '../types/assistant';
+import { downloadTextFile } from '../utils/downloads';
+import { copyTextToClipboard } from '../utils/clipboard';
+import { exportConversationAsImage } from '../utils/exportConversationAsImage';
 
 let cssInjected = false;
 function injectStyles() {
   if (cssInjected || typeof document === 'undefined') return;
   cssInjected = true;
   const style = document.createElement('style');
-  style.textContent = HIGHLIGHT_CSS + MARKDOWN_CSS;
+  style.textContent = CHAT_HIGHLIGHT_CSS + CHAT_MARKDOWN_CSS;
   document.head.appendChild(style);
 }
 
@@ -123,15 +40,136 @@ type Message = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  references?: AssistantObjectRef[];
 };
 
-function AssistantMessage({ content }: { content: string }) {
+type MarkdownCodeProps = {
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+  onCopyCode: (value: string) => void;
+  t: (key: string) => string;
+};
+
+type MessageActionButtonProps = {
+  onPress: () => void;
+  label: string;
+  children: React.ReactNode;
+  disabled?: boolean;
+};
+
+function formatTranscript(messages: Message[]) {
+  return messages
+    .map((message) => {
+      const roleLabel = message.role === 'user' ? 'User' : 'Assistant';
+      const referenceText = (message.references || [])
+        .map((ref) => `- ${ref.object_type}: ${ref.title}${ref.subtitle ? ` (${ref.subtitle})` : ''}`)
+        .join('\n');
+      return [
+        `${roleLabel}: ${message.content}`,
+        referenceText ? `References:\n${referenceText}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n');
+    })
+    .join('\n\n');
+}
+
+function CodeBlock({ inline, className, children, onCopyCode, t }: MarkdownCodeProps) {
+  const code = String(children).replace(/\n$/, '');
+  if (inline) {
+    return <code className={className}>{children}</code>;
+  }
+
+  return (
+    <View style={s.codeWrap}>
+      <View style={s.codeHeader}>
+        <Text style={s.codeLabel}>{className?.replace('language-', '') || 'code'}</Text>
+        <TouchableOpacity style={s.codeCopyBtn} onPress={() => onCopyCode(code)}>
+          <Text style={s.codeCopyBtnText}>{t('chat.copyCode')}</Text>
+        </TouchableOpacity>
+      </View>
+      <Text selectable style={s.codeText}>{code}</Text>
+    </View>
+  );
+}
+
+function ObjectRefCard({
+  refItem,
+  onOpen,
+  onDownload,
+  t,
+}: {
+  refItem: AssistantObjectRef;
+  onOpen: (ref: AssistantObjectRef) => void;
+  onDownload: (ref: AssistantObjectRef) => void;
+  t: (key: string) => string;
+}) {
+  const canOpen = (refItem.actions || []).includes('open');
+  const canDownload = (refItem.actions || []).includes('download');
+
+  return (
+    <View style={s.refCard}>
+      <Text style={s.refType}>{refItem.object_type}</Text>
+      <Text style={s.refTitle}>{refItem.title}</Text>
+      {refItem.subtitle ? <Text style={s.refSubtitle}>{refItem.subtitle}</Text> : null}
+      <View style={s.refActions}>
+        {canOpen && (
+          <TouchableOpacity style={s.refBtn} onPress={() => onOpen(refItem)}>
+            <Text style={s.refBtnText}>{t('widget.open')}</Text>
+          </TouchableOpacity>
+        )}
+        {canDownload && (
+          <TouchableOpacity style={s.refBtn} onPress={() => onDownload(refItem)}>
+            <Text style={s.refBtnText}>{t('widget.download')}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+}
+
+function MessageActionButton({ onPress, label, children, disabled }: MessageActionButtonProps) {
+  return (
+    <TouchableOpacity
+      style={s.msgActionBtn}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      disabled={disabled}
+      hitSlop={8}
+      activeOpacity={0.75}
+    >
+      {children}
+    </TouchableOpacity>
+  );
+}
+
+function AssistantMessage({
+  content,
+  onCopyCode,
+  t,
+}: {
+  content: string;
+  onCopyCode: (value: string) => void;
+  t: (key: string) => string;
+}) {
   if (Platform.OS !== 'web') {
-    return <Text style={s.asstText}>{content}</Text>;
+    return <Text selectable style={s.asstText}>{content}</Text>;
   }
   return (
     <div className="md-body">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeHighlight]}
+        components={{
+          code: ({ inline, className, children }) => (
+            <CodeBlock inline={inline} className={className} onCopyCode={onCopyCode} t={t}>
+              {children}
+            </CodeBlock>
+          ),
+        }}
+      >
         {content}
       </ReactMarkdown>
     </div>
@@ -140,10 +178,15 @@ function AssistantMessage({ content }: { content: string }) {
 
 export default function ChatScreen() {
   const { user } = useAuth();
+  const { navigate } = useRouter();
+  const { t, locale } = useI18n();
+  const { addToast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [reloadingMessageId, setReloadingMessageId] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
+  const conversationRef = useRef<View>(null);
 
   useEffect(() => {
     injectStyles();
@@ -153,21 +196,97 @@ export default function ChatScreen() {
     scrollRef.current?.scrollToEnd({ animated: true });
   }, [messages, loading]);
 
+  const latestAssistantMessageId = [...messages].reverse().find((message) => message.role === 'assistant')?.id;
+
+  const copyText = async (text: string) => {
+    await copyTextToClipboard(text);
+    addToast({ type: 'success', title: t('common.copy'), message: t('common.copied') });
+  };
+
+  const handleCopyConversation = async () => {
+    try {
+      await copyText(formatTranscript(messages));
+    } catch (e: any) {
+      addToast({ type: 'error', title: t('common.error'), message: e?.message || 'Copy failed' });
+    }
+  };
+
+  const handleReloadResponse = async (messageId: string) => {
+    if (loading || reloadingMessageId) return;
+
+    const messageIndex = messages.findIndex((message) => message.id === messageId);
+    if (messageIndex <= 0) return;
+
+    const assistantMessage = messages[messageIndex];
+    const previousMessage = messages[messageIndex - 1];
+    if (assistantMessage.role !== 'assistant' || previousMessage.role !== 'user') return;
+    if (latestAssistantMessageId !== messageId) return;
+
+    const conversation = messages.slice(0, messageIndex).map((message) => ({
+      role: message.role,
+      content: message.content,
+    }));
+
+    setLoading(true);
+    setReloadingMessageId(messageId);
+
+    try {
+      const res = await api.askAssistant(previousMessage.content, conversation);
+      setMessages((prev) => prev.map((message) => (
+        message.id === messageId
+          ? { ...message, content: res.answer, references: res.references || [] }
+          : message
+      )));
+    } catch (e: any) {
+      addToast({ type: 'error', title: t('common.error'), message: e?.message || 'Reload failed' });
+    } finally {
+      setLoading(false);
+      setReloadingMessageId(null);
+    }
+  };
+
+  const handleExportConversationImage = async () => {
+    if (Platform.OS !== 'web') {
+      addToast({ type: 'error', title: t('common.error'), message: 'Conversation image export is only available on web' });
+      return;
+    }
+
+    const element = conversationRef.current as unknown as HTMLElement | null;
+    if (!element) {
+      addToast({ type: 'error', title: t('common.error'), message: 'Conversation view is not ready' });
+      return;
+    }
+
+    try {
+      await exportConversationAsImage(element, `chat-${new Date().toISOString().slice(0, 10)}.png`);
+      addToast({ type: 'success', title: t('common.download'), message: t('chat.exportImage') });
+    } catch (e: any) {
+      addToast({ type: 'error', title: t('common.error'), message: e?.message || 'Image export failed' });
+    }
+  };
+
   const handleSend = () => {
     if (!input.trim()) return;
 
     const userMsg: Message = { id: `${Date.now()}`, role: 'user', content: input };
-    setMessages((prev) => [...prev, userMsg]);
     const q = input;
     setInput('');
     setLoading(true);
 
+    const nextMessages = [...messages, userMsg];
+    setMessages(nextMessages);
+
     api
-      .askAssistant(q)
+      .askAssistant(q, nextMessages.map((m) => ({ role: m.role, content: m.content })))
       .then((res) => {
         setMessages((prev) => [
           ...prev,
-          { id: `${Date.now()}-a`, role: 'assistant', content: res.answer },
+          {
+            id: `${Date.now()}-a`,
+            role: 'assistant',
+            content: res.answer,
+            references: res.references || [],
+          },
         ]);
       })
       .catch((e: Error) => {
@@ -186,17 +305,60 @@ export default function ChatScreen() {
     }
   };
 
+  const handleOpenReference = (refItem: AssistantObjectRef) => {
+    const numericId = Number(refItem.object_id);
+    if (refItem.object_type === 'offer' && !Number.isNaN(numericId)) {
+      navigate({ name: 'offer-editor', offerId: numericId });
+      return;
+    }
+    if (refItem.object_type === 'guest' && !Number.isNaN(numericId)) {
+      navigate({ name: 'guest-profile', guestId: numericId });
+      return;
+    }
+    if (refItem.object_type === 'employee' && !Number.isNaN(numericId)) {
+      navigate({ name: 'employee-profile', employeeId: numericId });
+      return;
+    }
+    if (refItem.object_type === 'daily_briefing') {
+      navigate({ name: 'belegung-editor', date: refItem.object_id });
+    }
+  };
+
+  const handleDownloadReference = async (refItem: AssistantObjectRef) => {
+    if (refItem.object_type !== 'offer') return;
+    const numericId = Number(refItem.object_id);
+    if (Number.isNaN(numericId)) return;
+
+    try {
+      const html = await api.exportOfferHtml(numericId, locale);
+      downloadTextFile(`offer-${numericId}.html`, html, 'text/html;charset=utf-8');
+      addToast({ type: 'success', title: t('common.download'), message: refItem.title });
+    } catch (e: any) {
+      addToast({ type: 'error', title: t('common.error'), message: e?.message || 'Export failed' });
+    }
+  };
+
   return (
     <View style={s.root}>
       {/* Header */}
       <View style={s.header}>
-        <Text style={s.headerLabel}>KI-Assistent</Text>
-        <Text style={s.title}>Bleiche Knowledge Desk</Text>
+        <Text style={s.headerLabel}>{t('nav.assistant')}</Text>
+        <Text style={s.title}>{t('chat.title')}</Text>
         {user && (
           <Text style={s.roleTag}>
-            {ROLE_LABELS[user.role]} · Aktive Datenabfrage
+            {ROLE_LABELS[user.role]} · {t('chat.activeQuery')}
           </Text>
         )}
+        <View style={s.headerActions}>
+          <TouchableOpacity style={s.headerBtn} onPress={handleCopyConversation}>
+            <Text style={s.headerBtnText}>{t('chat.copyConversation')}</Text>
+          </TouchableOpacity>
+          {Platform.OS === 'web' && (
+            <TouchableOpacity style={s.headerBtn} onPress={handleExportConversationImage}>
+              <Text style={s.headerBtnText}>{t('chat.exportImage')}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Messages */}
@@ -205,31 +367,71 @@ export default function ChatScreen() {
         style={s.msgs}
         contentContainerStyle={s.msgsContent}
       >
-        {messages.length === 0 && (
-          <Text style={s.empty}>
-            Stellen Sie Fragen zu Anreisen, Gästen, Personal oder tagesaktuellen Daten.
-          </Text>
-        )}
-        {messages.map((msg) => (
-          <View
-            key={msg.id}
-            style={[s.msg, msg.role === 'user' ? s.userMsg : s.asstMsg]}
-          >
-            {msg.role === 'user' ? (
-              <Text style={s.userText}>{msg.content}</Text>
-            ) : (
-              <AssistantMessage content={msg.content} />
-            )}
-          </View>
-        ))}
-        {loading && <ActivityIndicator style={{ marginVertical: 16 }} color={colors.brand600} />}
+        <View ref={conversationRef} collapsable={false} style={s.conversationCapture}>
+          {messages.map((msg) => {
+            const isLatestAssistant = msg.role === 'assistant' && msg.id === latestAssistantMessageId;
+            return (
+              <View
+                key={msg.id}
+                style={[s.msgShell, msg.role === 'user' ? s.msgShellUser : s.msgShellAssistant]}
+              >
+                <View
+                  style={[
+                    s.msg,
+                    msg.role === 'user' ? s.userMsg : s.asstMsg,
+                    reloadingMessageId === msg.id && s.msgReloading,
+                  ]}
+                >
+                  <Text style={[s.msgRole, msg.role === 'user' ? s.msgRoleUser : s.msgRoleAssistant]}>
+                    {msg.role === 'user' ? t('chat.you') : t('chat.assistant')}
+                  </Text>
+                  {msg.role === 'user' ? (
+                    <Text selectable style={s.userText}>{msg.content}</Text>
+                  ) : (
+                    <View>
+                      <AssistantMessage content={msg.content} onCopyCode={copyText} t={t} />
+                      {msg.references?.length ? (
+                        <View style={s.refList}>
+                          {msg.references.map((r) => (
+                            <ObjectRefCard
+                              key={`${msg.id}-${r.object_type}-${r.object_id}`}
+                              refItem={r}
+                              onOpen={handleOpenReference}
+                              onDownload={handleDownloadReference}
+                              t={t}
+                            />
+                          ))}
+                        </View>
+                      ) : null}
+                    </View>
+                  )}
+                </View>
+                <View style={[s.msgActions, msg.role === 'user' ? s.msgActionsUser : s.msgActionsAssistant]}>
+                  <MessageActionButton onPress={() => copyText(msg.content)} label={t('common.copy')}>
+                    <CopyIcon size={CHAT_THEME.actionIconSize} color={CHAT_THEME.actionIcon} />
+                  </MessageActionButton>
+                  {isLatestAssistant && (
+                    <MessageActionButton
+                      onPress={() => handleReloadResponse(msg.id)}
+                      label={t('common.reload')}
+                      disabled={reloadingMessageId === msg.id}
+                    >
+                      <ReloadIcon size={CHAT_THEME.actionIconSize} color={CHAT_THEME.actionIcon} />
+                    </MessageActionButton>
+                  )}
+                </View>
+              </View>
+            );
+          })}
+          {loading && <ActivityIndicator style={{ marginVertical: 16 }} color={colors.brand600} />}
+        </View>
       </ScrollView>
 
       {/* Input */}
       <View style={s.inputBar}>
         <TextInput
           style={s.textInput}
-          placeholder="Anfrage eingeben… (Enter zum Senden, Shift+Enter für Zeilenumbruch)"
+          placeholder={t('chat.placeholder')}
           placeholderTextColor={colors.dark300}
           value={input}
           onChangeText={setInput}
@@ -242,7 +444,7 @@ export default function ChatScreen() {
           onPress={handleSend}
           disabled={loading}
         >
-          <Text style={s.sendBtnText}>Senden</Text>
+          <Text style={s.sendBtnText}>{t('chat.send')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -268,17 +470,36 @@ const s = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
-    color: colors.dark400,
+    color: CHAT_THEME.assistantLabel,
   },
   title: {
     fontFamily: fonts.serif,
     fontSize: 22,
-    color: colors.brand700,
+    color: CHAT_THEME.captureHeaderTitle,
   },
   roleTag: {
     fontFamily: fonts.sans,
     fontSize: 12,
-    color: colors.dark500,
+    color: CHAT_THEME.assistantLabel,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 6,
+    flexWrap: 'wrap',
+  },
+  headerBtn: {
+    borderWidth: 1,
+    borderColor: CHAT_THEME.headerButtonBorder,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: CHAT_THEME.headerButtonBg,
+  },
+  headerBtnText: {
+    fontFamily: fonts.sans,
+    fontSize: 11,
+    fontWeight: '600',
+    color: CHAT_THEME.headerButtonText,
   },
   msgs: {
     flex: 1,
@@ -286,60 +507,227 @@ const s = StyleSheet.create({
   },
   msgsContent: {
     padding: 16,
+  },
+  conversationCapture: {
     gap: 10,
+  },
+  conversationHeader: {
+    backgroundColor: CHAT_THEME.captureHeaderBg,
+    borderWidth: 1,
+    borderColor: CHAT_THEME.captureHeaderBorder,
+    padding: 12,
+    gap: 2,
+  },
+  conversationHeaderLabel: {
+    fontFamily: fonts.sans,
+    fontSize: 10,
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+    color: CHAT_THEME.captureHeaderLabel,
+  },
+  conversationHeaderTitle: {
+    fontFamily: fonts.serif,
+    fontSize: 18,
+    color: CHAT_THEME.captureHeaderTitle,
   },
   empty: {
     fontFamily: fonts.sans,
     fontSize: 14,
-    color: colors.dark500,
+    color: CHAT_THEME.assistantLabel,
     marginTop: 32,
     lineHeight: 22,
   },
+  msgShell: {
+    gap: 6,
+  },
+  msgShellUser: {
+    alignItems: 'flex-end',
+  },
+  msgShellAssistant: {
+    alignItems: 'flex-start',
+  },
   msg: {
     maxWidth: '88%',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingHorizontal: CHAT_THEME.messagePaddingH,
+    paddingVertical: CHAT_THEME.messagePaddingV,
+    gap: 8,
+    borderRadius: CHAT_THEME.messageRadius,
   },
   userMsg: {
-    alignSelf: 'flex-end',
-    backgroundColor: colors.brand600,
+    backgroundColor: CHAT_THEME.userBubbleBg,
+    borderWidth: 1,
+    borderColor: CHAT_THEME.userBubbleBorder,
   },
   asstMsg: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.white,
+    backgroundColor: CHAT_THEME.assistantBubbleBg,
     borderWidth: 1,
-    borderColor: colors.dark200,
+    borderColor: CHAT_THEME.assistantBubbleBorder,
     maxWidth: '92%',
   },
   userText: {
     fontFamily: fonts.sans,
     fontSize: 14,
     lineHeight: 21,
-    color: '#fff',
+    color: CHAT_THEME.userText,
   },
   asstText: {
     fontFamily: fonts.sans,
     fontSize: 14,
     lineHeight: 21,
-    color: colors.textPrimary,
+    color: CHAT_THEME.assistantText,
+  },
+  msgRole: {
+    fontFamily: fonts.sans,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  msgRoleUser: {
+    color: CHAT_THEME.userLabel,
+  },
+  msgRoleAssistant: {
+    color: CHAT_THEME.assistantLabel,
+  },
+  msgActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: CHAT_THEME.actionRowGap,
+    paddingHorizontal: 2,
+  },
+  msgActionsUser: {
+    alignSelf: 'flex-end',
+  },
+  msgActionsAssistant: {
+    alignSelf: 'flex-start',
+  },
+  msgActionBtn: {
+    borderWidth: 1,
+    borderColor: CHAT_THEME.actionButtonBorder,
+    width: CHAT_THEME.actionButtonSize,
+    height: CHAT_THEME.actionButtonSize,
+    borderRadius: CHAT_THEME.actionButtonRadius,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: CHAT_THEME.actionButtonBg,
+  },
+  msgActionBtnPressed: {
+    backgroundColor: CHAT_THEME.actionButtonBgActive,
+    borderColor: CHAT_THEME.actionButtonBorderActive,
+  },
+  msgActionBtnDisabled: {
+    opacity: 0.5,
+  },
+  msgReloading: {
+    opacity: 0.72,
+  },
+  refList: {
+    marginTop: 10,
+    gap: 8,
+  },
+  codeWrap: {
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: CHAT_THEME.codeBorder,
+    backgroundColor: CHAT_THEME.codeBg,
+  },
+  codeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: CHAT_THEME.codeBorder,
+  },
+  codeLabel: {
+    fontFamily: fonts.sans,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: CHAT_THEME.codeLabel,
+  },
+  codeCopyBtn: {
+    borderWidth: 1,
+    borderColor: CHAT_THEME.codeButtonBorder,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: colors.white,
+  },
+  codeCopyBtnText: {
+    fontFamily: fonts.sans,
+    fontSize: 10,
+    fontWeight: '600',
+    color: CHAT_THEME.codeButtonText,
+  },
+  codeText: {
+    fontFamily: 'JetBrains Mono',
+    fontSize: 12,
+    lineHeight: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    color: CHAT_THEME.assistantText,
+  },
+  refCard: {
+    borderWidth: 1,
+    borderColor: CHAT_THEME.refCardBorder,
+    padding: 10,
+    backgroundColor: CHAT_THEME.refCardBg,
+  },
+  refType: {
+    fontFamily: fonts.sans,
+    fontSize: 10,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: CHAT_THEME.refType,
+  },
+  refTitle: {
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    fontWeight: '600',
+    color: CHAT_THEME.refTitle,
+    marginTop: 2,
+  },
+  refSubtitle: {
+    fontFamily: fonts.sans,
+    fontSize: 12,
+    color: CHAT_THEME.refSubtitle,
+    marginTop: 2,
+  },
+  refActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+  },
+  refBtn: {
+    borderWidth: 1,
+    borderColor: CHAT_THEME.refButtonBorder,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  refBtnText: {
+    fontFamily: fonts.sans,
+    fontSize: 11,
+    color: CHAT_THEME.refButtonText,
   },
   inputBar: {
     flexDirection: 'row',
     gap: 8,
     padding: 12,
     borderTopWidth: 1,
-    borderTopColor: colors.dark200,
-    backgroundColor: colors.white,
+    borderTopColor: CHAT_THEME.inputBorder,
+    backgroundColor: CHAT_THEME.inputBg,
   },
   textInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: colors.dark200,
+    borderColor: CHAT_THEME.inputBorder,
     paddingHorizontal: 12,
     paddingVertical: 9,
     fontFamily: fonts.sans,
     fontSize: 14,
-    color: colors.textPrimary,
+    color: CHAT_THEME.assistantText,
     maxHeight: 120,
   },
   sendBtn: {

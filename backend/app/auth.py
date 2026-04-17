@@ -17,7 +17,9 @@ from app.models.user import User
 from app.models.employee import EmployeeRole
 
 
-JWT_SECRET = os.getenv("JWT_SECRET", "bleiche-dev-secret-change-me")
+JWT_SECRET = os.getenv("JWT_SECRET")
+if not JWT_SECRET:
+    raise RuntimeError("Missing JWT_SECRET environment variable. Define it in backend/.env.")
 JWT_ALG_LABEL = "HS256"
 TOKEN_TTL_SECONDS = 60 * 60 * 12  # 12 hours
 
@@ -138,21 +140,28 @@ MODULE_ACCESS: dict[str, set[str]] = {
 LLM_TOOL_ACCESS: dict[str, set[str]] = {
     EmployeeRole.ADMIN.value: {
         "list_guests", "get_guest_by_name", "search_guest_notes",
-        "list_employees", "get_employee_by_role",
-        "list_offers", "list_daily_briefings",
+        "get_guest",
+        "list_employees", "get_employee_by_role", "get_employee",
+        "list_offers", "get_offer", "create_offer",
+        "list_daily_briefings", "get_daily_briefing",
     },
     EmployeeRole.MANAGER.value: {
         "list_guests", "get_guest_by_name", "search_guest_notes",
-        "list_employees", "get_employee_by_role",
-        "list_offers", "list_daily_briefings",
+        "get_guest",
+        "list_employees", "get_employee_by_role", "get_employee",
+        "list_offers", "get_offer", "create_offer",
+        "list_daily_briefings", "get_daily_briefing",
     },
     EmployeeRole.RECEPTIONIST.value: {
         "list_guests", "get_guest_by_name", "search_guest_notes",
-        "list_offers", "list_daily_briefings",
+        "get_guest",
+        "list_offers", "get_offer", "create_offer",
+        "list_daily_briefings", "get_daily_briefing",
     },
     EmployeeRole.CONCIERGE.value: {
         "list_guests", "get_guest_by_name",
-        "list_daily_briefings",
+        "get_guest",
+        "list_daily_briefings", "get_daily_briefing",
     },
 }
 

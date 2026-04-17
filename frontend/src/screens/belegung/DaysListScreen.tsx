@@ -12,6 +12,7 @@ import {
 import { api } from '../../api/client';
 import { useRouter } from '../../navigation/Router';
 import { useToast } from '../../components/ui/Toast';
+import { useI18n } from '../../i18n/I18nContext';
 import { formatDateGerman, formatWeekday, todayISO } from '../../utils/helpers';
 import { colors } from '../../theme/colors';
 import { fonts } from '../../theme/typography';
@@ -19,6 +20,7 @@ import { fonts } from '../../theme/typography';
 export default function DaysListScreen() {
   const { navigate } = useRouter();
   const { addToast } = useToast();
+  const { t } = useI18n();
   const [days, setDays] = useState<{ date: string; updated_at: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [newDate, setNewDate] = useState(todayISO());
@@ -99,7 +101,7 @@ export default function DaysListScreen() {
     <View style={s.root}>
       {/* Header */}
       <View style={s.topBar}>
-        <Text style={s.pageTitle}>Alle Tage</Text>
+        <Text style={s.pageTitle}>{t('days.title')}</Text>
       </View>
 
       {/* Create new day */}

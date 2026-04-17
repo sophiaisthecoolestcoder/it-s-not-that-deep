@@ -12,6 +12,7 @@ import {
 import { api } from '../../api/client';
 import { useRouter } from '../../navigation/Router';
 import { useToast } from '../../components/ui/Toast';
+import { useI18n } from '../../i18n/I18nContext';
 import { BleicheSelect } from '../../components/ui/NativeSelect';
 import type { Offer, OfferStatus } from '../../types/offer';
 import { STATUS_LABELS, STATUS_BG, STATUS_FG } from '../../types/offer';
@@ -27,6 +28,7 @@ const STATUS_OPTIONS = (['draft', 'sent', 'accepted', 'declined'] as OfferStatus
 export default function OffersListScreen() {
   const { navigate } = useRouter();
   const { addToast } = useToast();
+  const { t } = useI18n();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -52,18 +54,18 @@ export default function OffersListScreen() {
   function handleDelete(o: Offer) {
     const name = `${o.first_name} ${o.last_name}`;
     Alert.alert(
-      'Angebot löschen',
-      `Angebot für "${name}" wirklich löschen?`,
+      t('offers.deleteConfirmTitle'),
+      t('offers.deleteConfirmBody', { name }),
       [
-        { text: 'Abbrechen', style: 'cancel' },
+        { text: t('common.back'), style: 'cancel' },
         {
-          text: 'Löschen',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => {
             api
               .deleteOffer(o.id)
               .then(() => {
-                addToast({ type: 'success', title: 'Angebot gelöscht', message: name });
+                addToast({ type: 'success', title: t('offers.deleted'), message: name });
                 setOffers((prev) => prev.filter((x) => x.id !== o.id));
               })
               .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }));
@@ -98,14 +100,14 @@ export default function OffersListScreen() {
       {/* Header */}
       <View style={s.topBar}>
         <View>
-          <Text style={s.pageTitle}>Angebote</Text>
+          <Text style={s.pageTitle}>{t('offers.title')}</Text>
           <Text style={s.subtitle}>{offers.length} Angebot{offers.length !== 1 ? 'e' : ''}</Text>
         </View>
         <TouchableOpacity
           style={s.btnPrimary}
           onPress={() => navigate({ name: 'offer-editor' })}
         >
-          <Text style={s.btnPrimaryText}>+ Neues Angebot</Text>
+          <Text style={s.btnPrimaryText}>+ {t('offers.new')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -113,7 +115,7 @@ export default function OffersListScreen() {
       <View style={s.searchWrap}>
         <TextInput
           style={s.searchInput}
-          placeholder="Kunde suchen..."
+          placeholder={t('offers.search')}
           placeholderTextColor={colors.dark300}
           value={search}
           onChangeText={setSearch}
@@ -125,14 +127,14 @@ export default function OffersListScreen() {
       ) : filtered.length === 0 ? (
         <View style={s.emptyCard}>
           <Text style={s.emptyText}>
-            {search ? 'Keine Angebote gefunden.' : 'Noch keine Angebote vorhanden.'}
+            {search ? t('offers.noneFound') : t('offers.none')}
           </Text>
           {!search && (
             <TouchableOpacity
               style={s.btnSecondary}
               onPress={() => navigate({ name: 'offer-editor' })}
             >
-              <Text style={s.btnSecondaryText}>Erstes Angebot erstellen</Text>
+              <Text style={s.btnSecondaryText}>{t('offers.createFirst')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -186,19 +188,19 @@ export default function OffersListScreen() {
                       style={s.actionBtn}
                       onPress={() => navigate({ name: 'offer-editor', offerId: offer.id })}
                     >
-                      <Text style={s.actionBtnText}>Öffnen</Text>
+                      <Text style={s.actionBtnText}>{t('common.open')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={s.actionBtn}
                       onPress={() => handleDuplicate(offer)}
                     >
-                      <Text style={s.actionBtnText}>Kopie</Text>
+                      <Text style={s.actionBtnText}>{t('offers.duplicate')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[s.actionBtn, s.actionBtnDanger]}
                       onPress={() => handleDelete(offer)}
                     >
-                      <Text style={[s.actionBtnText, s.actionBtnDangerText]}>Löschen</Text>
+                      <Text style={[s.actionBtnText, s.actionBtnDangerText]}>{t('common.delete')}</Text>
                     </TouchableOpacity>
                     <BleicheSelect
                       value={offer.status}

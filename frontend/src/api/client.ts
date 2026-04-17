@@ -3,6 +3,9 @@ import { storage } from '../utils/storage';
 import type { Offer, OfferInput } from '../types/offer';
 import type { AuthUser, EmployeeRole } from '../types/auth';
 import type { DailyData, StaffMember } from '../types/belegung';
+import type { AskAssistantResponse } from '../types/assistant';
+import type { Guest } from '../types/guest';
+import type { Employee } from '../types/employee';
 
 const BASE_URL = Platform.select({
   android: 'http://10.0.2.2:8000/api',
@@ -73,6 +76,8 @@ export const api = {
   // Employees / guests
   getEmployees: () => request<any[]>('/employees/'),
   getGuests: () => request<any[]>('/guests/'),
+  getGuest: (id: number) => request<Guest>(`/guests/${id}`),
+  getEmployee: (id: number) => request<Employee>(`/employees/${id}`),
 
   // Offers
   listOffers: () => request<Offer[]>('/offers/'),
@@ -84,6 +89,17 @@ export const api = {
     request<void>(`/offers/${id}`, { method: 'DELETE' }),
   duplicateOffer: (id: number) =>
     request<Offer>(`/offers/${id}/duplicate`, { method: 'POST' }),
+  exportOfferHtml: async (id: number, lang: 'de' | 'en' = 'de') => {
+    const token = getToken();
+    const headers: Record<string, string> = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const res = await fetch(`${BASE_URL}/offers/${id}/export/html?lang=${lang}`, { headers });
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
+    return res.text();
+  },
 
   // Belegung
   listDays: () => request<Array<{ date: string; updated_at: string }>>('/belegung/days'),
@@ -102,10 +118,10 @@ export const api = {
   removeStaff: (id: number) => request<void>(`/belegung/staff/${id}`, { method: 'DELETE' }),
 
   // LLM
-  askAssistant: (question: string) =>
-    request<{ question: string; answer: string; role: string; tools_available: string[] }>(
+  askAssistant: (question: string, messages: Array<{ role: 'user' | 'assistant'; content: string }> = []) =>
+    request<AskAssistantResponse>(
       '/llm/ask',
-      { method: 'POST', body: JSON.stringify({ question }) },
+      { method: 'POST', body: JSON.stringify({ question, messages }) },
     ),
   llmCapabilities: () =>
     request<{ role: string; tools_available: string[] }>('/llm/capabilities'),

@@ -12,6 +12,7 @@ import {
 import { api } from '../../api/client';
 import { useRouter } from '../../navigation/Router';
 import { useToast } from '../../components/ui/Toast';
+import { useI18n } from '../../i18n/I18nContext';
 import { BleicheSelect } from '../../components/ui/NativeSelect';
 import type { Salutation, OfferStatus } from '../../types/offer';
 import {
@@ -27,6 +28,7 @@ import {
 } from '../../utils/helpers';
 import { colors } from '../../theme/colors';
 import { fonts } from '../../theme/typography';
+import { downloadTextFile } from '../../utils/downloads';
 
 const SALUTATION_OPTIONS = [
   { value: 'Herr', label: 'Herr' },
@@ -85,6 +87,7 @@ interface Props {
 export default function OfferEditorScreen({ offerId }: Props) {
   const { navigate } = useRouter();
   const { addToast } = useToast();
+  const { t, locale } = useI18n();
   const isEditing = Boolean(offerId);
 
   const [loading, setLoading] = useState(isEditing);
@@ -210,6 +213,20 @@ export default function OfferEditorScreen({ offerId }: Props) {
     }
   }
 
+  async function handleExportHtml() {
+    if (!offerId) {
+      addToast({ type: 'warning', title: t('common.error'), message: 'Save the offer first.' });
+      return;
+    }
+    try {
+      const html = await api.exportOfferHtml(offerId, locale);
+      downloadTextFile(`offer-${offerId}.html`, html, 'text/html;charset=utf-8');
+      addToast({ type: 'success', title: t('common.download'), message: `#${offerId}` });
+    } catch (e: any) {
+      addToast({ type: 'error', title: t('common.error'), message: e?.message || 'Export failed' });
+    }
+  }
+
   function guestText(): string {
     const aWord = adultsNum === 1 && salutation === 'Herr' ? 'Erwachsenen' : 'Erwachsene';
     let t = `für ${adultsNum} ${aWord}`;
@@ -240,17 +257,20 @@ export default function OfferEditorScreen({ offerId }: Props) {
           disabled={saving}
         >
           <Text style={s.btnPrimaryText}>
-            {saving ? 'Speichern...' : 'Speichern'}
+            {saving ? `${t('common.save')}...` : t('common.save')}
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity style={s.btnSecondary} onPress={handleExportHtml}>
+          <Text style={s.btnSecondaryText}>{t('offer.export')}</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={s.btnSecondary} onPress={handlePrint}>
-          <Text style={s.btnSecondaryText}>Drucken / PDF</Text>
+          <Text style={s.btnSecondaryText}>{t('offer.printPdf')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={s.btnGhost}
           onPress={() => navigate({ name: 'offers-list' })}
         >
-          <Text style={s.btnGhostText}>← Zurück</Text>
+          <Text style={s.btnGhostText}>← {t('common.back')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -259,7 +279,7 @@ export default function OfferEditorScreen({ offerId }: Props) {
         <ScrollView style={s.formPane} showsVerticalScrollIndicator>
           <View style={s.formCard}>
             <Text style={s.formTitle}>
-              {isEditing ? 'Angebot bearbeiten' : 'Neues Angebot'}
+              {isEditing ? t('offer.edit') : t('offer.new')}
             </Text>
 
             {/* Kundendaten */}
@@ -721,10 +741,7 @@ const s = StyleSheet.create({
   docPage: {
     backgroundColor: colors.white,
     padding: 48,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
   },
   docText: {
     fontFamily: fonts.sans,

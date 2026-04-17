@@ -5,6 +5,8 @@ export type AppScreen =
   | { name: 'home' }
   | { name: 'offers-list' }
   | { name: 'offer-editor'; offerId?: number }
+  | { name: 'guest-profile'; guestId: number }
+  | { name: 'employee-profile'; employeeId: number }
   | { name: 'belegung-editor'; date?: string }
   | { name: 'days-list' }
   | { name: 'staff-manager' }

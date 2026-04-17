@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from './src/auth/AuthContext';
 import { RouterProvider, useRouter } from './src/navigation/Router';
 import { ToastProvider } from './src/components/ui/Toast';
+import { I18nProvider } from './src/i18n/I18nContext';
 
 import Layout from './src/components/Layout';
 import LoginScreen from './src/screens/LoginScreen';
@@ -15,6 +16,8 @@ import BelegungEditorScreen from './src/screens/belegung/BelegungEditorScreen';
 import DaysListScreen from './src/screens/belegung/DaysListScreen';
 import StaffManagerScreen from './src/screens/belegung/StaffManagerScreen';
 import ChatScreen from './src/screens/ChatScreen';
+import GuestProfileScreen from './src/screens/guests/GuestProfileScreen';
+import EmployeeProfileScreen from './src/screens/employees/EmployeeProfileScreen';
 import { colors } from './src/theme/colors';
 
 // ── Error boundary so crashes show a message instead of blank page ──────────
@@ -54,6 +57,10 @@ function ScreenRouter() {
       return <OffersListScreen />;
     case 'offer-editor':
       return <OfferEditorScreen offerId={(screen as any).offerId} />;
+    case 'guest-profile':
+      return <GuestProfileScreen guestId={(screen as any).guestId} />;
+    case 'employee-profile':
+      return <EmployeeProfileScreen employeeId={(screen as any).employeeId} />;
     case 'belegung-editor':
       return <BelegungEditorScreen initialDate={(screen as any).date} />;
     case 'days-list':
@@ -108,9 +115,11 @@ export default function App() {
         <StatusBar barStyle="dark-content" />
         <AuthProvider>
           <RouterProvider>
-            <ToastProvider>
-              <AppContent />
-            </ToastProvider>
+            <I18nProvider>
+              <ToastProvider>
+                <AppContent />
+              </ToastProvider>
+            </I18nProvider>
           </RouterProvider>
         </AuthProvider>
       </SafeAreaProvider>

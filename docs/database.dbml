@@ -19,29 +19,100 @@ Enum employeerole {
   admin
 }
 
+Enum salutation {
+  Herr
+  Frau
+  Familie
+}
+
+Enum offerstatus {
+  draft
+  sent
+  accepted
+  declined
+}
+
 Table employees {
-  id integer [pk, increment]
-  first_name varchar(100) [not null]
-  last_name varchar(100) [not null]
-  email varchar(255) [not null, unique, note: 'indexed']
-  phone varchar(30)
-  role employeerole [not null]
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
+    id         integer      [pk, increment]
+    first_name varchar(100) [not null]
+    last_name  varchar(100) [not null]
+    email      varchar(255) [not null, unique, note: 'indexed']
+    phone      varchar(30)
+    role       employeerole [not null]
+    created_at timestamptz  [default: `now()`]
+    updated_at timestamptz  [default: `now()`]
+}
+
+Table users {
+    id            integer      [pk, increment]
+    username      varchar(100) [not null, unique, note: 'indexed']
+    password_hash varchar(255) [not null]
+    role          employeerole [not null]
+    employee_id   integer
+    is_active     boolean      [not null, default: true]
+    created_at    timestamptz  [default: `now()`]
+    updated_at    timestamptz  [default: `now()`]
 }
 
 Table guests {
-  id integer [pk, increment]
-  first_name varchar(100) [not null]
-  last_name varchar(100) [not null]
-  email varchar(255) [not null, unique, note: 'indexed']
-  phone varchar(30)
-  date_of_birth date
-  address text
-  nationality varchar(100)
-  notes text
-  created_at timestamptz [default: `now()`]
-  updated_at timestamptz [default: `now()`]
+    id            integer      [pk, increment]
+    first_name    varchar(100) [not null]
+    last_name     varchar(100) [not null]
+    email         varchar(255) [not null, unique, note: 'indexed']
+    phone         varchar(30)
+    date_of_birth date
+    address       text
+    nationality   varchar(100)
+    notes         text
+    created_at    timestamptz  [default: `now()`]
+    updated_at    timestamptz  [default: `now()`]
 }
 
-//[[vibebase.{"positions":{"employees":{"x":60,"y":60},"guests":{"x":60,"y":320}},"preferences":{"colorScheme":"default","showNotes":true,"showIndexes":true,"showTypes":true,"snapToGrid":true,"gridSize":20},"viewport":{"x":93.21053136610232,"y":15.624702665930954,"zoom":0.6240726250000023},"collapsed":{}}]]
+Table offers {
+    id                   integer      [pk, increment]
+    salutation           salutation   [not null]
+    first_name           varchar(100) [not null, default: '']
+    last_name            varchar(100) [not null, default: '']
+    street               varchar(255) [not null, default: '']
+    zip_code             varchar(20)  [not null, default: '']
+    city                 varchar(100) [not null, default: '']
+    email                varchar(255) [not null, default: '']
+    offer_date           date
+    arrival_date         date
+    departure_date       date
+    room_category        varchar(100) [not null, default: '']
+    custom_room_category varchar(255) [not null, default: '']
+    adults               integer      [not null, default: 2]
+    children_ages        integer      [] [not null, default: []]
+    price_per_night      varchar(50)  [not null, default: '']
+    total_price          varchar(50)  [not null, default: '']
+    employee_name        varchar(200) [not null, default: '']
+    notes                text         [not null, default: '']
+    status               offerstatus  [not null, default: 'draft']
+    created_at           timestamptz  [default: `now()`]
+    updated_at           timestamptz  [default: `now()`]
+}
+
+Table daily_briefings {
+    id         integer     [pk, increment]
+    date       date        [not null, unique]
+    data       jsonb       [not null]
+    created_at timestamptz [default: `now()`]
+    updated_at timestamptz [default: `now()`]
+}
+
+Table staff_members {
+    id         integer      [pk, increment]
+    name       varchar(200) [not null, unique]
+    created_at timestamptz  [default: `now()`]
+}
+
+Table rooms {
+    number   varchar(10) [pk]
+    category varchar(20) [not null]
+    floor    varchar(20) [not null]
+}
+
+Ref: users.employee_id > employees.id
+
+//[[vibebase.{"positions":{"employees":{"x":60,"y":60},"guests":{"x":60,"y":320},"offers":{"x":460,"y":60},"daily_briefings":{"x":460,"y":300},"users":{"x":60,"y":620},"staff_members":{"x":460,"y":600},"rooms":{"x":760,"y":60}},"preferences":{"colorScheme":"default","showNotes":true,"showIndexes":true,"showTypes":true,"snapToGrid":true,"gridSize":20},"viewport":{"x":93.21053136610232,"y":15.624702665930954,"zoom":0.6240726250000023},"collapsed":{}}]]
