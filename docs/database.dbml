@@ -43,3 +43,5 @@ Table guests {
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
 }
+
+//[[vibebase.{"positions":{"employees":{"x":60,"y":60},"guests":{"x":60,"y":320}},"preferences":{"colorScheme":"","showNotes":true,"showIndexes":true,"showTypes":true,"snapToGrid":true,"gridSize":20},"viewport":{"x":169.25870287042142,"y":-50.21183010949153,"zoom":1.0050752032887538},"collapsed":{}}]]
