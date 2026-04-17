@@ -60,14 +60,15 @@ export default function ChatScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Bleiche Assistant</Text>
-        <Text style={styles.subtitle}>Ask about guests or employees</Text>
+        <Text style={styles.headerLabel}>Assistant</Text>
+        <Text style={styles.title}>Bleiche Knowledge Desk</Text>
+        <Text style={styles.subtitle}>Guest and staff insights with live data lookup</Text>
       </View>
 
       <ScrollView style={styles.messagesContainer}>
         {messages.length === 0 ? (
           <Text style={styles.emptyState}>
-            Ask me anything about guests or employees at Bleiche Resort & Spa.
+            Ask about arrivals, nationality filters, staff roles, and guest notes.
           </Text>
         ) : null}
         {messages.map((msg) => (
@@ -91,7 +92,7 @@ export default function ChatScreen() {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Ask a question..."
+          placeholder="Type your request..."
           placeholderTextColor={colors.textSecondary}
           value={input}
           onChangeText={setInput}
@@ -103,7 +104,7 @@ export default function ChatScreen() {
           onPress={handleSend}
           disabled={loading}
         >
-          <Text style={styles.sendButtonText}>Send</Text>
+          <Text style={styles.sendButtonText}>Senden</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -114,53 +115,67 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   header: {
-    paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     backgroundColor: colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderWidth: 1,
+    borderColor: colors.dark200,
+    marginBottom: 10,
+  },
+  headerLabel: {
+    ...typography.label,
+    color: colors.dark400,
+    marginBottom: 6,
   },
   title: {
     ...typography.h2,
-    color: colors.forest,
-    marginBottom: 4,
+    color: colors.brand700,
+    marginBottom: 6,
   },
   subtitle: {
     ...typography.caption,
-    color: colors.textSecondary,
+    color: colors.dark500,
   },
   messagesContainer: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: colors.dark200,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
   emptyState: {
     ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
+    color: colors.dark500,
+    textAlign: 'left',
     marginTop: 40,
   },
   message: {
     marginBottom: 12,
-    maxWidth: '85%',
+    maxWidth: '92%',
   },
   userMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: colors.forest,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: colors.brand600,
+    borderRadius: 0,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
   },
   assistantMessage: {
     alignSelf: 'flex-start',
     backgroundColor: colors.card,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    borderRadius: 0,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.dark200,
   },
   messageText: {
     ...typography.body,
@@ -176,27 +191,34 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
     gap: 8,
     borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-    backgroundColor: colors.background,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: colors.dark200,
+    backgroundColor: colors.white,
   },
   input: {
     flex: 1,
-    backgroundColor: colors.card,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: colors.white,
+    borderRadius: 0,
+    borderWidth: 1,
+    borderColor: colors.dark300,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     ...typography.body,
     color: colors.textPrimary,
     maxHeight: 100,
   },
   sendButton: {
-    backgroundColor: colors.forest,
-    borderRadius: 20,
-    paddingHorizontal: 24,
+    backgroundColor: colors.brand600,
+    borderRadius: 0,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: colors.brand600,
     justifyContent: 'center',
     alignItems: 'center',
   },

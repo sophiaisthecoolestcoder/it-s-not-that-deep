@@ -72,8 +72,9 @@ export default function HomeScreen(props: HomeScreenProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.tagline}>BLEICHE</Text>
-        <Text style={styles.subtitle}>Resort & Spa</Text>
+        <Text style={styles.pageLabel}>Dashboard</Text>
+        <Text style={styles.tagline}>Bleiche Resort</Text>
+        <Text style={styles.subtitle}>Operations Workspace</Text>
         <View style={styles.divider} />
         <Text style={styles.motto}>Verabreden, ankommen. Sein.</Text>
       </View>
@@ -82,13 +83,13 @@ export default function HomeScreen(props: HomeScreenProps) {
         <TouchableOpacity style={styles.card} onPress={loadEmployees}>
           <Text style={styles.cardIcon}>👥</Text>
           <Text style={styles.cardTitle}>Mitarbeiter</Text>
-          <Text style={styles.cardCaption}>Verwaltung</Text>
+          <Text style={styles.cardCaption}>Personal ubersicht</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.card} onPress={loadGuests}>
           <Text style={styles.cardIcon}>🛎️</Text>
           <Text style={styles.cardTitle}>Gäste</Text>
-          <Text style={styles.cardCaption}>Verwaltung</Text>
+          <Text style={styles.cardCaption}>Anreisen und Profile</Text>
         </TouchableOpacity>
       </View>
 
@@ -96,7 +97,7 @@ export default function HomeScreen(props: HomeScreenProps) {
         <TouchableOpacity style={[styles.card, styles.chatCard]} onPress={props.onNavigateToChat}>
           <Text style={styles.cardIcon}>🤖</Text>
           <Text style={styles.cardTitle}>Assistant</Text>
-          <Text style={styles.cardCaption}>AI-Anfragen</Text>
+          <Text style={styles.cardCaption}>KI gestutzte Anfragen</Text>
         </TouchableOpacity>
       </View>
 
@@ -107,6 +108,10 @@ export default function HomeScreen(props: HomeScreenProps) {
         <ScrollView style={styles.list}>
           <Text style={styles.listTitle}>Mitarbeiter ({employees.length})</Text>
           {employees.length === 0 ? <Text style={styles.empty}>Keine Mitarbeiter gefunden.</Text> : null}
+          <View style={styles.tableHeaderRow}>
+            <Text style={styles.tableHeaderCell}>Name</Text>
+            <Text style={styles.tableHeaderCell}>Rolle</Text>
+          </View>
           {employees.map((employee) => (
             <View key={employee.id} style={styles.row}>
               <Text style={styles.rowTitle}>
@@ -122,6 +127,10 @@ export default function HomeScreen(props: HomeScreenProps) {
         <ScrollView style={styles.list}>
           <Text style={styles.listTitle}>Gäste ({guests.length})</Text>
           {guests.length === 0 ? <Text style={styles.empty}>Keine Gäste gefunden.</Text> : null}
+          <View style={styles.tableHeaderRow}>
+            <Text style={styles.tableHeaderCell}>Name</Text>
+            <Text style={styles.tableHeaderCell}>Nationalität</Text>
+          </View>
           {guests.map((guest) => (
             <View key={guest.id} style={styles.row}>
               <Text style={styles.rowTitle}>
@@ -141,89 +150,119 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
     paddingHorizontal: 24,
-    paddingTop: 60,
+    paddingTop: 52,
   },
   header: {
-    alignItems: 'center',
-    marginBottom: 48,
+    alignItems: 'flex-start',
+    marginBottom: 30,
+  },
+  pageLabel: {
+    ...typography.label,
+    color: colors.dark400,
+    marginBottom: 8,
   },
   tagline: {
     ...typography.h1,
-    fontSize: 36,
-    letterSpacing: 8,
-    color: colors.forest,
+    fontSize: 38,
+    letterSpacing: 1.2,
+    color: colors.brand600,
   },
   subtitle: {
-    ...typography.caption,
-    fontSize: 14,
-    letterSpacing: 4,
-    marginTop: 4,
-    color: colors.sage,
+    ...typography.label,
+    marginTop: 6,
+    color: colors.dark500,
   },
   divider: {
-    width: 40,
-    height: 1,
-    backgroundColor: colors.gold,
-    marginVertical: 16,
+    width: 84,
+    height: 2,
+    backgroundColor: colors.brand400,
+    marginTop: 16,
+    marginBottom: 12,
   },
   motto: {
     ...typography.body,
     fontStyle: 'italic',
-    color: colors.textSecondary,
+    color: colors.dark500,
   },
   cardRow: {
     flexDirection: 'row',
-    gap: 16,
-    marginBottom: 16,
+    gap: 14,
+    marginBottom: 14,
   },
   card: {
     flex: 1,
     backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 24,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 12,
-    elevation: 3,
+    borderRadius: 0,
+    borderWidth: 1,
+    borderColor: colors.dark200,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    alignItems: 'flex-start',
   },
   cardIcon: {
-    fontSize: 32,
-    marginBottom: 12,
+    fontSize: 22,
+    marginBottom: 10,
   },
   cardTitle: {
     ...typography.h3,
     marginBottom: 4,
+    color: colors.brand700,
   },
   cardCaption: {
-    ...typography.caption,
+    ...typography.label,
+    color: colors.dark400,
+    fontSize: 10,
   },
   loader: {
-    marginTop: 20,
+    marginTop: 14,
   },
   error: {
-    marginTop: 16,
-    color: '#B3261E',
-    textAlign: 'center',
+    marginTop: 14,
+    color: colors.error,
+    textAlign: 'left',
   },
   list: {
-    marginTop: 20,
+    marginTop: 10,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.dark200,
   },
   listTitle: {
-    ...typography.h3,
-    marginBottom: 12,
-    color: colors.forest,
+    ...typography.label,
+    fontSize: 11,
+    color: colors.dark600,
+    backgroundColor: colors.brand100,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.dark200,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  tableHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.dark200,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: colors.dark50,
+  },
+  tableHeaderCell: {
+    ...typography.label,
+    color: colors.dark500,
   },
   empty: {
     ...typography.body,
     color: colors.textSecondary,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
   },
   row: {
-    backgroundColor: colors.card,
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.dark100,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
   rowTitle: {
     ...typography.body,
@@ -231,10 +270,9 @@ const styles = StyleSheet.create({
   },
   rowMeta: {
     ...typography.caption,
-    marginTop: 4,
-    color: colors.textSecondary,
+    color: colors.dark500,
   },
   chatCard: {
-    flex: 0.5,
+    flex: 0.65,
   },
 });

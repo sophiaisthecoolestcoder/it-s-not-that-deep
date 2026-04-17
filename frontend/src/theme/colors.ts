@@ -1,27 +1,44 @@
-/**
- * Bleiche Resort & Spa — Brand color palette
- * Derived from bleiche.de: warm neutrals, deep forest greens, elegant golds.
- */
 export const colors = {
-  // Primary
-  forest: '#2C3E2D',
-  sage: '#6B7F5E',
-  gold: '#B8975A',
+  // Old bleiche-resort palette (warm earth + charcoal)
+  brand50: '#faf6f1',
+  brand100: '#f5ede3',
+  brand200: '#EEE5DA',
+  brand300: '#ddd0bf',
+  brand400: '#C2A98C',
+  brand500: '#b09570',
+  brand600: '#8B6A43',
+  brand700: '#6d5234',
+  brand800: '#503c26',
+  brand900: '#3a2b1b',
 
-  // Neutrals
-  cream: '#F5F0EB',
-  warmGray: '#D6CFC7',
-  charcoal: '#3A3A3A',
+  dark50: '#f5f5f5',
+  dark100: '#ececec',
+  dark200: '#dedede',
+  dark300: '#a5a6a6',
+  dark400: '#787978',
+  dark500: '#535353',
+  dark600: '#3a3a3a',
+  dark700: '#2d2d2d',
+  dark800: '#222222',
+  dark900: '#1a1a1a',
 
-  // Surface
+  // Legacy aliases for existing code
+  forest: '#8B6A43',
+  sage: '#787978',
+  gold: '#C2A98C',
+  cream: '#EEE5DA',
+  warmGray: '#dedede',
+  charcoal: '#3a3a3a',
+
+  // Surfaces
   white: '#FFFFFF',
-  background: '#FAF8F5',
+  background: '#faf6f1',
   card: '#FFFFFF',
 
-  // Text
-  textPrimary: '#2C2C2C',
-  textSecondary: '#6B6B6B',
-  textMuted: '#9E9E9E',
+  // Text aliases
+  textPrimary: '#3a3a3a',
+  textSecondary: '#787978',
+  textMuted: '#a5a6a6',
 
   // Semantic
   error: '#C0392B',
