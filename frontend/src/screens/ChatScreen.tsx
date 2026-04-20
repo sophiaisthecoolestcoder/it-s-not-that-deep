@@ -162,9 +162,9 @@ function AssistantMessage({
     <div className="md-body">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeHighlight]}
+        rehypePlugins={[[rehypeSanitize, SANITIZE_SCHEMA], rehypeHighlight]}
         components={{
-          code: ({ inline, className, children }) => (
+          code: ({ inline, className, children }: any) => (
             <CodeBlock inline={inline} className={className} onCopyCode={onCopyCode} t={t}>
               {children}
             </CodeBlock>
@@ -177,27 +177,40 @@ function AssistantMessage({
   );
 }
 
+const MAX_MESSAGES = 50;
+
+const SANITIZE_SCHEMA = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    code: [...((defaultSchema.attributes && defaultSchema.attributes.code) || []), 'className'],
+    span: [...((defaultSchema.attributes && defaultSchema.attributes.span) || []), 'className'],
+  },
+};
+
 export default function ChatScreen() {
   const { user } = useAuth();
   const { navigate } = useRouter();
   const { t, locale } = useI18n();
   const { addToast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [conversationId, setConversationId] = useState<number | null>(null);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [reloadingMessageId, setReloadingMessageId] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const conversationRef = useRef<View>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     injectStyles();
+    return () => {
+      abortRef.current?.abort();
+    };
   }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
   }, [messages, loading]);
-
-  const latestAssistantMessageId = [...messages].reverse().find((message) => message.role === 'assistant')?.id;
 
   const copyText = async (text: string) => {
     await copyTextToClipboard(text);
@@ -212,38 +225,12 @@ export default function ChatScreen() {
     }
   };
 
-  const handleReloadResponse = async (messageId: string) => {
-    if (loading || reloadingMessageId) return;
-
-    const messageIndex = messages.findIndex((message) => message.id === messageId);
-    if (messageIndex <= 0) return;
-
-    const assistantMessage = messages[messageIndex];
-    const previousMessage = messages[messageIndex - 1];
-    if (assistantMessage.role !== 'assistant' || previousMessage.role !== 'user') return;
-    if (latestAssistantMessageId !== messageId) return;
-
-    const conversation = messages.slice(0, messageIndex).map((message) => ({
-      role: message.role,
-      content: message.content,
-    }));
-
-    setLoading(true);
-    setReloadingMessageId(messageId);
-
-    try {
-      const res = await api.askAssistant(previousMessage.content, conversation);
-      setMessages((prev) => prev.map((message) => (
-        message.id === messageId
-          ? { ...message, content: res.answer, references: res.references || [] }
-          : message
-      )));
-    } catch (e: any) {
-      addToast({ type: 'error', title: t('common.error'), message: e?.message || 'Reload failed' });
-    } finally {
-      setLoading(false);
-      setReloadingMessageId(null);
-    }
+  const handleNewConversation = () => {
+    abortRef.current?.abort();
+    setMessages([]);
+    setConversationId(null);
+    setInput('');
+    setLoading(false);
   };
 
   const handleExportConversationImage = async () => {
@@ -266,37 +253,49 @@ export default function ChatScreen() {
     }
   };
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const appendMessage = (msg: Message) => {
+    setMessages((prev) => {
+      const next = [...prev, msg];
+      return next.length > MAX_MESSAGES ? next.slice(next.length - MAX_MESSAGES) : next;
+    });
+  };
 
-    const userMsg: Message = { id: `${Date.now()}`, role: 'user', content: input };
-    const q = input;
+  const handleSend = () => {
+    if (!input.trim() || loading) return;
+
+    const q = input.trim();
+    const userMsg: Message = { id: `${Date.now()}`, role: 'user', content: q };
     setInput('');
     setLoading(true);
+    appendMessage(userMsg);
 
-    const nextMessages = [...messages, userMsg];
-    setMessages(nextMessages);
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     api
-      .askAssistant(q, nextMessages.map((m) => ({ role: m.role, content: m.content })))
+      .askAssistant(q, conversationId ?? undefined, controller.signal)
       .then((res) => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `${Date.now()}-a`,
-            role: 'assistant',
-            content: res.answer,
-            references: res.references || [],
-          },
-        ]);
+        setConversationId(res.conversation_id);
+        appendMessage({
+          id: `${Date.now()}-a`,
+          role: 'assistant',
+          content: res.answer,
+          references: res.references || [],
+        });
       })
       .catch((e: Error) => {
-        setMessages((prev) => [
-          ...prev,
-          { id: `${Date.now()}-err`, role: 'assistant', content: `**Fehler:** ${e.message}` },
-        ]);
+        if ((e as any).name === 'AbortError') return;
+        appendMessage({
+          id: `${Date.now()}-err`,
+          role: 'assistant',
+          content: `**${t('common.error')}:** ${e.message}`,
+        });
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (abortRef.current === controller) abortRef.current = null;
+        setLoading(false);
+      });
   };
 
   const handleKeyDown = (e: any) => {
@@ -351,6 +350,9 @@ export default function ChatScreen() {
           </Text>
         )}
         <View style={s.headerActions}>
+          <TouchableOpacity style={s.headerBtn} onPress={handleNewConversation}>
+            <Text style={s.headerBtnText}>{t('chat.newConversation')}</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={s.headerBtn} onPress={handleCopyConversation}>
             <Text style={s.headerBtnText}>{t('chat.copyConversation')}</Text>
           </TouchableOpacity>
@@ -369,61 +371,46 @@ export default function ChatScreen() {
         contentContainerStyle={s.msgsContent}
       >
         <View ref={conversationRef} collapsable={false} style={s.conversationCapture}>
-          {messages.map((msg) => {
-            const isLatestAssistant = msg.role === 'assistant' && msg.id === latestAssistantMessageId;
-            return (
-              <View
-                key={msg.id}
-                style={[s.msgShell, msg.role === 'user' ? s.msgShellUser : s.msgShellAssistant]}
-              >
-                <View
-                  style={[
-                    s.msg,
-                    msg.role === 'user' ? s.userMsg : s.asstMsg,
-                    reloadingMessageId === msg.id && s.msgReloading,
-                  ]}
-                >
-                  <Text style={[s.msgRole, msg.role === 'user' ? s.msgRoleUser : s.msgRoleAssistant]}>
-                    {msg.role === 'user' ? t('chat.you') : t('chat.assistant')}
-                  </Text>
-                  {msg.role === 'user' ? (
-                    <Text selectable style={s.userText}>{msg.content}</Text>
-                  ) : (
-                    <View>
-                      <AssistantMessage content={msg.content} onCopyCode={copyText} t={t} />
-                      {msg.references?.length ? (
-                        <View style={s.refList}>
-                          {msg.references.map((r) => (
-                            <ObjectRefCard
-                              key={`${msg.id}-${r.object_type}-${r.object_id}`}
-                              refItem={r}
-                              onOpen={handleOpenReference}
-                              onDownload={handleDownloadReference}
-                              t={t}
-                            />
-                          ))}
-                        </View>
-                      ) : null}
-                    </View>
-                  )}
-                </View>
-                <View style={[s.msgActions, msg.role === 'user' ? s.msgActionsUser : s.msgActionsAssistant]}>
-                  <MessageActionButton onPress={() => copyText(msg.content)} label={t('common.copy')}>
-                    <CopyIcon size={CHAT_THEME.actionIconSize} color={CHAT_THEME.actionIcon} />
-                  </MessageActionButton>
-                  {isLatestAssistant && (
-                    <MessageActionButton
-                      onPress={() => handleReloadResponse(msg.id)}
-                      label={t('common.reload')}
-                      disabled={reloadingMessageId === msg.id}
-                    >
-                      <ReloadIcon size={CHAT_THEME.actionIconSize} color={CHAT_THEME.actionIcon} />
-                    </MessageActionButton>
-                  )}
-                </View>
+          {messages.length === 0 && !loading && (
+            <Text style={s.empty}>{t('chat.empty')}</Text>
+          )}
+          {messages.map((msg) => (
+            <View
+              key={msg.id}
+              style={[s.msgShell, msg.role === 'user' ? s.msgShellUser : s.msgShellAssistant]}
+            >
+              <View style={[s.msg, msg.role === 'user' ? s.userMsg : s.asstMsg]}>
+                <Text style={[s.msgRole, msg.role === 'user' ? s.msgRoleUser : s.msgRoleAssistant]}>
+                  {msg.role === 'user' ? t('chat.you') : t('chat.assistant')}
+                </Text>
+                {msg.role === 'user' ? (
+                  <Text selectable style={s.userText}>{msg.content}</Text>
+                ) : (
+                  <View>
+                    <AssistantMessage content={msg.content} onCopyCode={copyText} t={t} />
+                    {msg.references?.length ? (
+                      <View style={s.refList}>
+                        {msg.references.map((r) => (
+                          <ObjectRefCard
+                            key={`${msg.id}-${r.object_type}-${r.object_id}`}
+                            refItem={r}
+                            onOpen={handleOpenReference}
+                            onDownload={handleDownloadReference}
+                            t={t}
+                          />
+                        ))}
+                      </View>
+                    ) : null}
+                  </View>
+                )}
               </View>
-            );
-          })}
+              <View style={[s.msgActions, msg.role === 'user' ? s.msgActionsUser : s.msgActionsAssistant]}>
+                <MessageActionButton onPress={() => copyText(msg.content)} label={t('common.copy')}>
+                  <CopyIcon size={CHAT_THEME.actionIconSize} color={CHAT_THEME.actionIcon} />
+                </MessageActionButton>
+              </View>
+            </View>
+          ))}
           {loading && <ActivityIndicator style={{ marginVertical: 16 }} color={colors.brand600} />}
         </View>
       </ScrollView>

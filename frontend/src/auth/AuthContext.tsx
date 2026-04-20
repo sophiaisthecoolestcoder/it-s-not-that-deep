@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { api, setToken, getToken } from '../api/client';
+import { api, setToken, getToken, onUnauthorized } from '../api/client';
 import type { AuthUser } from '../types/auth';
 
 interface AuthContextValue {
@@ -21,6 +21,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    onUnauthorized(() => {
+      setToken(null);
+      setUser(null);
+    });
     const token = getToken();
     if (!token) {
       setLoading(false);
@@ -30,6 +34,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then((u) => setUser(u))
       .catch(() => setToken(null))
       .finally(() => setLoading(false));
+    return () => {
+      onUnauthorized(null);
+    };
   }, []);
 
   const login = async (username: string, password: string) => {
@@ -40,6 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    api.logout().catch(() => {});
     setToken(null);
     setUser(null);
   };

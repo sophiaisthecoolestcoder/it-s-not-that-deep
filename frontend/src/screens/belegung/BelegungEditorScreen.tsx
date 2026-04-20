@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { api } from '../../api/client';
 import { useToast } from '../../components/ui/Toast';
@@ -21,6 +22,7 @@ import type {
 } from '../../types/belegung';
 import { getRoomCategory } from '../../utils/rooms';
 import { formatDateShort, formatWeekday, generateId, todayISO } from '../../utils/helpers';
+import { exportBelegung } from '../../utils/excelExport';
 import { colors } from '../../theme/colors';
 import { fonts } from '../../theme/typography';
 
@@ -385,6 +387,19 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
     if (typeof window !== 'undefined') (window as any).print();
   }
 
+  async function handleExportExcel() {
+    if (Platform.OS !== 'web') {
+      addToast({ type: 'error', title: 'Fehler', message: 'Excel-Export nur im Web verfügbar' });
+      return;
+    }
+    try {
+      await exportBelegung(data);
+      addToast({ type: 'success', title: 'Excel', message: `${currentDate}.xlsx` });
+    } catch (e: any) {
+      addToast({ type: 'error', title: 'Fehler', message: e?.message || 'Excel-Export fehlgeschlagen' });
+    }
+  }
+
   if (loading) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -408,6 +423,9 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
         />
         <TouchableOpacity style={[s.btnPrimary, saving && { opacity: 0.6 }]} onPress={handleSave} disabled={saving}>
           <Text style={s.btnPrimaryText}>{saving ? 'Speichern...' : 'Speichern'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={s.btnSecondary} onPress={handleExportExcel}>
+          <Text style={s.btnSecondaryText}>Excel (.xlsx)</Text>
         </TouchableOpacity>
         <TouchableOpacity style={s.btnSecondary} onPress={handlePrint}>
           <Text style={s.btnSecondaryText}>Drucken</Text>

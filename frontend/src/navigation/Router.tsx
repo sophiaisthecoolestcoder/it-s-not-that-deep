@@ -26,6 +26,8 @@ const RouterContext = createContext<RouterContextValue>({
   goBack: () => {},
 });
 
+const MAX_HISTORY = 50;
+
 export function RouterProvider({ children }: { children: React.ReactNode }) {
   const [history, setHistory] = useState<AppScreen[]>([{ name: 'login' }]);
 
@@ -33,10 +35,10 @@ export function RouterProvider({ children }: { children: React.ReactNode }) {
 
   const navigate = (next: AppScreen) => {
     setHistory((prev) => {
-      // Replace if same screen, push otherwise
       const last = prev[prev.length - 1];
-      if (last.name === next.name) return [...prev.slice(0, -1), next];
-      return [...prev, next];
+      const base = last.name === next.name ? prev.slice(0, -1) : prev;
+      const pushed = [...base, next];
+      return pushed.length > MAX_HISTORY ? pushed.slice(pushed.length - MAX_HISTORY) : pushed;
     });
   };
 

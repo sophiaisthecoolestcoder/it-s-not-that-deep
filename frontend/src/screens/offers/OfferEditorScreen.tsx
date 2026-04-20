@@ -29,6 +29,7 @@ import {
 import { colors } from '../../theme/colors';
 import { fonts } from '../../theme/typography';
 import { downloadTextFile } from '../../utils/downloads';
+import { generateOfferDocx } from '../../utils/docxExport';
 
 const SALUTATION_OPTIONS = [
   { value: 'Herr', label: 'Herr' },
@@ -227,6 +228,24 @@ export default function OfferEditorScreen({ offerId }: Props) {
     }
   }
 
+  async function handleExportWord() {
+    if (Platform.OS !== 'web') {
+      addToast({ type: 'error', title: t('common.error'), message: 'Word export is only available on web' });
+      return;
+    }
+    if (!offerId) {
+      addToast({ type: 'warning', title: t('common.error'), message: 'Save the offer first.' });
+      return;
+    }
+    try {
+      const fresh = await api.getOffer(offerId);
+      await generateOfferDocx(fresh);
+      addToast({ type: 'success', title: t('common.download'), message: `#${offerId}.docx` });
+    } catch (e: any) {
+      addToast({ type: 'error', title: t('common.error'), message: e?.message || 'Word export failed' });
+    }
+  }
+
   function guestText(): string {
     const aWord = adultsNum === 1 && salutation === 'Herr' ? 'Erwachsenen' : 'Erwachsene';
     let t = `für ${adultsNum} ${aWord}`;
@@ -262,6 +281,9 @@ export default function OfferEditorScreen({ offerId }: Props) {
         </TouchableOpacity>
         <TouchableOpacity style={s.btnSecondary} onPress={handleExportHtml}>
           <Text style={s.btnSecondaryText}>{t('offer.export')}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={s.btnSecondary} onPress={handleExportWord}>
+          <Text style={s.btnSecondaryText}>{t('offer.exportWord')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={s.btnSecondary} onPress={handlePrint}>
           <Text style={s.btnSecondaryText}>{t('offer.printPdf')}</Text>
