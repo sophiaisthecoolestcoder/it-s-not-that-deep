@@ -12,6 +12,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { useRouter } from '../navigation/Router';

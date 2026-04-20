@@ -8,6 +8,20 @@ from app.models.employee import Employee, EmployeeRole
 from app.models.guest import Guest
 from app.models.offer import Offer, OfferStatus, Salutation
 from app.models.belegung import DailyBriefing
+from app.security import ilike_escape
+
+
+# Hard caps — keep tool-result payloads out of runaway-token territory.
+_MAX_LIMIT = 50
+_MAX_NOTE_PREVIEW = 280
+
+
+def _note_preview(notes: Optional[str]) -> Optional[str]:
+    if not notes:
+        return notes
+    if len(notes) <= _MAX_NOTE_PREVIEW:
+        return notes
+    return notes[:_MAX_NOTE_PREVIEW] + "…"
 
 
 def list_guests(limit: int = 10, nationality: Optional[str] = None) -> Dict[str, Any]:
@@ -15,8 +29,9 @@ def list_guests(limit: int = 10, nationality: Optional[str] = None) -> Dict[str,
     try:
         query = session.query(Guest)
         if nationality:
-            query = query.filter(Guest.nationality.ilike(f"%{nationality}%"))
-        guests = query.limit(max(1, min(limit, 50))).all()
+            pattern = f"%{ilike_escape(nationality)}%"
+            query = query.filter(Guest.nationality.ilike(pattern, escape="\\"))
+        guests = query.limit(max(1, min(limit, _MAX_LIMIT))).all()
         return {
             "count": len(guests),
             "guests": [
@@ -25,7 +40,7 @@ def list_guests(limit: int = 10, nationality: Optional[str] = None) -> Dict[str,
                     "name": f"{g.first_name} {g.last_name}",
                     "email": g.email,
                     "nationality": g.nationality,
-                    "notes": g.notes,
+                    "notes": _note_preview(g.notes),
                 }
                 for g in guests
             ],
@@ -37,11 +52,12 @@ def list_guests(limit: int = 10, nationality: Optional[str] = None) -> Dict[str,
 def get_guest_by_name(name: str) -> Dict[str, Any]:
     session = SessionLocal()
     try:
+        pattern = f"%{ilike_escape(name)}%"
         guests = (
             session.query(Guest)
             .filter(
-                (Guest.first_name.ilike(f"%{name}%"))
-                | (Guest.last_name.ilike(f"%{name}%"))
+                (Guest.first_name.ilike(pattern, escape="\\"))
+                | (Guest.last_name.ilike(pattern, escape="\\"))
             )
             .limit(10)
             .all()
@@ -54,7 +70,7 @@ def get_guest_by_name(name: str) -> Dict[str, Any]:
                     "name": f"{g.first_name} {g.last_name}",
                     "email": g.email,
                     "nationality": g.nationality,
-                    "notes": g.notes,
+                    "notes": _note_preview(g.notes),
                 }
                 for g in guests
             ],
@@ -120,16 +136,19 @@ def get_employee_by_role(role: str) -> Dict[str, Any]:
 def search_guest_notes(keyword: str) -> Dict[str, Any]:
     session = SessionLocal()
     try:
+        if not keyword or len(keyword.strip()) < 3:
+            return {"error": "keyword must be at least 3 characters"}
+        pattern = f"%{ilike_escape(keyword)}%"
         guests = (
             session.query(Guest)
-            .filter(Guest.notes.ilike(f"%{keyword}%"))
-            .limit(25)
+            .filter(Guest.notes.ilike(pattern, escape="\\"))
+            .limit(15)
             .all()
         )
         return {
             "count": len(guests),
             "guests": [
-                {"id": g.id, "name": f"{g.first_name} {g.last_name}", "notes": g.notes}
+                {"id": g.id, "name": f"{g.first_name} {g.last_name}", "notes": _note_preview(g.notes)}
                 for g in guests
             ],
         }

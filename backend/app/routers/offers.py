@@ -70,13 +70,21 @@ def delete_offer(offer_id: int, db: Session = Depends(get_db), user: User = Depe
     db.commit()
 
 
+_DUPLICATE_FIELDS = (
+    "salutation", "first_name", "last_name", "street", "zip_code", "city", "email",
+    "offer_date", "arrival_date", "departure_date",
+    "room_category", "custom_room_category", "adults", "children_ages",
+    "price_per_night", "total_price", "employee_name", "notes",
+)
+
+
 @router.post("/{offer_id}/duplicate", response_model=OfferRead, status_code=201)
 def duplicate_offer(offer_id: int, db: Session = Depends(get_db), user: User = Depends(_write_access)):
     src = db.query(Offer).filter(Offer.id == offer_id).first()
     if not src:
         raise HTTPException(status_code=404, detail="Angebot nicht gefunden")
-    clone_data = {c.name: getattr(src, c.name) for c in Offer.__table__.columns if c.name not in ("id", "created_at", "updated_at")}
     from app.models.offer import OfferStatus
+    clone_data = {f: getattr(src, f) for f in _DUPLICATE_FIELDS}
     clone_data["status"] = OfferStatus.DRAFT
     clone = Offer(**clone_data)
     db.add(clone)

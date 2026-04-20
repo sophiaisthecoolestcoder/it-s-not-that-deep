@@ -28,5 +28,6 @@ export interface AuthUser {
   username: string;
   role: EmployeeRole;
   employee_id: number | null;
+  must_change_password: boolean;
   modules: ModuleKey[];
 }

@@ -21,7 +21,16 @@ JWT_SECRET = os.getenv("JWT_SECRET")
 if not JWT_SECRET:
     raise RuntimeError("Missing JWT_SECRET environment variable. Define it in backend/.env.")
 JWT_ALG_LABEL = "HS256"
-TOKEN_TTL_SECONDS = 60 * 60 * 12  # 12 hours
+TOKEN_TTL_SECONDS = int(os.getenv("TOKEN_TTL_SECONDS", str(60 * 60 * 8)))  # 8h default
+
+# Fixed-shape stored hash for timing-equalisation when the username does not exist.
+# The KDF still runs but can never match any real password.
+INVALID_PASSWORD_PLACEHOLDER = (
+    "pbkdf2_sha256$200000$"
+    + base64.b64encode(b"x" * 16).decode()
+    + "$"
+    + base64.b64encode(b"y" * 32).decode()
+)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 

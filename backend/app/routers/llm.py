@@ -1,56 +1,120 @@
-"""LLM router for Bleiche API — role-aware."""
+"""LLM router — role-aware, rate-limited, DB-backed conversation history."""
+import logging
 
-from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
-from app.llm import LLMAgent
 from app.auth import get_current_user, tools_for
+from app.database import get_db
+from app.llm import LLMAgent
+from app.models.conversation import Conversation, ConversationMessage
 from app.models.user import User
+from app.schemas.conversation import AskRequest, AskResponse
+from app.security import llm_user_daily, llm_user_limiter
 
 router = APIRouter(prefix="/llm", tags=["LLM"])
+logger = logging.getLogger("bleiche.llm")
 
 
-class QueryRequest(BaseModel):
-    question: str
-    messages: list[dict] = Field(default_factory=list)
+def _load_recent_history(db: Session, conversation_id: int, turns: int = 8):
+    """Return up to `turns` most recent user/assistant pairs as {role, content}."""
+    rows = (
+        db.query(ConversationMessage)
+        .filter(
+            ConversationMessage.conversation_id == conversation_id,
+            ConversationMessage.role.in_(("user", "assistant")),
+        )
+        .order_by(ConversationMessage.id.desc())
+        .limit(turns * 2)
+        .all()
+    )
+    return [{"role": r.role, "content": r.content} for r in reversed(rows)]
 
 
-class QueryResponse(BaseModel):
-    question: str
-    answer: str
-    role: str
-    tools_available: list[str]
-    references: list[dict] = []
+@router.post("/ask", response_model=AskResponse)
+def ask_assistant(
+    payload: AskRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    llm_user_limiter.check(f"u:{user.id}")
+    llm_user_daily.check(f"u:{user.id}:d")
 
-
-@router.post("/ask", response_model=QueryResponse)
-def ask_assistant(request: QueryRequest, user: User = Depends(get_current_user)) -> QueryResponse:
     allowed = sorted(tools_for(user.role))
-    display_name = " ".join(part for part in [getattr(user.employee, "first_name", ""), getattr(user.employee, "last_name", "")] if part).strip()
+    if not allowed:
+        raise HTTPException(status_code=403, detail="Ihre Rolle hat keinen Zugriff auf den Assistenten")
+
+    # Resolve or create conversation
+    conv: Conversation
+    if payload.conversation_id:
+        conv = (
+            db.query(Conversation)
+            .filter(Conversation.id == payload.conversation_id, Conversation.user_id == user.id)
+            .first()
+        )
+        if not conv:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+    else:
+        conv = Conversation(user_id=user.id, title=payload.question[:120])
+        db.add(conv)
+        db.flush()  # obtain id
+
+    # Persist the user turn first
+    user_msg = ConversationMessage(
+        conversation_id=conv.id, role="user", content=payload.question
+    )
+    db.add(user_msg)
+    db.flush()
+
+    # Build context from DB (not from the client — prevents forgery)
+    history = _load_recent_history(db, conv.id, turns=8)[:-1]  # drop the just-added user msg
+
+    employee = getattr(user, "employee", None)
+    display_name = (
+        " ".join(p for p in [getattr(employee, "first_name", ""), getattr(employee, "last_name", "")] if p).strip()
+        or user.username
+    )
     user_context = {
         "username": user.username,
         "role": user.role.value,
-        "display_name": display_name or user.username,
+        "display_name": display_name,
     }
-    if getattr(user.employee, "email", None):
-        user_context["email"] = user.employee.email
+    if getattr(employee, "email", None):
+        user_context["email"] = employee.email
+
     try:
         agent = LLMAgent(role=user.role, user_context=user_context)
-        result = agent.query(request.question, conversation=request.messages)
-        answer = result.get("answer", "")
-        references = result.get("references", [])
+        result = agent.query(payload.question, conversation=history)
     except ValueError as e:
-        answer = f"Error: {str(e)}. Please ensure GROQ_API_KEY is set."
-        references = []
+        logger.warning("llm_unavailable user=%s err=%s", user.username, e)
+        raise HTTPException(status_code=503, detail="Assistent ist momentan nicht verfügbar")
     except Exception as e:  # noqa: BLE001
-        answer = f"Error: {str(e)}"
-        references = []
-    return QueryResponse(
-        question=request.question,
-        answer=answer,
+        logger.exception("llm_internal_error user=%s", user.username)
+        raise HTTPException(status_code=500, detail="Interner Fehler im Assistenten")
+
+    usage = result.get("usage", {}) or {}
+    asst = ConversationMessage(
+        conversation_id=conv.id,
+        role="assistant",
+        content=result.get("answer", ""),
+        refs=result.get("references") or None,
+        prompt_tokens=usage.get("prompt_tokens", 0),
+        completion_tokens=usage.get("completion_tokens", 0),
+        cost_micro_cents=usage.get("cost_micro_cents", 0),
+        model=usage.get("model"),
+    )
+    db.add(asst)
+    db.commit()
+    db.refresh(conv)
+
+    return AskResponse(
+        conversation_id=conv.id,
+        question=payload.question,
+        answer=result.get("answer", ""),
         role=user.role.value,
         tools_available=allowed,
-        references=references,
+        references=result.get("references") or [],
+        usage=usage,
     )
 
 

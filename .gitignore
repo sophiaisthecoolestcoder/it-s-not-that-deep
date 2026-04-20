@@ -1,13 +1,23 @@
+# Secrets — any .env file anywhere
+.env
+.env.*
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
 # Python
 backend/venv/
 __pycache__/
 *.pyc
 *.pyo
-backend/.env
+.pytest_cache/
+.mypy_cache/
 
 # Node
 frontend/node_modules/
 frontend/.metro-health-check*
+frontend/dist/
+frontend/web-build/
 
 # iOS
 frontend/ios/Pods/

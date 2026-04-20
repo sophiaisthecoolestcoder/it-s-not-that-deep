@@ -41,9 +41,10 @@ def seed():
                 username=admin_username,
                 password_hash=hash_password(admin_password),
                 role=EmployeeRole.ADMIN,
+                must_change_password=True,
             )
             session.add(admin)
-            print(f"[seed] created admin user '{admin_username}' (change password after first login)")
+            print(f"[seed] created admin user '{admin_username}' (MUST change password on first login)")
         else:
             print(f"[seed] admin user '{admin_username}' already exists")
 
@@ -58,8 +59,9 @@ def seed():
                     username=username,
                     password_hash=hash_password(password),
                     role=role,
+                    must_change_password=True,
                 ))
-                print(f"[seed] created {role.value} user '{username}'")
+                print(f"[seed] created {role.value} user '{username}' (MUST change password on first login)")
 
         # Rooms
         existing = {r.number for r in session.query(Room).all()}
