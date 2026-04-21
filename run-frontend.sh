@@ -15,5 +15,5 @@ echo "📦 Installing dependencies..."
 npm install --quiet
 
 # Start frontend
-echo "🚀 Starting Bleiche Frontend on http://localhost:3000"
+echo "🚀 Starting Bleiche Frontend on http://localhost:3333"
 npm run web

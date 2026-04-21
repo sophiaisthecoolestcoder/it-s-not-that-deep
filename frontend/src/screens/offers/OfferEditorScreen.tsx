@@ -149,7 +149,7 @@ export default function OfferEditorScreen({ offerId }: Props) {
       })
       .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }))
       .finally(() => setLoading(false));
-  }, [offerId, addToast]);
+  }, [offerId, addToast, t]);
 
   // Derived
   const isCustomRoom = roomCategory === 'custom';

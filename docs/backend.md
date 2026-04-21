@@ -39,7 +39,7 @@ The backend registers the following routers:
 - `GET /api/auth/me` returns the current user profile and module access list.
 - The backend requires `JWT_SECRET` to exist at startup.
 - Role checks are implemented with dependency helpers such as `require_roles()`.
-- **Session revocation on password change:** the `users.tokens_invalidated_before` column is bumped to `now()` whenever a user changes their password. Any JWT whose `iat` is earlier than that timestamp is rejected in `get_current_user`. This makes `POST /api/auth/change-password` act as a global session-revoke.
+- **Session revocation on password change:** the `users.tokens_invalidated_before` column is bumped to `now()` whenever a user changes their password. Any JWT whose `iat` is earlier than that timestamp is rejected in `get_current_user`. `POST /api/auth/change-password` then mints a fresh token (with an `iat` at or after the revocation marker) and returns it in the response, so the current device keeps its session while all other devices holding the old token are immediately signed out.
 - **Login lockout and rate limits:** `POST /api/auth/login` is gated by per-IP and per-username rate limiters plus a lockout after 5 consecutive failures. `POST /api/auth/change-password` has its own per-user rate limiter.
 
 ### 3. Authorization Model

@@ -1,5 +1,5 @@
 import type { DailyData, GuestRow, OpsEntry } from '../types/belegung';
-import { formatDateGerman, formatDateShort, formatFullDate, formatWeekday } from './helpers';
+import { formatDateGerman, formatDateShort, formatWeekday } from './helpers';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 

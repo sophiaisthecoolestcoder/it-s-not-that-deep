@@ -32,7 +32,7 @@ app = FastAPI(
 
 
 # CORS — restrict to explicit origins in production. Comma-separated env var.
-_default_origins = "http://localhost:3000,http://localhost:8080,http://localhost:19006"
+_default_origins = "http://localhost:3333,http://localhost:3000,http://localhost:8080,http://localhost:19006"
 ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", _default_origins).split(",") if o.strip()]
 
 app.add_middleware(

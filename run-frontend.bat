@@ -11,7 +11,7 @@ cd /d "%~dp0frontend" || (
 echo [Bleiche] Installing dependencies...
 call npm install --quiet || exit /b 1
 
-echo [Bleiche] Starting Frontend at http://localhost:3000
+echo [Bleiche] Starting Frontend at http://localhost:3333
 call npm run web
 
 endlocal

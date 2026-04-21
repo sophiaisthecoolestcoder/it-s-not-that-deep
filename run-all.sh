@@ -27,4 +27,4 @@ EOF
 
 echo "✅ Backend and Frontend starting in separate terminal tabs"
 echo "⏳ Backend will be ready at http://localhost:8000 (docs at /docs)"
-echo "⏳ Frontend will be ready at http://localhost:3000"
+echo "⏳ Frontend will be ready at http://localhost:3333"

@@ -187,7 +187,7 @@ export const api = {
   me: () => request<AuthUser>('/auth/me'),
   logout: () => request<void>('/auth/logout', { method: 'POST' }),
   changePassword: (currentPassword: string, newPassword: string) =>
-    request<void>('/auth/change-password', {
+    request<LoginResponse>('/auth/change-password', {
       method: 'POST',
       body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
     }),

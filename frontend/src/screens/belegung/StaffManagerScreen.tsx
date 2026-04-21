@@ -30,7 +30,7 @@ export default function StaffManagerScreen() {
       .then(setStaff)
       .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }))
       .finally(() => setLoading(false));
-  }, [addToast]);
+  }, [addToast, t]);
 
   useEffect(() => {
     load();

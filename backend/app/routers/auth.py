@@ -7,11 +7,11 @@ from app.database import get_db
 from app.models.user import User
 from app.models.employee import EmployeeRole
 from app.auth import (
-    hash_password,
-    verify_password,
     create_access_token,
     get_current_user,
+    hash_password,
     modules_for,
+    verify_password,
     INVALID_PASSWORD_PLACEHOLDER,
     TOKEN_TTL_SECONDS,
 )
@@ -82,23 +82,32 @@ def logout(user: User = Depends(get_current_user)):
     logger.info("logout user=%s", user.username)
 
 
-@router.post("/change-password", status_code=204)
+@router.post("/change-password", response_model=TokenResponse)
 def change_password(
     payload: ChangePasswordRequest,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    """Rotate the caller's password and issue a fresh token.
+
+    Bumping `tokens_invalidated_before` revokes *every other* session that was
+    using the old token. A new token minted after that bump stays valid, so the
+    current device keeps its session.
+    """
+    from datetime import datetime, timezone
     password_change_limiter.check(f"u:{user.id}")
     if not verify_password(payload.current_password, user.password_hash):
         raise HTTPException(status_code=400, detail="Aktuelles Passwort ist falsch")
     if len(payload.new_password) < 10:
         raise HTTPException(status_code=400, detail="Neues Passwort muss mindestens 10 Zeichen haben")
-    from datetime import datetime, timezone
     user.password_hash = hash_password(payload.new_password)
     user.must_change_password = False
     user.tokens_invalidated_before = datetime.now(timezone.utc)
     db.commit()
+    db.refresh(user)
     logger.info("password_changed user=%s", user.username)
+    token = create_access_token(user.id, user.username, user.role.value)
+    return TokenResponse(access_token=token, expires_in=TOKEN_TTL_SECONDS, user=user)
 
 
 @router.post("/register", response_model=UserRead, status_code=201)

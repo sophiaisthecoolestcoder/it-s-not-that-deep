@@ -324,7 +324,7 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
   const { addToast } = useToast();
   const [currentDate, setCurrentDate] = useState(initialDate || todayISO());
   const [data, setData] = useState<DailyData>(emptyData(currentDate));
-  const [staff, setStaff] = useState<{ id: number | string; name: string }[]>([]);
+  const [, setStaff] = useState<{ id: number | string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 

@@ -31,12 +31,24 @@ module.exports = (_env, argv = {}) => {
           use: {
             loader: 'babel-loader',
             options: {
+              // Don't pick up the root babel.config.js (which targets the RN bundler
+              // and sets different `loose` options for the class-fields plugins,
+              // which would conflict with preset-env here and emit a warning).
+              configFile: false,
+              babelrc: false,
               presets: [
-                ['@babel/preset-env', { targets: { esmodules: true }, modules: false }],
+                ['@babel/preset-env', { targets: { esmodules: true }, modules: false, loose: true }],
                 ['@babel/preset-react', { runtime: 'automatic' }],
                 '@babel/preset-typescript',
               ],
-              plugins: ['react-native-web'],
+              plugins: [
+                'react-native-web',
+                // Keep class-fields transforms consistent so Babel doesn't warn
+                // about mismatched `loose` modes between sibling plugins.
+                ['@babel/plugin-transform-class-properties', { loose: true }],
+                ['@babel/plugin-transform-private-methods', { loose: true }],
+                ['@babel/plugin-transform-private-property-in-object', { loose: true }],
+              ],
             },
           },
         },
@@ -67,7 +79,7 @@ module.exports = (_env, argv = {}) => {
       }),
     ],
     devServer: {
-      port: 3000,
+      port: Number(process.env.PORT) || 3333,
       hot: true,
       open: true,
       static: {
