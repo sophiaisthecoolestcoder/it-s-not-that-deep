@@ -28,7 +28,7 @@ export default function StaffManagerScreen() {
     api
       .listStaff()
       .then(setStaff)
-      .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }))
+      .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }))
       .finally(() => setLoading(false));
   }, [addToast]);
 
@@ -51,7 +51,7 @@ export default function StaffManagerScreen() {
         setNewName('');
         addToast({ type: 'success', title: 'Hinzugefügt', message: name });
       })
-      .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }))
+      .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }))
       .finally(() => setAdding(false));
   }
 
@@ -62,7 +62,7 @@ export default function StaffManagerScreen() {
         setStaff((prev) => prev.filter((s) => s.id !== member.id));
         addToast({ type: 'success', title: 'Entfernt', message: member.name });
       })
-      .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }));
+      .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }));
   }
 
   const sorted = [...staff].sort((a, b) => a.name.localeCompare(b.name, 'de'));

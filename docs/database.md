@@ -21,12 +21,15 @@ Key fields:
 - `role`
 - `employee_id`
 - `is_active`
+- `must_change_password`
+- `tokens_invalidated_before` (nullable `timestamptz`)
 - timestamps
 
 Notes:
 
 - `role` uses the PostgreSQL `employeerole` enum.
 - `employee_id` is optional and links login identity to a staff record when needed.
+- `tokens_invalidated_before` is bumped to `now()` on password change. `get_current_user` rejects any JWT whose `iat` is earlier, so rotating a password effectively signs the user out of all other sessions.
 
 ### 2. `employees`
 
@@ -107,6 +110,34 @@ Notes:
 - this table stores one record per day,
 - the JSON payload holds the occupancy editor data,
 - and the assistant can read daily briefing summaries through a tool.
+
+The `data` blob is shaped by the frontend's `DailyData` type at `frontend/src/types/belegung.ts`. At minimum the backend relies on the following top-level keys being present (arrays may be empty but should exist):
+
+- `arrivals` — array of guest rows arriving on this date
+- `stayers` — array of guest rows remaining on this date
+- `header`, `stats`, `weeklyOccupancy` — per-day metadata blocks shown in the editor
+- `infoSection`, `fruehschicht`, `spaetschicht`, `kueche`, `veranstaltungenBankett`, `englischeMenuekarten` — free-text fields
+- `fruehOps`, `spaetOps`, `kuecheOps`, `tischwuenscheOps` — operational entries
+- `kuecheLaktose`, `kuecheGluten`, `kuecheAllergien`, `kuecheUnvertraeglichkeiten`, `kuecheSonstiges` — kitchen dietary lists
+- `geburtstage`, `housekeeping`, `empfangChauffeure`, `landtherme`, `newspapers`, `newGuests`, `freeRooms` — auxiliary lists
+
+Size and depth are enforced on write (`512 KiB` and `12` levels — see `app/schemas/belegung.py`). The LLM `get_daily_briefing` tool only exposes counts, not the raw blob.
+
+### 8. `conversations` and `conversation_messages`
+
+Server-side storage for LLM assistant chats.
+
+`conversations`:
+
+- `id`, `user_id` (FK to `users` with `ON DELETE CASCADE`), `title`, `created_at`, `last_active_at`
+
+`conversation_messages` (append-only):
+
+- `id`, `conversation_id` (FK with `ON DELETE CASCADE`), `role` (`user`/`assistant`/`tool`), `content`, `tool_call_id`, `tool_name`, `tool_calls` (JSONB), `refs` (JSONB), `prompt_tokens`, `completion_tokens`, `cost_micro_cents`, `model`, `created_at`
+- composite index `(conversation_id, created_at)` for history lookups
+- no `updated_at` — messages are never edited in place; deleting the owning conversation cascades
+
+`refs` carries the structured object references the assistant surfaced (offers, guests, employees, daily briefings). The LLM router reads recent `refs` and feeds a compact summary into the next system prompt so follow-up questions can resolve past mentions without replaying tool payloads.
 
 ### 6. `staff_members`
 

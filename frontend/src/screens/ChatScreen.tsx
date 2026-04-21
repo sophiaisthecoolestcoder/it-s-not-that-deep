@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -13,7 +13,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
-import { api } from '../api/client';
+import { api, ConversationMessage as ApiConversationMessage } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { useRouter } from '../navigation/Router';
 import { useI18n } from '../i18n/I18nContext';
@@ -27,6 +27,10 @@ import type { AssistantObjectRef } from '../types/assistant';
 import { downloadTextFile } from '../utils/downloads';
 import { copyTextToClipboard } from '../utils/clipboard';
 import { exportConversationAsImage } from '../utils/exportConversationAsImage';
+import { generateId } from '../utils/helpers';
+import { storage } from '../utils/storage';
+
+const ACTIVE_CONVERSATION_KEY = 'bleiche_active_conversation_id';
 
 let cssInjected = false;
 function injectStyles() {
@@ -74,6 +78,21 @@ function formatTranscript(messages: Message[]) {
         .join('\n');
     })
     .join('\n\n');
+}
+
+function messageFromApi(row: ApiConversationMessage): Message {
+  return {
+    id: `srv-${row.id}`,
+    role: row.role,
+    content: row.content,
+    references: (row.refs || []).map((r) => ({
+      object_type: r.object_type,
+      object_id: r.object_id,
+      title: r.title,
+      subtitle: r.subtitle,
+      actions: r.actions || [],
+    })) as AssistantObjectRef[],
+  };
 }
 
 function CodeBlock({ inline, className, children, onCopyCode, t }: MarkdownCodeProps) {
@@ -133,7 +152,7 @@ function ObjectRefCard({
 function MessageActionButton({ onPress, label, children, disabled }: MessageActionButtonProps) {
   return (
     <TouchableOpacity
-      style={s.msgActionBtn}
+      style={[s.msgActionBtn, disabled && s.msgActionBtnDisabled]}
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
@@ -145,6 +164,15 @@ function MessageActionButton({ onPress, label, children, disabled }: MessageActi
     </TouchableOpacity>
   );
 }
+
+const SANITIZE_SCHEMA = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    code: [...((defaultSchema.attributes && defaultSchema.attributes.code) || []), 'className'],
+    span: [...((defaultSchema.attributes && defaultSchema.attributes.span) || []), 'className'],
+  },
+};
 
 function AssistantMessage({
   content,
@@ -177,18 +205,13 @@ function AssistantMessage({
   );
 }
 
-const MAX_MESSAGES = 50;
+const MAX_MESSAGES = 200;
 
-const SANITIZE_SCHEMA = {
-  ...defaultSchema,
-  attributes: {
-    ...defaultSchema.attributes,
-    code: [...((defaultSchema.attributes && defaultSchema.attributes.code) || []), 'className'],
-    span: [...((defaultSchema.attributes && defaultSchema.attributes.span) || []), 'className'],
-  },
+type Props = {
+  conversationId?: number;
 };
 
-export default function ChatScreen() {
+export default function ChatScreen({ conversationId: initialConversationId }: Props) {
   const { user } = useAuth();
   const { navigate } = useRouter();
   const { t, locale } = useI18n();
@@ -197,10 +220,13 @@ export default function ChatScreen() {
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [hydrating, setHydrating] = useState(false);
+  const [reloadingMessageId, setReloadingMessageId] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const conversationRef = useRef<View>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  // Inject CSS once (web only) and cancel any in-flight request on unmount.
   useEffect(() => {
     injectStyles();
     return () => {
@@ -211,6 +237,50 @@ export default function ChatScreen() {
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
   }, [messages, loading]);
+
+  // Resume logic: if a conversationId was passed via navigation, hydrate it.
+  // Otherwise fall back to the last-used one in storage. If nothing, start fresh.
+  useEffect(() => {
+    const stored = Number(storage.get(ACTIVE_CONVERSATION_KEY) || '') || null;
+    const target = initialConversationId ?? stored ?? null;
+    if (!target) {
+      setConversationId(null);
+      setMessages([]);
+      return;
+    }
+    let cancelled = false;
+    setHydrating(true);
+    api
+      .getConversation(target)
+      .then((detail) => {
+        if (cancelled) return;
+        setConversationId(detail.id);
+        setMessages(
+          detail.messages
+            .filter((m) => m.role === 'user' || m.role === 'assistant')
+            .map(messageFromApi),
+        );
+        storage.set(ACTIVE_CONVERSATION_KEY, String(detail.id));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // Stored id was stale (404) or network issue — start fresh without noise.
+        storage.remove(ACTIVE_CONVERSATION_KEY);
+        setConversationId(null);
+        setMessages([]);
+      })
+      .finally(() => {
+        if (!cancelled) setHydrating(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialConversationId]);
+
+  const persistConversationId = useCallback((id: number | null) => {
+    if (id == null) storage.remove(ACTIVE_CONVERSATION_KEY);
+    else storage.set(ACTIVE_CONVERSATION_KEY, String(id));
+  }, []);
 
   const copyText = async (text: string) => {
     await copyTextToClipboard(text);
@@ -229,8 +299,10 @@ export default function ChatScreen() {
     abortRef.current?.abort();
     setMessages([]);
     setConversationId(null);
+    persistConversationId(null);
     setInput('');
     setLoading(false);
+    setReloadingMessageId(null);
   };
 
   const handleExportConversationImage = async () => {
@@ -253,49 +325,82 @@ export default function ChatScreen() {
     }
   };
 
-  const appendMessage = (msg: Message) => {
+  const appendMessage = useCallback((msg: Message) => {
     setMessages((prev) => {
       const next = [...prev, msg];
       return next.length > MAX_MESSAGES ? next.slice(next.length - MAX_MESSAGES) : next;
     });
-  };
+  }, []);
+
+  const sendQuestion = useCallback(
+    (question: string, opts?: { replaceAssistantId?: string }) => {
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      if (opts?.replaceAssistantId) {
+        setReloadingMessageId(opts.replaceAssistantId);
+      } else {
+        setLoading(true);
+      }
+
+      return api
+        .askAssistant(question, conversationId ?? undefined, controller.signal)
+        .then((res) => {
+          setConversationId(res.conversation_id);
+          persistConversationId(res.conversation_id);
+          const next: Message = {
+            id: generateId(),
+            role: 'assistant',
+            content: res.answer,
+            references: res.references || [],
+          };
+          if (opts?.replaceAssistantId) {
+            setMessages((prev) =>
+              prev.map((m) => (m.id === opts.replaceAssistantId ? { ...next, id: m.id } : m)),
+            );
+          } else {
+            appendMessage(next);
+          }
+        })
+        .catch((e: Error) => {
+          if ((e as any).name === 'AbortError') return;
+          if (opts?.replaceAssistantId) {
+            addToast({ type: 'error', title: t('common.error'), message: e.message });
+          } else {
+            appendMessage({
+              id: generateId(),
+              role: 'assistant',
+              content: `**${t('common.error')}:** ${e.message}`,
+            });
+          }
+        })
+        .finally(() => {
+          if (abortRef.current === controller) abortRef.current = null;
+          if (opts?.replaceAssistantId) setReloadingMessageId(null);
+          else setLoading(false);
+        });
+    },
+    [conversationId, appendMessage, persistConversationId, addToast, t],
+  );
 
   const handleSend = () => {
-    if (!input.trim() || loading) return;
-
     const q = input.trim();
-    const userMsg: Message = { id: `${Date.now()}`, role: 'user', content: q };
+    if (!q || loading || hydrating) return;
+    const userMsg: Message = { id: generateId(), role: 'user', content: q };
     setInput('');
-    setLoading(true);
     appendMessage(userMsg);
+    sendQuestion(q);
+  };
 
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    api
-      .askAssistant(q, conversationId ?? undefined, controller.signal)
-      .then((res) => {
-        setConversationId(res.conversation_id);
-        appendMessage({
-          id: `${Date.now()}-a`,
-          role: 'assistant',
-          content: res.answer,
-          references: res.references || [],
-        });
-      })
-      .catch((e: Error) => {
-        if ((e as any).name === 'AbortError') return;
-        appendMessage({
-          id: `${Date.now()}-err`,
-          role: 'assistant',
-          content: `**${t('common.error')}:** ${e.message}`,
-        });
-      })
-      .finally(() => {
-        if (abortRef.current === controller) abortRef.current = null;
-        setLoading(false);
-      });
+  const handleReloadResponse = (messageId: string) => {
+    if (loading || reloadingMessageId) return;
+    const idx = messages.findIndex((m) => m.id === messageId);
+    if (idx <= 0) return;
+    const target = messages[idx];
+    const preceding = messages[idx - 1];
+    if (target.role !== 'assistant' || preceding.role !== 'user') return;
+    sendQuestion(preceding.content, { replaceAssistantId: messageId });
   };
 
   const handleKeyDown = (e: any) => {
@@ -338,6 +443,8 @@ export default function ChatScreen() {
     }
   };
 
+  const latestAssistantMessageId = [...messages].reverse().find((m) => m.role === 'assistant')?.id;
+
   return (
     <View style={s.root}>
       {/* Header */}
@@ -352,6 +459,12 @@ export default function ChatScreen() {
         <View style={s.headerActions}>
           <TouchableOpacity style={s.headerBtn} onPress={handleNewConversation}>
             <Text style={s.headerBtnText}>{t('chat.newConversation')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={s.headerBtn}
+            onPress={() => navigate({ name: 'conversations-list' })}
+          >
+            <Text style={s.headerBtnText}>{t('chat.history')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.headerBtn} onPress={handleCopyConversation}>
             <Text style={s.headerBtnText}>{t('chat.copyConversation')}</Text>
@@ -371,46 +484,71 @@ export default function ChatScreen() {
         contentContainerStyle={s.msgsContent}
       >
         <View ref={conversationRef} collapsable={false} style={s.conversationCapture}>
-          {messages.length === 0 && !loading && (
+          {hydrating && (
+            <View style={s.hydrating}>
+              <ActivityIndicator color={colors.brand600} />
+              <Text style={s.hydratingText}>{t('chat.loading')}</Text>
+            </View>
+          )}
+          {!hydrating && messages.length === 0 && !loading && (
             <Text style={s.empty}>{t('chat.empty')}</Text>
           )}
-          {messages.map((msg) => (
-            <View
-              key={msg.id}
-              style={[s.msgShell, msg.role === 'user' ? s.msgShellUser : s.msgShellAssistant]}
-            >
-              <View style={[s.msg, msg.role === 'user' ? s.userMsg : s.asstMsg]}>
-                <Text style={[s.msgRole, msg.role === 'user' ? s.msgRoleUser : s.msgRoleAssistant]}>
-                  {msg.role === 'user' ? t('chat.you') : t('chat.assistant')}
-                </Text>
-                {msg.role === 'user' ? (
-                  <Text selectable style={s.userText}>{msg.content}</Text>
-                ) : (
-                  <View>
-                    <AssistantMessage content={msg.content} onCopyCode={copyText} t={t} />
-                    {msg.references?.length ? (
-                      <View style={s.refList}>
-                        {msg.references.map((r) => (
-                          <ObjectRefCard
-                            key={`${msg.id}-${r.object_type}-${r.object_id}`}
-                            refItem={r}
-                            onOpen={handleOpenReference}
-                            onDownload={handleDownloadReference}
-                            t={t}
-                          />
-                        ))}
-                      </View>
-                    ) : null}
-                  </View>
-                )}
+          {messages.map((msg) => {
+            const isLatestAssistant = msg.role === 'assistant' && msg.id === latestAssistantMessageId;
+            const isReloading = reloadingMessageId === msg.id;
+            return (
+              <View
+                key={msg.id}
+                style={[s.msgShell, msg.role === 'user' ? s.msgShellUser : s.msgShellAssistant]}
+              >
+                <View
+                  style={[
+                    s.msg,
+                    msg.role === 'user' ? s.userMsg : s.asstMsg,
+                    isReloading && s.msgReloading,
+                  ]}
+                >
+                  <Text style={[s.msgRole, msg.role === 'user' ? s.msgRoleUser : s.msgRoleAssistant]}>
+                    {msg.role === 'user' ? t('chat.you') : t('chat.assistant')}
+                  </Text>
+                  {msg.role === 'user' ? (
+                    <Text selectable style={s.userText}>{msg.content}</Text>
+                  ) : (
+                    <View>
+                      <AssistantMessage content={msg.content} onCopyCode={copyText} t={t} />
+                      {msg.references?.length ? (
+                        <View style={s.refList}>
+                          {msg.references.map((r) => (
+                            <ObjectRefCard
+                              key={`${msg.id}-${r.object_type}-${r.object_id}`}
+                              refItem={r}
+                              onOpen={handleOpenReference}
+                              onDownload={handleDownloadReference}
+                              t={t}
+                            />
+                          ))}
+                        </View>
+                      ) : null}
+                    </View>
+                  )}
+                </View>
+                <View style={[s.msgActions, msg.role === 'user' ? s.msgActionsUser : s.msgActionsAssistant]}>
+                  <MessageActionButton onPress={() => copyText(msg.content)} label={t('common.copy')}>
+                    <CopyIcon size={CHAT_THEME.actionIconSize} color={CHAT_THEME.actionIcon} />
+                  </MessageActionButton>
+                  {isLatestAssistant && (
+                    <MessageActionButton
+                      onPress={() => handleReloadResponse(msg.id)}
+                      label={t('chat.reloadResponse')}
+                      disabled={isReloading || loading}
+                    >
+                      <ReloadIcon size={CHAT_THEME.actionIconSize} color={CHAT_THEME.actionIcon} />
+                    </MessageActionButton>
+                  )}
+                </View>
               </View>
-              <View style={[s.msgActions, msg.role === 'user' ? s.msgActionsUser : s.msgActionsAssistant]}>
-                <MessageActionButton onPress={() => copyText(msg.content)} label={t('common.copy')}>
-                  <CopyIcon size={CHAT_THEME.actionIconSize} color={CHAT_THEME.actionIcon} />
-                </MessageActionButton>
-              </View>
-            </View>
-          ))}
+            );
+          })}
           {loading && <ActivityIndicator style={{ marginVertical: 16 }} color={colors.brand600} />}
         </View>
       </ScrollView>
@@ -423,14 +561,14 @@ export default function ChatScreen() {
           placeholderTextColor={colors.dark300}
           value={input}
           onChangeText={setInput}
-          editable={!loading}
+          editable={!loading && !hydrating}
           multiline
           onKeyPress={handleKeyDown}
         />
         <TouchableOpacity
-          style={[s.sendBtn, loading && { opacity: 0.5 }]}
+          style={[s.sendBtn, (loading || hydrating) && { opacity: 0.5 }]}
           onPress={handleSend}
-          disabled={loading}
+          disabled={loading || hydrating}
         >
           <Text style={s.sendBtnText}>{t('chat.send')}</Text>
         </TouchableOpacity>
@@ -499,24 +637,15 @@ const s = StyleSheet.create({
   conversationCapture: {
     gap: 10,
   },
-  conversationHeader: {
-    backgroundColor: CHAT_THEME.captureHeaderBg,
-    borderWidth: 1,
-    borderColor: CHAT_THEME.captureHeaderBorder,
-    padding: 12,
-    gap: 2,
+  hydrating: {
+    padding: 20,
+    alignItems: 'center',
+    gap: 10,
   },
-  conversationHeaderLabel: {
+  hydratingText: {
     fontFamily: fonts.sans,
-    fontSize: 10,
-    letterSpacing: 1.1,
-    textTransform: 'uppercase',
-    color: CHAT_THEME.captureHeaderLabel,
-  },
-  conversationHeaderTitle: {
-    fontFamily: fonts.serif,
-    fontSize: 18,
-    color: CHAT_THEME.captureHeaderTitle,
+    fontSize: 12,
+    color: colors.dark400,
   },
   empty: {
     fontFamily: fonts.sans,
@@ -598,10 +727,6 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: CHAT_THEME.actionButtonBg,
-  },
-  msgActionBtnPressed: {
-    backgroundColor: CHAT_THEME.actionButtonBgActive,
-    borderColor: CHAT_THEME.actionButtonBorderActive,
   },
   msgActionBtnDisabled: {
     opacity: 0.5,

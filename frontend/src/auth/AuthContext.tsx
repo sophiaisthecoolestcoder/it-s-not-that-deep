@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api, setToken, getToken, onUnauthorized } from '../api/client';
 import type { AuthUser } from '../types/auth';
+import { storage } from '../utils/storage';
+
+// Keep in sync with ChatScreen's ACTIVE_CONVERSATION_KEY. Duplicated here so
+// we don't create a circular import between auth and a feature screen.
+const ACTIVE_CONVERSATION_KEY = 'bleiche_active_conversation_id';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -24,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     onUnauthorized(() => {
       setToken(null);
       setUser(null);
+      storage.remove(ACTIVE_CONVERSATION_KEY);
     });
     const token = getToken();
     if (!token) {
@@ -50,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     api.logout().catch(() => {});
     setToken(null);
     setUser(null);
+    storage.remove(ACTIVE_CONVERSATION_KEY);
   };
 
   return (

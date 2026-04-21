@@ -147,7 +147,7 @@ export default function OfferEditorScreen({ offerId }: Props) {
         setNotes(o.notes || '');
         setStatus(o.status);
       })
-      .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }))
+      .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }))
       .finally(() => setLoading(false));
   }, [offerId, addToast]);
 
@@ -204,7 +204,7 @@ export default function OfferEditorScreen({ offerId }: Props) {
         addToast({ type: 'success', title: isEditing ? 'Aktualisiert' : 'Gespeichert' });
         if (!isEditing) navigate({ name: 'offers-list' });
       })
-      .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }))
+      .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }))
       .finally(() => setSaving(false));
   }
 

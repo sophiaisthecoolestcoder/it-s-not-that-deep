@@ -46,6 +46,14 @@ const TRANSLATIONS: Record<Locale, Dict> = {
     'chat.copyMessage': 'Nachricht kopieren',
     'chat.copyCode': 'Code kopieren',
     'chat.reloadResponse': 'Antwort neu laden',
+    'chat.history': 'Verlauf',
+    'chat.loading': 'Laedt Unterhaltung...',
+    'conversations.title': 'Unterhaltungen',
+    'conversations.empty': 'Noch keine Unterhaltungen.',
+    'conversations.new': 'Neue Unterhaltung starten',
+    'conversations.deleted': 'Unterhaltung geloescht',
+    'conversations.deleteConfirmTitle': 'Unterhaltung loeschen',
+    'conversations.deleteConfirmBody': 'Diese Unterhaltung und alle Nachrichten endgueltig loeschen?',
     'offers.title': 'Angebote',
     'offers.new': 'Neues Angebot',
     'offers.search': 'Kunde suchen...',
@@ -54,8 +62,13 @@ const TRANSLATIONS: Record<Locale, Dict> = {
     'offers.createFirst': 'Erstes Angebot erstellen',
     'offers.duplicate': 'Kopie',
     'offers.deleted': 'Angebot geloescht',
+    'offers.duplicated': 'Dupliziert',
+    'offers.duplicatedBody': 'Kopie fuer {name}',
+    'offers.statusChanged': 'Status geaendert',
     'offers.deleteConfirmTitle': 'Angebot loeschen',
     'offers.deleteConfirmBody': 'Angebot fuer "{name}" wirklich loeschen?',
+    'offers.count.one': '{count} Angebot',
+    'offers.count.other': '{count} Angebote',
     'offer.export': 'Export HTML',
     'offer.exportWord': 'Word (.docx)',
     'belegung.exportExcel': 'Excel (.xlsx)',
@@ -64,6 +77,24 @@ const TRANSLATIONS: Record<Locale, Dict> = {
     'offer.new': 'Neues Angebot',
     'staff.title': 'Mitarbeiter verwalten',
     'days.title': 'Alle Tage',
+    'days.newDay': 'Neuen Tag anlegen',
+    'days.date': 'Datum',
+    'days.datePlaceholder': 'JJJJ-MM-TT',
+    'days.create': '+ Tag erstellen',
+    'days.creating': 'Erstelle...',
+    'days.created': 'Tag erstellt',
+    'days.deleted': 'Tag geloescht',
+    'days.deleteConfirmTitle': 'Tag loeschen',
+    'days.deleteConfirmBody': 'Tag {date} wirklich loeschen? Diese Aktion kann nicht rueckgaengig gemacht werden.',
+    'days.empty': 'Noch keine Tage gespeichert. Erstellen Sie einen neuen Tag oben.',
+    'days.summary.one': '{count} Tag gespeichert',
+    'days.summary.other': '{count} Tage gespeichert',
+    'days.col.date': 'Datum',
+    'days.col.weekday': 'Wochentag',
+    'days.col.arrivals': 'Anreisen',
+    'days.col.stayers': 'Bleiber',
+    'days.col.actions': 'Aktionen',
+    'common.cancel': 'Abbrechen',
     'login.username': 'Benutzername',
     'login.password': 'Passwort',
     'login.signIn': 'Anmelden',
@@ -112,6 +143,14 @@ const TRANSLATIONS: Record<Locale, Dict> = {
     'chat.copyMessage': 'Copy message',
     'chat.copyCode': 'Copy code',
     'chat.reloadResponse': 'Reload response',
+    'chat.history': 'History',
+    'chat.loading': 'Loading conversation...',
+    'conversations.title': 'Conversations',
+    'conversations.empty': 'No conversations yet.',
+    'conversations.new': 'Start a new conversation',
+    'conversations.deleted': 'Conversation deleted',
+    'conversations.deleteConfirmTitle': 'Delete conversation',
+    'conversations.deleteConfirmBody': 'Permanently delete this conversation and all its messages?',
     'offers.title': 'Offers',
     'offers.new': 'New Offer',
     'offers.search': 'Search customer...',
@@ -120,8 +159,13 @@ const TRANSLATIONS: Record<Locale, Dict> = {
     'offers.createFirst': 'Create first offer',
     'offers.duplicate': 'Duplicate',
     'offers.deleted': 'Offer deleted',
+    'offers.duplicated': 'Duplicated',
+    'offers.duplicatedBody': 'Copy for {name}',
+    'offers.statusChanged': 'Status changed',
     'offers.deleteConfirmTitle': 'Delete offer',
     'offers.deleteConfirmBody': 'Delete offer for "{name}"?',
+    'offers.count.one': '{count} offer',
+    'offers.count.other': '{count} offers',
     'offer.export': 'Export HTML',
     'offer.exportWord': 'Word (.docx)',
     'belegung.exportExcel': 'Excel (.xlsx)',
@@ -130,6 +174,24 @@ const TRANSLATIONS: Record<Locale, Dict> = {
     'offer.new': 'New Offer',
     'staff.title': 'Manage Staff',
     'days.title': 'All Days',
+    'days.newDay': 'Create new day',
+    'days.date': 'Date',
+    'days.datePlaceholder': 'YYYY-MM-DD',
+    'days.create': '+ Create day',
+    'days.creating': 'Creating...',
+    'days.created': 'Day created',
+    'days.deleted': 'Day deleted',
+    'days.deleteConfirmTitle': 'Delete day',
+    'days.deleteConfirmBody': 'Delete day {date}? This action cannot be undone.',
+    'days.empty': 'No days saved yet. Create a new day above.',
+    'days.summary.one': '{count} day stored',
+    'days.summary.other': '{count} days stored',
+    'days.col.date': 'Date',
+    'days.col.weekday': 'Weekday',
+    'days.col.arrivals': 'Arrivals',
+    'days.col.stayers': 'Stayers',
+    'days.col.actions': 'Actions',
+    'common.cancel': 'Cancel',
     'login.username': 'Username',
     'login.password': 'Password',
     'login.signIn': 'Sign In',
@@ -154,13 +216,25 @@ const I18nContext = createContext<I18nContextValue>({
 
 const STORAGE_KEY = 'bleiche_locale';
 
+function normaliseLocale(raw: string | null): Locale {
+  return raw === 'en' ? 'en' : 'de';
+}
+
+// Only expand `{knownKey}` placeholders whose names actually appear in `vars`,
+// so interpolated values containing `{foo}` can't be re-expanded as templates.
+function interpolate(template: string, vars: Record<string, string>): string {
+  return template.replace(/\{([a-zA-Z0-9_]+)\}/g, (match, key) => {
+    return Object.prototype.hasOwnProperty.call(vars, key) ? vars[key] : match;
+  });
+}
+
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const initial = (storage.get(STORAGE_KEY) as Locale | null) || 'de';
-  const [locale, setLocaleState] = useState<Locale>(initial === 'en' ? 'en' : 'de');
+  const [locale, setLocaleState] = useState<Locale>(() => normaliseLocale(storage.get(STORAGE_KEY)));
 
   const setLocale = (next: Locale) => {
-    setLocaleState(next);
-    storage.set(STORAGE_KEY, next);
+    const safe = normaliseLocale(next);
+    setLocaleState(safe);
+    storage.set(STORAGE_KEY, safe);
   };
 
   const value = useMemo<I18nContextValue>(() => ({
@@ -169,10 +243,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     t: (key, vars) => {
       const base = TRANSLATIONS[locale][key] ?? TRANSLATIONS.de[key] ?? key;
       if (!vars) return base;
-      return Object.entries(vars).reduce(
-        (acc, [k, v]) => acc.replaceAll(`{${k}}`, v),
-        base,
-      );
+      return interpolate(base, vars);
     },
   }), [locale]);
 

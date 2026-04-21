@@ -31,9 +31,9 @@ export default function DaysListScreen() {
     api
       .listDays()
       .then(setDays)
-      .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }))
+      .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }))
       .finally(() => setLoading(false));
-  }, [addToast]);
+  }, [addToast, t]);
 
   useEffect(() => {
     load();
@@ -67,30 +67,30 @@ export default function DaysListScreen() {
         newspapers: [], newGuests: [], freeRooms: [],
       })
       .then(() => {
-        addToast({ type: 'success', title: 'Tag erstellt', message: formatDateGerman(newDate) });
+        addToast({ type: 'success', title: t('days.created'), message: formatDateGerman(newDate) });
         navigate({ name: 'belegung-editor', date: newDate });
       })
-      .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }))
+      .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }))
       .finally(() => setCreating(false));
   }
 
   function handleDeleteDay(date: string) {
     Alert.alert(
-      'Tag löschen',
-      `Tag ${formatDateGerman(date)} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`,
+      t('days.deleteConfirmTitle'),
+      t('days.deleteConfirmBody', { date: formatDateGerman(date) }),
       [
-        { text: 'Abbrechen', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Löschen',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => {
             api
               .deleteDay(date)
               .then(() => {
-                addToast({ type: 'success', title: 'Tag gelöscht', message: formatDateGerman(date) });
+                addToast({ type: 'success', title: t('days.deleted'), message: formatDateGerman(date) });
                 setDays((prev) => prev.filter((d) => d.date !== date));
               })
-              .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }));
+              .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }));
           },
         },
       ],
@@ -106,15 +106,15 @@ export default function DaysListScreen() {
 
       {/* Create new day */}
       <View style={s.createCard}>
-        <Text style={s.createLabel}>Neuen Tag anlegen</Text>
+        <Text style={s.createLabel}>{t('days.newDay')}</Text>
         <View style={s.createRow}>
           <View>
-            <Text style={s.fieldLabel}>Datum</Text>
+            <Text style={s.fieldLabel}>{t('days.date')}</Text>
             <TextInput
               style={s.dateInput}
               value={newDate}
               onChangeText={setNewDate}
-              placeholder="JJJJ-MM-TT"
+              placeholder={t('days.datePlaceholder')}
               placeholderTextColor={colors.dark300}
             />
           </View>
@@ -124,7 +124,7 @@ export default function DaysListScreen() {
             disabled={creating}
           >
             <Text style={s.btnPrimaryText}>
-              {creating ? 'Erstelle...' : '+ Tag erstellen'}
+              {creating ? t('days.creating') : t('days.create')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -137,18 +137,22 @@ export default function DaysListScreen() {
         <View style={s.table}>
           {/* Header */}
           <View style={[s.tr, s.thead]}>
-            {['Datum', 'Wochentag', 'Anreisen', 'Bleiber', 'Aktionen'].map((h) => (
-              <View key={h} style={[s.th, h === 'Aktionen' && s.thActions]}>
-                <Text style={s.thText}>{h}</Text>
+            {[
+              { key: 'date', label: t('days.col.date') },
+              { key: 'weekday', label: t('days.col.weekday') },
+              { key: 'arrivals', label: t('days.col.arrivals') },
+              { key: 'stayers', label: t('days.col.stayers') },
+              { key: 'actions', label: t('days.col.actions') },
+            ].map((h) => (
+              <View key={h.key} style={[s.th, h.key === 'actions' && s.thActions]}>
+                <Text style={s.thText}>{h.label}</Text>
               </View>
             ))}
           </View>
           <ScrollView>
             {sortedDays.length === 0 ? (
               <View style={s.empty}>
-                <Text style={s.emptyText}>
-                  Noch keine Tage gespeichert. Erstellen Sie einen neuen Tag oben.
-                </Text>
+                <Text style={s.emptyText}>{t('days.empty')}</Text>
               </View>
             ) : (
               sortedDays.map((day) => (
@@ -174,7 +178,7 @@ export default function DaysListScreen() {
                       style={s.actionBtn}
                       onPress={() => handleOpenDay(day.date)}
                     >
-                      <Text style={s.actionBtnText}>Öffnen</Text>
+                      <Text style={s.actionBtnText}>{t('common.open')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[s.actionBtn, s.actionBtnDanger]}
@@ -183,7 +187,9 @@ export default function DaysListScreen() {
                         handleDeleteDay(day.date);
                       }}
                     >
-                      <Text style={[s.actionBtnText, { color: '#b91c1c' }]}>Löschen</Text>
+                      <Text style={[s.actionBtnText, { color: colors.errorText }]}>
+                        {t('common.delete')}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </TouchableOpacity>
@@ -195,7 +201,7 @@ export default function DaysListScreen() {
 
       {sortedDays.length > 0 && (
         <Text style={s.summary}>
-          {sortedDays.length} {sortedDays.length === 1 ? 'Tag' : 'Tage'} gespeichert
+          {t(sortedDays.length === 1 ? 'days.summary.one' : 'days.summary.other', { count: String(sortedDays.length) })}
         </Text>
       )}
     </View>
@@ -327,7 +333,7 @@ const s = StyleSheet.create({
     paddingVertical: 5,
   },
   actionBtnDanger: {
-    borderColor: '#fca5a5',
+    borderColor: colors.errorBorder,
   },
   actionBtnText: {
     fontFamily: fonts.sans,

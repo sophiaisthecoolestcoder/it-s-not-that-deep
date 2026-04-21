@@ -15,6 +15,9 @@ class User(Base):
     employee_id = Column(Integer, ForeignKey("employees.id", ondelete="SET NULL"), nullable=True)
     is_active = Column(Boolean, nullable=False, server_default="true")
     must_change_password = Column(Boolean, nullable=False, server_default="false")
+    # Any JWT whose `iat` is earlier than this timestamp is rejected. Bumped on
+    # password change so stolen tokens can't outlive the secret they were issued under.
+    tokens_invalidated_before = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

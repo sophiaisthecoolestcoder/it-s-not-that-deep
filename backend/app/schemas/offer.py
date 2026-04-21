@@ -17,17 +17,22 @@ def _validate_children(values: Optional[List[int]]) -> Optional[List[int]]:
     return values
 
 
+class _NegativePriceError(ValueError):
+    """Raised when a parseable price value is negative. Kept distinct from
+    float-parse errors so we can tell 'literal -100' from 'free-text not a number'."""
+
+
 def _validate_non_negative_price(raw: str) -> str:
     if not raw:
         return raw
     cleaned = raw.replace(",", ".").replace("€", "").replace(" ", "")
     try:
-        if float(cleaned) < 0:
-            raise ValueError("Preis darf nicht negativ sein")
-    except ValueError as exc:
-        # not parseable as a number — let it through (free-text surcharges like "nach Absprache")
-        if "negativ" in str(exc):
-            raise
+        parsed = float(cleaned)
+    except ValueError:
+        # Not parseable as a number — allow free-text surcharges ("nach Absprache").
+        return raw
+    if parsed < 0:
+        raise _NegativePriceError("Preis darf nicht negativ sein")
     return raw
 
 
@@ -47,7 +52,7 @@ class OfferBase(BaseModel):
     room_category: str = Field(default="", max_length=100)
     custom_room_category: str = Field(default="", max_length=255)
     adults: int = Field(default=2, ge=1, le=20)
-    children_ages: List[int] = []
+    children_ages: List[int] = Field(default_factory=list)
     price_per_night: str = Field(default="", max_length=50)
     total_price: str = Field(default="", max_length=50)
 

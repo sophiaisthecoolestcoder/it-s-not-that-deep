@@ -10,7 +10,8 @@ export type AppScreen =
   | { name: 'belegung-editor'; date?: string }
   | { name: 'days-list' }
   | { name: 'staff-manager' }
-  | { name: 'chat' };
+  | { name: 'chat'; conversationId?: number }
+  | { name: 'conversations-list' };
 
 interface RouterContextValue {
   screen: AppScreen;

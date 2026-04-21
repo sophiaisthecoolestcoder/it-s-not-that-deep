@@ -19,8 +19,8 @@ _write_access = require_roles(EmployeeRole.ADMIN, EmployeeRole.MANAGER, Employee
 
 @router.get("/", response_model=list[OfferRead])
 def list_offers(
-    skip: int = 0,
-    limit: int = 200,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=200, ge=1, le=500),
     db: Session = Depends(get_db),
     user: User = Depends(_read_access),
 ):

@@ -61,6 +61,7 @@ login_user_limiter = RateLimiter(limit=5, window_seconds=300, name="login_user")
 llm_user_limiter = RateLimiter(limit=20, window_seconds=60, name="llm_user")
 llm_user_daily = RateLimiter(limit=500, window_seconds=24 * 3600, name="llm_user_daily")
 write_limiter = RateLimiter(limit=60, window_seconds=60, name="write")
+password_change_limiter = RateLimiter(limit=5, window_seconds=300, name="password_change")
 
 
 # ── Login lockout (after N consecutive failures, cool off) ───────────────────

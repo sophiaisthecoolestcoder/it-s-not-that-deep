@@ -113,6 +113,12 @@ def get_current_user(
     user = db.query(User).filter(User.id == int(payload["sub"])).first()
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="User inactive or missing")
+    # Reject tokens issued before the user's latest credential rotation.
+    invalidated = getattr(user, "tokens_invalidated_before", None)
+    if invalidated is not None:
+        token_iat = int(payload.get("iat", 0) or 0)
+        if token_iat < int(invalidated.timestamp()):
+            raise HTTPException(status_code=401, detail="Token revoked. Please sign in again.")
     return user
 
 

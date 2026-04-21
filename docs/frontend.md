@@ -46,9 +46,10 @@ Screens currently available:
 - `belegung-editor`
 - `days-list`
 - `staff-manager`
-- `chat`
+- `chat` — accepts an optional `conversationId` to resume a specific thread
+- `conversations-list` — lists and manages the current user's past assistant conversations
 
-This is enough for the current product and avoids pulling in a heavier client-side navigation framework.
+Each screen is wrapped in an `ErrorBoundary` keyed by route name, so a failure in one screen does not poison the rest of the app — navigating away resets the boundary. Navigation history is capped at 50 entries.
 
 ## Layout
 
@@ -114,20 +115,19 @@ This was added to keep the operational UI usable for different staff members wit
 Responsibilities:
 
 - attach the JWT token to authenticated requests,
-- convert non-OK responses into useful `Error` objects,
-- provide typed helpers for offers, guests, employees, Belegung, and assistant calls,
+- apply a default 20-second request timeout (composed with any caller-provided `AbortSignal`),
+- convert non-OK responses into useful `Error` objects, including parsing FastAPI's structured validation `detail` arrays,
+- auto-invoke the `onUnauthorized` handler on `401` so `AuthContext` can drop the session,
+- provide typed helpers for offers, guests, employees, Belegung, assistant, and conversations,
 - and expose the offer HTML export endpoint.
 
 Important helpers:
 
-- `api.login()`
-- `api.me()`
-- `api.listOffers()`
-- `api.createOffer()`
-- `api.exportOfferHtml()`
-- `api.askAssistant()`
-- `api.getGuest()`
-- `api.getEmployee()`
+- `api.login()` / `api.me()` / `api.logout()` / `api.changePassword()`
+- `api.listOffers()` / `api.createOffer()` / `api.exportOfferHtml()`
+- `api.askAssistant(question, conversationId?, signal?)` — sends only the current question, the backend reloads history by `conversation_id`
+- `api.listConversations()` / `api.getConversation(id)` / `api.deleteConversation(id)` / `api.myUsage(days)`
+- `api.getGuest()` / `api.getEmployee()`
 
 ## Screen Responsibilities
 
@@ -167,13 +167,18 @@ These screens are linked from assistant references and are intentionally simple 
 
 It supports:
 
-- full conversation thread sending,
-- clickable object references,
+- resume: the active `conversation_id` is persisted in `localStorage` under `bleiche_active_conversation_id`, so reloads and navigation back to the screen continue the same thread; a conversation passed explicitly via the router takes precedence over the stored value,
+- clickable object references (opens the matching detail screen or downloads an offer as HTML),
 - message-level copy buttons,
 - code-block copy buttons,
-- conversation copy,
-- temporary conversation image export on web,
-- and regenerate/reload for the latest assistant response.
+- full conversation copy,
+- conversation image export on web,
+- regenerate/reload for the latest assistant response (re-sends the preceding user turn with the same `conversation_id` and replaces the assistant bubble in-place),
+- and a "History" header button plus sidebar entry that navigates to `ConversationsListScreen`.
+
+### Conversations List Screen
+
+`frontend/src/screens/ConversationsListScreen.tsx` lists the current user's past assistant conversations (via `GET /api/conversations/`). Each row opens the thread in `ChatScreen` (`navigate({ name: 'chat', conversationId })`) and exposes a delete action that cascades to its messages.
 
 ## Clipboard And Export Helpers
 

@@ -40,11 +40,15 @@ export default function LoginScreen() {
       <View style={s.card}>
         {/* Brand header */}
         <View style={s.brandArea}>
-          <Image
-            source={{ uri: '/assets/bleiche-logo-text.png' }}
-            style={s.brandMark}
-            resizeMode="contain"
-          />
+          {Platform.OS === 'web' ? (
+            <Image
+              source={{ uri: '/assets/bleiche-logo-text.png' }}
+              style={s.brandMark}
+              resizeMode="contain"
+            />
+          ) : (
+            <View style={s.brandMark} />
+          )}
           <Text style={s.brandTitle}>Bleiche Resort & Spa</Text>
           <Text style={s.brandSub}>{t('login.workspace')}</Text>
         </View>

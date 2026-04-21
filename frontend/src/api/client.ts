@@ -40,6 +40,49 @@ export function onUnauthorized(handler: UnauthorizedHandler | null): void {
 
 export interface RequestOptions extends RequestInit {
   signal?: AbortSignal;
+  timeoutMs?: number;
+}
+
+const DEFAULT_TIMEOUT_MS = 20_000;
+
+function mergeSignals(external?: AbortSignal, timeoutMs: number = DEFAULT_TIMEOUT_MS): {
+  signal: AbortSignal;
+  cleanup: () => void;
+} {
+  const timeoutController = new AbortController();
+  const timer = setTimeout(() => timeoutController.abort(), timeoutMs);
+  if (!external) {
+    return { signal: timeoutController.signal, cleanup: () => clearTimeout(timer) };
+  }
+  if (external.aborted) {
+    timeoutController.abort();
+    return { signal: timeoutController.signal, cleanup: () => clearTimeout(timer) };
+  }
+  const onAbort = () => timeoutController.abort();
+  external.addEventListener('abort', onAbort);
+  return {
+    signal: timeoutController.signal,
+    cleanup: () => {
+      clearTimeout(timer);
+      external.removeEventListener('abort', onAbort);
+    },
+  };
+}
+
+function formatDetail(detail: unknown): string | null {
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) {
+    // FastAPI validation errors: [{loc, msg, type}, ...]
+    const msgs = detail
+      .map((d) => (d && typeof d === 'object' && 'msg' in (d as Record<string, unknown>) ? String((d as Record<string, unknown>).msg) : null))
+      .filter((m): m is string => !!m);
+    if (msgs.length) return msgs.join('; ');
+  }
+  if (detail && typeof detail === 'object') {
+    const msg = (detail as Record<string, unknown>).msg;
+    if (typeof msg === 'string') return msg;
+  }
+  return null;
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -50,7 +93,23 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  const { signal, cleanup } = mergeSignals(options.signal, options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, { ...options, headers, signal });
+  } catch (err) {
+    cleanup();
+    if ((err as Error)?.name === 'AbortError') {
+      // If caller's own signal fired, surface as AbortError unchanged.
+      if (options.signal?.aborted) throw err;
+      const timeoutErr = new Error(`Request timed out after ${options.timeoutMs ?? DEFAULT_TIMEOUT_MS}ms`) as Error & { status: number };
+      timeoutErr.status = 0;
+      throw timeoutErr;
+    }
+    throw err;
+  }
+  cleanup();
+
   if (!res.ok) {
     if (res.status === 401 && unauthorizedHandler) {
       unauthorizedHandler();
@@ -58,9 +117,8 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     let message = `${res.status} ${res.statusText}`;
     try {
       const body = await res.json();
-      if (body?.detail) {
-        message = typeof body.detail === 'string' ? body.detail : JSON.stringify(body.detail);
-      }
+      const formatted = formatDetail(body?.detail);
+      if (formatted) message = formatted;
     } catch {
       /* non-JSON response body */
     }
@@ -77,6 +135,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 export interface LoginResponse {
   access_token: string;
   token_type: string;
+  expires_in: number;
   user: {
     id: number;
     username: string;
@@ -85,6 +144,7 @@ export interface LoginResponse {
     is_active: boolean;
     must_change_password: boolean;
     created_at: string;
+    updated_at?: string | null;
   };
 }
 

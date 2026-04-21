@@ -38,9 +38,9 @@ export default function OffersListScreen() {
     api
       .listOffers()
       .then(setOffers)
-      .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }))
+      .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }))
       .finally(() => setLoading(false));
-  }, [addToast]);
+  }, [addToast, t]);
 
   useEffect(() => {
     load();
@@ -68,7 +68,7 @@ export default function OffersListScreen() {
                 addToast({ type: 'success', title: t('offers.deleted'), message: name });
                 setOffers((prev) => prev.filter((x) => x.id !== o.id));
               })
-              .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }));
+              .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }));
           },
         },
       ],
@@ -76,23 +76,34 @@ export default function OffersListScreen() {
   }
 
   function handleDuplicate(o: Offer) {
+    const name = `${o.first_name} ${o.last_name}`;
     api
       .duplicateOffer(o.id)
       .then((copy) => {
         setOffers((prev) => [copy, ...prev]);
-        addToast({ type: 'success', title: 'Dupliziert', message: `Kopie für ${o.first_name} ${o.last_name}` });
+        addToast({
+          type: 'success',
+          title: t('offers.duplicated'),
+          message: t('offers.duplicatedBody', { name }),
+        });
       })
-      .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }));
+      .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }));
   }
 
   function handleStatusChange(id: number, status: OfferStatus) {
+    const previous = offers;
+    // Optimistic: flip the badge immediately, revert on failure.
+    setOffers((prev) => prev.map((x) => (x.id === id ? { ...x, status } : x)));
     api
       .updateOffer(id, { status })
       .then((updated) => {
         setOffers((prev) => prev.map((x) => (x.id === id ? updated : x)));
-        addToast({ type: 'info', title: 'Status geändert', message: STATUS_LABELS[status] });
+        addToast({ type: 'info', title: t('offers.statusChanged'), message: STATUS_LABELS[status] });
       })
-      .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }));
+      .catch((e: Error) => {
+        setOffers(previous);
+        addToast({ type: 'error', title: t('common.error'), message: e.message });
+      });
   }
 
   return (
@@ -101,7 +112,9 @@ export default function OffersListScreen() {
       <View style={s.topBar}>
         <View>
           <Text style={s.pageTitle}>{t('offers.title')}</Text>
-          <Text style={s.subtitle}>{offers.length} Angebot{offers.length !== 1 ? 'e' : ''}</Text>
+          <Text style={s.subtitle}>
+            {t(offers.length === 1 ? 'offers.count.one' : 'offers.count.other', { count: String(offers.length) })}
+          </Text>
         </View>
         <TouchableOpacity
           style={s.btnPrimary}
@@ -387,9 +400,9 @@ const s = StyleSheet.create({
     color: colors.dark500,
   },
   actionBtnDanger: {
-    borderColor: '#fca5a5',
+    borderColor: colors.errorBorder,
   },
   actionBtnDangerText: {
-    color: '#b91c1c',
+    color: colors.errorText,
   },
 });

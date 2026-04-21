@@ -13,8 +13,15 @@ from app.auth import (
     get_current_user,
     modules_for,
     INVALID_PASSWORD_PLACEHOLDER,
+    TOKEN_TTL_SECONDS,
 )
-from app.security import client_ip, login_ip_limiter, login_lockout, login_user_limiter
+from app.security import (
+    client_ip,
+    login_ip_limiter,
+    login_lockout,
+    login_user_limiter,
+    password_change_limiter,
+)
 from app.schemas.user import (
     ChangePasswordRequest,
     LoginRequest,
@@ -50,7 +57,7 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
     login_lockout.record_success(payload.username)
     token = create_access_token(user.id, user.username, user.role.value)
     logger.info("login_ok user=%s ip=%s role=%s", user.username, ip, user.role.value)
-    return TokenResponse(access_token=token, user=user)
+    return TokenResponse(access_token=token, expires_in=TOKEN_TTL_SECONDS, user=user)
 
 
 @router.get("/me")
@@ -81,12 +88,15 @@ def change_password(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    password_change_limiter.check(f"u:{user.id}")
     if not verify_password(payload.current_password, user.password_hash):
         raise HTTPException(status_code=400, detail="Aktuelles Passwort ist falsch")
     if len(payload.new_password) < 10:
         raise HTTPException(status_code=400, detail="Neues Passwort muss mindestens 10 Zeichen haben")
+    from datetime import datetime, timezone
     user.password_hash = hash_password(payload.new_password)
     user.must_change_password = False
+    user.tokens_invalidated_before = datetime.now(timezone.utc)
     db.commit()
     logger.info("password_changed user=%s", user.username)
 

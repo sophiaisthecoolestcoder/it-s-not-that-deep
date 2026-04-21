@@ -19,6 +19,7 @@ class UserRead(BaseModel):
     is_active: bool
     must_change_password: bool = False
     created_at: datetime
+    updated_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
@@ -36,4 +37,5 @@ class ChangePasswordRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    expires_in: int
     user: UserRead

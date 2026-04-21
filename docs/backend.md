@@ -7,9 +7,11 @@ The backend is a FastAPI service with SQLAlchemy ORM models and Alembic migratio
 ## Runtime Entry Point
 
 - Application entry: `backend/app/main.py`
-- Health endpoint: `GET /api/health`
+- Health endpoints: `GET /api/health` (liveness), `GET /api/health/deep` (DB + LLM readiness)
 - API prefix: `/api`
-- CORS: enabled for all origins in the current local-development setup
+- CORS: restricted to the origins listed in `ALLOWED_ORIGINS` (comma-separated, defaults cover local web/metro)
+- Request body cap: `MAX_BODY_BYTES` (default 1 MiB) enforced in middleware
+- Every request gets an `X-Request-ID` header and is logged with method/path/status/duration
 
 The backend registers the following routers:
 
@@ -19,22 +21,26 @@ The backend registers the following routers:
 - `offers`
 - `belegung`
 - `llm`
+- `conversations`
 
 ## Core Backend Concepts
 
 ### 1. Database Access
 
 - `backend/app/database.py` loads environment variables with `python-dotenv`.
-- `DATABASE_URL` is required and the app now fails fast if it is missing.
+- `DATABASE_URL` is required and the app fails fast if it is missing.
+- The engine is configured with a connection pool (`DB_POOL_SIZE`, `DB_MAX_OVERFLOW`, `DB_POOL_RECYCLE_SECONDS` env overrides) and `pool_pre_ping=True` to weed out stale connections.
 - `SessionLocal` is the unit of work used by routes and tools.
 
 ### 2. Authentication
 
-- Login is handled by `POST /api/auth/login`.
-- JWT tokens are generated in `backend/app/auth.py` using the standard library.
+- Login is handled by `POST /api/auth/login`. The response is `{access_token, token_type, expires_in, user}` so the client knows the TTL.
+- JWT tokens are generated in `backend/app/auth.py` using the standard library (HS256). TTL is controlled by `TOKEN_TTL_SECONDS` (default 8 hours).
 - `GET /api/auth/me` returns the current user profile and module access list.
-- The backend now requires `JWT_SECRET` to exist at startup.
+- The backend requires `JWT_SECRET` to exist at startup.
 - Role checks are implemented with dependency helpers such as `require_roles()`.
+- **Session revocation on password change:** the `users.tokens_invalidated_before` column is bumped to `now()` whenever a user changes their password. Any JWT whose `iat` is earlier than that timestamp is rejected in `get_current_user`. This makes `POST /api/auth/change-password` act as a global session-revoke.
+- **Login lockout and rate limits:** `POST /api/auth/login` is gated by per-IP and per-username rate limiters plus a lockout after 5 consecutive failures. `POST /api/auth/change-password` has its own per-user rate limiter.
 
 ### 3. Authorization Model
 
@@ -62,6 +68,8 @@ Routes in `backend/app/routers/auth.py`:
 
 - `POST /api/auth/login`
 - `GET /api/auth/me`
+- `POST /api/auth/logout` (acknowledges and logs the client-side logout; real revocation happens via `change-password`)
+- `POST /api/auth/change-password`
 - `POST /api/auth/register`
 
 The register endpoint is admin-only.
@@ -115,8 +123,17 @@ Routes in `backend/app/routers/belegung.py`:
 
 Routes in `backend/app/routers/llm.py`:
 
-- `POST /api/llm/ask`
-- `GET /api/llm/capabilities`
+- `POST /api/llm/ask` — accepts `{question, conversation_id?}`, returns `{conversation_id, question, answer, role, tools_available, references, usage}`. Rate-limited per user (short-burst + daily).
+- `GET /api/llm/capabilities` — lists the tools available to the caller's role.
+
+### Conversations
+
+Routes in `backend/app/routers/conversations.py`:
+
+- `GET /api/conversations/` — list the caller's conversations, newest active first.
+- `GET /api/conversations/{id}` — full detail with messages; 404 if not owned by the caller.
+- `DELETE /api/conversations/{id}` — cascades to messages.
+- `GET /api/conversations/usage/me?days=N` — token + cost totals for the last N days.
 
 ## Data Validation And Schemas
 
@@ -136,8 +153,13 @@ Required environment variables:
 
 Optional environment variables:
 
-- `GROQ_API_KEY`
-- `GROQ_MODEL`
+- `GROQ_API_KEY`, `GROQ_MODEL`, `GROQ_INPUT_PRICE_PER_MTOK`, `GROQ_OUTPUT_PRICE_PER_MTOK`
+- `TOKEN_TTL_SECONDS` (JWT expiry; default 8 hours)
+- `LOG_LEVEL` (default `INFO`)
+- `ALLOWED_ORIGINS` (comma-separated CORS allowlist)
+- `MAX_BODY_BYTES` (request size cap; default 1 MiB)
+- `DB_POOL_SIZE`, `DB_MAX_OVERFLOW`, `DB_POOL_RECYCLE_SECONDS`
+- `LLM_MAX_TOOL_ITERATIONS`, `LLM_MAX_TOOL_RESULT_CHARS`, `LLM_MAX_HISTORY_TURNS`, `LLM_MAX_PRIOR_REFS`
 
 When `GROQ_API_KEY` is absent, the assistant route cannot function, but the rest of the backend can still run.
 

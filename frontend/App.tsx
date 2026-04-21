@@ -16,6 +16,7 @@ import BelegungEditorScreen from './src/screens/belegung/BelegungEditorScreen';
 import DaysListScreen from './src/screens/belegung/DaysListScreen';
 import StaffManagerScreen from './src/screens/belegung/StaffManagerScreen';
 import ChatScreen from './src/screens/ChatScreen';
+import ConversationsListScreen from './src/screens/ConversationsListScreen';
 import GuestProfileScreen from './src/screens/guests/GuestProfileScreen';
 import EmployeeProfileScreen from './src/screens/employees/EmployeeProfileScreen';
 import { colors } from './src/theme/colors';
@@ -50,28 +51,44 @@ class ErrorBoundary extends Component<
 function ScreenRouter() {
   const { screen } = useRouter();
 
+  let body: React.ReactNode;
   switch (screen.name) {
     case 'home':
-      return <HomeScreen />;
+      body = <HomeScreen />;
+      break;
     case 'offers-list':
-      return <OffersListScreen />;
+      body = <OffersListScreen />;
+      break;
     case 'offer-editor':
-      return <OfferEditorScreen offerId={(screen as any).offerId} />;
+      body = <OfferEditorScreen offerId={screen.offerId} />;
+      break;
     case 'guest-profile':
-      return <GuestProfileScreen guestId={(screen as any).guestId} />;
+      body = <GuestProfileScreen guestId={screen.guestId} />;
+      break;
     case 'employee-profile':
-      return <EmployeeProfileScreen employeeId={(screen as any).employeeId} />;
+      body = <EmployeeProfileScreen employeeId={screen.employeeId} />;
+      break;
     case 'belegung-editor':
-      return <BelegungEditorScreen initialDate={(screen as any).date} />;
+      body = <BelegungEditorScreen initialDate={screen.date} />;
+      break;
     case 'days-list':
-      return <DaysListScreen />;
+      body = <DaysListScreen />;
+      break;
     case 'staff-manager':
-      return <StaffManagerScreen />;
+      body = <StaffManagerScreen />;
+      break;
     case 'chat':
-      return <ChatScreen />;
+      body = <ChatScreen conversationId={screen.conversationId} />;
+      break;
+    case 'conversations-list':
+      body = <ConversationsListScreen />;
+      break;
     default:
-      return <HomeScreen />;
+      body = <HomeScreen />;
   }
+  // Re-key the boundary per screen so one screen's error doesn't permanently
+  // poison the next one — navigating away resets the boundary.
+  return <ErrorBoundary key={screen.name}>{body}</ErrorBoundary>;
 }
 
 // ── App content (auth-aware) ────────────────────────────────────────────────

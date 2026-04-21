@@ -29,7 +29,13 @@ class Conversation(Base):
 
 
 class ConversationMessage(Base):
+    """Append-only audit log. No updated_at column — messages are never edited
+    in place; deletions cascade from the owning Conversation."""
+
     __tablename__ = "conversation_messages"
+    __table_args__ = (
+        Index("ix_conv_msg_conv_created", "conversation_id", "created_at"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     conversation_id = Column(
@@ -52,6 +58,3 @@ class ConversationMessage(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     conversation = relationship("Conversation", back_populates="messages")
-
-
-Index("ix_conv_msg_conv_created", ConversationMessage.conversation_id, ConversationMessage.created_at)

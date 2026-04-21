@@ -135,6 +135,17 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 </Text>
               )}
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[s.navRow, isActive('conversations-list') && s.navRowActive]}
+              onPress={() => navigate({ name: 'conversations-list' })}
+            >
+              <View style={[s.activeLine, isActive('conversations-list') && s.activeLineLit]} />
+              {!collapsed && (
+                <Text style={[s.navText, isActive('conversations-list') && s.navTextActive]}>
+                  {t('chat.history')}
+                </Text>
+              )}
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>

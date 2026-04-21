@@ -22,11 +22,11 @@ The model should not invent hotel data.
 
 If a request depends on real guests, employees, offers, or occupancy data, the backend should force a tool-backed answer.
 
-### 2. Conversation Is Explicit
+### 2. Conversation Is Persisted Server-Side
 
-The model has no persistent memory of prior turns.
+Conversations live in Postgres (`conversations` + `conversation_messages`). The frontend sends only the current `question` and, if the user is continuing an existing thread, the `conversation_id`. The backend is the source of truth for history — it rebuilds the recent prompt context by reading the DB (never trusting client-sent turns).
 
-To support follow-up questions, the frontend sends the visible chat thread and the backend injects that history into the prompt on every request.
+To keep follow-up questions coherent, the backend additionally summarises *object references produced in earlier turns* (e.g. "offer id=42: Offer #42 Müller (draft | 2026-05-03)") and injects that compact list into the system prompt. Raw tool payloads from prior turns are not replayed — only their resolved references are carried forward.
 
 ### 3. User Context Is Explicit
 
@@ -47,13 +47,14 @@ The UI does not decide which tools are allowed.
 
 ## Request Flow
 
-1. The frontend app sends the current question and the current message thread to `POST /api/llm/ask`.
-2. The backend authenticates the user and builds the user-context block.
-3. `LLMAgent` builds the system prompt and passes prior conversation turns into the model.
-4. The model can either answer directly or request one or more tool calls.
-5. Tool results are executed by `backend/app/llm/tools.py`.
-6. The backend extracts object references from tool responses.
-7. The frontend renders the answer and reference cards.
+1. The frontend sends `{ question, conversation_id? }` to `POST /api/llm/ask`. No client-side history is sent.
+2. The backend authenticates the user, applies the per-user and daily rate limits, and either resolves or creates the target `Conversation` (scoped to `user_id`).
+3. Prior `{role, content}` turns and prior object `refs` are loaded from `conversation_messages` before the new user turn is persisted.
+4. `LLMAgent` builds the system prompt (user context + allowed tools + prior-refs summary), seeds the model with the history, and adds the current user question.
+5. The model can either answer directly or request tool calls. Tool schemas are filtered to match the caller's role; `tool_choice="auto"` lets the model decide per turn.
+6. Tool calls are executed by `backend/app/llm/tools.py`. Duplicate calls *within the same iteration* are rejected; across iterations, re-calls are allowed so the model can retry after new context arrives.
+7. Object references surfaced from tool responses are attached to the assistant's `conversation_messages` row as JSONB (`refs`) so they're available to future turns.
+8. The frontend renders the answer and reference cards, and persists the active `conversation_id` to `localStorage` so a reload resumes the thread.
 
 ## Tooling Model
 
@@ -135,11 +136,10 @@ Important implementation details:
 - Status values must match `draft`, `sent`, `accepted`, or `declined`.
 - The backend now maps enum values explicitly so the database write path is stable.
 
-## Conversation Reload
+## Conversation Resume and Regenerate
 
-The frontend includes a regenerate/reload action for the latest assistant message.
-
-It replays the last user turn with the prior conversation context, which is useful when the user wants a different phrasing or a second attempt at tool selection.
+- **Resume:** the most recently used `conversation_id` is kept in `localStorage` (`bleiche_active_conversation_id`). On chat mount the frontend calls `GET /api/conversations/{id}`, hydrates the message list, and continues the thread. A dedicated "History" screen (`ConversationsListScreen`) lists all of the user's conversations and lets them resume or delete any of them.
+- **Regenerate:** the latest assistant message has a reload button. Clicking it re-sends the preceding user turn with the existing `conversation_id` and replaces the assistant bubble in-place with the new answer. The second call benefits from the same prior-refs context the original call had, plus any new DB state.
 
 ## Temporary Export Features
 

@@ -1,5 +1,6 @@
 """LLM router — role-aware, rate-limited, DB-backed conversation history."""
 import logging
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -31,6 +32,40 @@ def _load_recent_history(db: Session, conversation_id: int, turns: int = 8):
     return [{"role": r.role, "content": r.content} for r in reversed(rows)]
 
 
+def _load_recent_refs(db: Session, conversation_id: int, message_limit: int = 20) -> List[Dict[str, Any]]:
+    """Collect object references produced in recent assistant turns.
+
+    Returns a flat, de-duplicated list of refs (most-recent first). The agent
+    uses this to keep 'the third offer' or 'that guest' resolvable across turns
+    without replaying raw tool output.
+    """
+    rows = (
+        db.query(ConversationMessage.refs)
+        .filter(
+            ConversationMessage.conversation_id == conversation_id,
+            ConversationMessage.role == "assistant",
+            ConversationMessage.refs.isnot(None),
+        )
+        .order_by(ConversationMessage.id.desc())
+        .limit(message_limit)
+        .all()
+    )
+    merged: List[Dict[str, Any]] = []
+    seen: set = set()
+    for (refs,) in rows:
+        if not isinstance(refs, list):
+            continue
+        for r in refs:
+            if not isinstance(r, dict):
+                continue
+            key = (r.get("object_type"), str(r.get("object_id")))
+            if not key[1] or key in seen:
+                continue
+            seen.add(key)
+            merged.append(r)
+    return merged
+
+
 @router.post("/ask", response_model=AskResponse)
 def ask_assistant(
     payload: AskRequest,
@@ -46,6 +81,7 @@ def ask_assistant(
 
     # Resolve or create conversation
     conv: Conversation
+    is_new_conversation = False
     if payload.conversation_id:
         conv = (
             db.query(Conversation)
@@ -58,16 +94,19 @@ def ask_assistant(
         conv = Conversation(user_id=user.id, title=payload.question[:120])
         db.add(conv)
         db.flush()  # obtain id
+        is_new_conversation = True
 
-    # Persist the user turn first
+    # Build context from the DB (server is the source of truth; client can't forge it).
+    # Load BEFORE persisting the new user turn so we don't have to slice it back out.
+    history = [] if is_new_conversation else _load_recent_history(db, conv.id, turns=8)
+    prior_refs = [] if is_new_conversation else _load_recent_refs(db, conv.id)
+
+    # Persist the user turn now.
     user_msg = ConversationMessage(
         conversation_id=conv.id, role="user", content=payload.question
     )
     db.add(user_msg)
     db.flush()
-
-    # Build context from DB (not from the client — prevents forgery)
-    history = _load_recent_history(db, conv.id, turns=8)[:-1]  # drop the just-added user msg
 
     employee = getattr(user, "employee", None)
     display_name = (
@@ -84,7 +123,7 @@ def ask_assistant(
 
     try:
         agent = LLMAgent(role=user.role, user_context=user_context)
-        result = agent.query(payload.question, conversation=history)
+        result = agent.query(payload.question, conversation=history, prior_refs=prior_refs)
     except ValueError as e:
         logger.warning("llm_unavailable user=%s err=%s", user.username, e)
         raise HTTPException(status_code=503, detail="Assistent ist momentan nicht verfügbar")

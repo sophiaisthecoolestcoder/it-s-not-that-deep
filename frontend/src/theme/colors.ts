@@ -38,6 +38,8 @@ export const colors = {
   textMuted: '#a5a6a6',
 
   error: '#C0392B',
+  errorBorder: '#fca5a5',
+  errorText: '#b91c1c',
   success: '#27AE60',
 
   // Legacy aliases kept so older RN code keeps compiling.
