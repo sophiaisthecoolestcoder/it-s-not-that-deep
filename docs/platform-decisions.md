@@ -4,13 +4,12 @@ This document explains why the codebase is shaped the way it is and which constr
 
 ## 1. Project Shape
 
-Bleiche is a monorepo with three practical layers:
+Bleiche is a monorepo with four practical layers:
 
 - `backend/` for the FastAPI service and PostgreSQL persistence.
-- `frontend/` for the React Native app that runs on web, iOS, and Android.
-- `docs/` for the documentation that should stay aligned with the code.
-
-The repo also contains a nested `bleiche-resort/` directory that reflects an older SPA-based version of the product. The active implementation is the root `backend/` and `frontend/` pair.
+- `frontend/` for the React Native platform app (web, iOS, Android) — authenticated staff workflows.
+- `site/` for the Astro + React + Tailwind public marketing website — anonymous visitors, static build.
+- `docs/` for the documentation that should stay aligned with the code. `docs/_reference/` holds historical artifacts (the hotel's original Word / Excel templates, earlier task briefs) kept as ground truth for what the exports reproduce.
 
 ## 2. Why This Stack
 

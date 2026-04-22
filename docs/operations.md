@@ -18,7 +18,7 @@ uvicorn app.main:app --reload
 
 On Windows, the repository also includes `run-backend.bat`.
 
-### Frontend
+### Frontend (platform)
 
 ```bash
 cd frontend
@@ -28,6 +28,16 @@ npm start
 For the web build, `npm run web` is the direct entry point.
 
 On Windows, the repository also includes `run-frontend.bat`.
+
+### Site (public marketing website)
+
+```bash
+cd site
+npm install       # first time only
+npm run dev       # http://localhost:4321
+```
+
+Root-level wrappers `run-site.bat` (Windows) and `run-site.sh` (macOS/Linux) install deps + start Astro dev in one go. Production build: `npm run build` — output lands in `site/dist/`, deploy to any static host. See `docs/site.md` for the full architecture.
 
 ## Environment Variables
 
@@ -85,6 +95,7 @@ All live in `backend/alembic/versions/`:
 5. `2026d1a2b3c4_enrich_employees_hr_fields.py` — HR fields on employees.
 6. `2026e2f3a4b5_create_calendar_tables.py` — general-purpose calendar.
 7. `2026f3a4b5c6_create_cashier_tables.py` — POS domain (products, invoices, items, receipts).
+8. `202704a1b2c3_calendar_events_add_public.py` — `public: bool` flag for website visibility.
 
 Every migration must support `alembic downgrade -1` → `alembic upgrade head` as a clean round-trip.
 
@@ -151,7 +162,8 @@ When new commits are pulled into a working checkout:
 1. If `backend/requirements.txt` changed → `cd backend && source venv/Scripts/activate && pip install -r requirements.txt`.
 2. If `backend/alembic/versions/` has new files → `cd backend && alembic upgrade head`.
 3. If `frontend/package.json` changed → `cd frontend && npm install`.
-4. If `backend/.env.example` has new keys → add them to local `backend/.env` (`.env` is gitignored; every teammate maintains their own with their own `DATABASE_URL` and optional service keys).
-5. Optionally re-run `python -m scripts.seed_sample_data` to pick up new sample records (idempotent).
+4. If `site/package.json` changed → `cd site && npm install`.
+5. If `backend/.env.example` or `site/.env.example` has new keys → add them to the respective `.env` file (both are gitignored; every teammate maintains their own).
+6. Optionally re-run `python -m scripts.seed_sample_data` to pick up new sample records (idempotent).
 
-`run-backend.bat` / `run-backend.sh` already do steps 1 and 2. Starting the backend via either script after a pull is the shortest path to a synced local environment.
+`run-backend.bat` / `run-backend.sh` already do steps 1 and 2. Starting the backend via either script after a pull is the shortest path to a synced local environment. `run-site.bat` / `run-site.sh` handle step 4 automatically.

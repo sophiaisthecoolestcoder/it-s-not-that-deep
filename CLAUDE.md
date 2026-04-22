@@ -7,10 +7,11 @@ This is the active Bleiche Resort & Spa operations platform.
 The codebase contains:
 
 - `backend/` — FastAPI + PostgreSQL + SQLAlchemy + Alembic
-- `frontend/` — React Native + TypeScript client for web/iOS/Android
-- `docs/` — authoritative documentation for the active codebase
+- `frontend/` — React Native + TypeScript platform app for web/iOS/Android (authenticated staff workflows)
+- `site/` — Astro + React + Tailwind public marketing website (anonymous visitors at `www.bleiche-resort.de`)
+- `docs/` — authoritative documentation for the active codebase. Historical artifacts (the hotel's real Word / Excel templates, earlier task briefs) live in `docs/_reference/`.
 
-There is also a nested `bleiche-resort/` directory that contains older reference material from a previous frontend direction. The root `backend/` and `frontend/` folders are the current source of truth.
+The two frontends share the same backend but hit different namespaces: `frontend/` uses the authenticated `/api/*` routes; `site/` uses only the unauthenticated `/api/public/*` routes (rate-limited, opt-in data only). See `docs/site.md`.
 
 ## Read These First
 
@@ -26,6 +27,7 @@ There is also a nested `bleiche-resort/` directory that contains older reference
 - `docs/employees.md`
 - `docs/cashier.md`
 - `docs/fiskaly-setup.md`
+- `docs/site.md`
 - `docs/operations.md`
 
 ## Current Runtime Picture
@@ -40,7 +42,7 @@ uvicorn app.main:app --reload
 
 API docs: http://localhost:8000/docs
 
-### Frontend
+### Frontend (platform)
 
 ```bash
 cd frontend
@@ -48,6 +50,20 @@ npm start
 ```
 
 Web build: `npm run web`
+
+### Site (public marketing website)
+
+```bash
+cd site
+npm install       # first time only
+npm run dev       # → http://localhost:4321
+```
+
+Or from repo root: `run-site.bat` (Windows) / `run-site.sh` (macOS/Linux).
+
+### All three at once
+
+`run-all.bat` / `run-all.sh` at the repo root open three terminal windows/tabs — backend (`:8000`), platform frontend (`:3333`), and site (`:4321`) — each running its own dev server. The platform and the site are **independent apps**; starting the platform does not start the site.
 
 ## Database
 
@@ -66,8 +82,9 @@ When new commits are pulled into a working checkout (anyone's laptop), an LLM ag
 1. **Backend deps:** if `backend/requirements.txt` changed → `cd backend && source venv/Scripts/activate && pip install -r requirements.txt` (use `venv/bin/activate` on macOS/Linux).
 2. **Database migrations:** if `backend/alembic/versions/` has new files → `cd backend && alembic upgrade head`.
 3. **Frontend deps:** if `frontend/package.json` or `frontend/package-lock.json` changed → `cd frontend && npm install`.
-4. **Environment variables:** if `backend/.env.example` grew new keys → copy them into the local `backend/.env` (preserving existing values). `.env` is gitignored by design; every teammate maintains their own.
-5. **Seed:** if new rows in `backend/scripts/seed_sample_data.py` are relevant, re-run it — the script is idempotent.
+4. **Site deps:** if `site/package.json` or `site/package-lock.json` changed → `cd site && npm install`.
+5. **Environment variables:** if `backend/.env.example` or `site/.env.example` grew new keys → copy them into the local `.env` files (preserving existing values). `.env` files are gitignored by design; every teammate maintains their own.
+6. **Seed:** if new rows in `backend/scripts/seed_sample_data.py` are relevant, re-run it — the script is idempotent.
 
 The `run-backend.bat` / `run-backend.sh` wrappers already execute steps 1 and 2 on every startup, so using them covers most teammates automatically. An LLM invoking `uvicorn app.main:app` directly skips that and must run the checks above first.
 

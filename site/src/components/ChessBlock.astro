@@ -1,0 +1,52 @@
+---
+/**
+ * "Chess-block" — half-and-half section with text on one side, image on the
+ * other, alternating row-by-row. Mirrors bleiche.de's feature sections.
+ */
+interface Props {
+  eyebrow?: string;
+  title: string;
+  body: string;
+  image: string;
+  href?: string;
+  ctaLabel?: string;
+  /** "left" = image on left, text on right. "right" = flipped. */
+  imagePosition?: "left" | "right";
+}
+
+const {
+  eyebrow,
+  title,
+  body,
+  image,
+  href,
+  ctaLabel = "Mehr lesen",
+  imagePosition = "left",
+} = Astro.props;
+---
+
+<div class="grid md:grid-cols-2 items-stretch">
+  {imagePosition === "left" && (
+    <div class="relative aspect-square md:aspect-auto">
+      <img src={image} alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover" />
+    </div>
+  )}
+  <div class="bg-sand-50 flex flex-col justify-center px-8 py-16 md:px-16">
+    {eyebrow && <div class="eyebrow mb-4">{eyebrow}</div>}
+    <h2 class="h-display mb-6">{title}</h2>
+    <p class="font-serif text-ink-500 leading-relaxed max-w-md">{body}</p>
+    {href && (
+      <a
+        href={href}
+        class="mt-8 inline-block self-start font-sans text-xs tracking-widest uppercase text-ink-500 border-b border-sand-400 pb-1 hover:text-sand-600 transition-colors"
+      >
+        {ctaLabel}
+      </a>
+    )}
+  </div>
+  {imagePosition === "right" && (
+    <div class="relative aspect-square md:aspect-auto">
+      <img src={image} alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover" />
+    </div>
+  )}
+</div>

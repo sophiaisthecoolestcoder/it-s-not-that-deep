@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fonts — free via Google Fonts. Load them once here so Astro can preload. */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;700&family=Noto+Serif:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap");
+
+@layer base {
+  :root {
+    /* Bleiche brand — sand/bronze/cream. Matches `frontend/src/theme/colors.ts`. */
+    --sand-100: 238 229 218;
+    --sand-400: 194 169 140;
+    --sand-600: 139 106 67;
+    --ink-500: 83 83 83;
+    --cream: 250 240 234;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply font-serif text-ink-500 bg-sand-50;
+    font-feature-settings: "ss01", "kern";
+  }
+
+  ::selection {
+    @apply bg-sand-400 text-white;
+  }
+}
+
+@layer components {
+  /* Section chapter rhythm — mirrors bleiche.de's "bot-gradient + chevron" pattern. */
+  .section-bottom-gradient {
+    @apply relative pb-24;
+  }
+  .section-bottom-gradient::after {
+    content: "";
+    @apply absolute bottom-0 left-0 right-0 h-24 pointer-events-none;
+    background: linear-gradient(to bottom, transparent, rgb(var(--cream)));
+  }
+
+  /* Eyebrow label — small caps, tracked out. */
+  .eyebrow {
+    @apply font-sans uppercase text-xs tracking-widest text-ink-400;
+  }
+
+  /* Display heading — Playfair, light weight, roomy. */
+  .h-display {
+    @apply font-display text-4xl md:text-5xl lg:text-6xl font-normal leading-[1.1] text-ink-500;
+  }
+}
+
+/* View Transitions — cross-fade between routes instead of a hard reload.
+   Astro injects `<ViewTransitions />` into the layout; this tunes the feel. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 500ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Disable motion for visitors who ask for it. Respect the user first. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

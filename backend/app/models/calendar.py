@@ -91,6 +91,10 @@ class CalendarEvent(Base):
     visible_to_roles = Column(ARRAY(Enum(EmployeeRole, name="employeerole", create_type=False)), nullable=True)
 
     location = Column(String(200), nullable=True)
+    # True = admin opts this event in to the public marketing website
+    # (GET /api/public/events). Independent from `audience_scope`, which is the
+    # *internal* sharing dimension.
+    public = Column(Boolean, nullable=False, server_default="false")
     created_by_user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

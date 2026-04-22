@@ -1,0 +1,50 @@
+---
+/**
+ * Minimal brochure-style footer. Copy deliberately sparse — the brand tone is
+ * "less is more". Fill in legal links (Impressum, AGB, Datenschutz) per DE law
+ * when going live.
+ */
+const year = new Date().getFullYear();
+---
+
+<footer class="bg-ink-500 text-sand-100 py-16">
+  <div class="max-w-screen-xl mx-auto px-6 md:px-10 grid md:grid-cols-4 gap-10 font-serif text-sm">
+    <div>
+      <div class="font-display text-lg tracking-widest uppercase text-white mb-3">
+        Bleiche Resort &amp; Spa
+      </div>
+      <p class="opacity-80 leading-relaxed">
+        Spreewald, Brandenburg<br />
+        Burger Wohnsiedlung 70<br />
+        03096 Burg (Spreewald)
+      </p>
+    </div>
+    <div>
+      <h3 class="eyebrow text-sand-300 mb-3">Kontakt</h3>
+      <ul class="space-y-1 opacity-80">
+        <li>+49 (0) 35603 620</li>
+        <li>info@bleiche-resort.de</li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="eyebrow text-sand-300 mb-3">Entdecken</h3>
+      <ul class="space-y-1">
+        <li><a href="/rooms" class="hover:text-sand-400">Zimmer &amp; Suiten</a></li>
+        <li><a href="/spa" class="hover:text-sand-400">Landtherme Spa</a></li>
+        <li><a href="/events" class="hover:text-sand-400">Veranstaltungen</a></li>
+        <li><a href="/gallery" class="hover:text-sand-400">Galerie</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="eyebrow text-sand-300 mb-3">Rechtliches</h3>
+      <ul class="space-y-1">
+        <li><a href="/impressum" class="hover:text-sand-400">Impressum</a></li>
+        <li><a href="/datenschutz" class="hover:text-sand-400">Datenschutz</a></li>
+        <li><a href="/agb" class="hover:text-sand-400">AGB</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-screen-xl mx-auto px-6 md:px-10 mt-12 pt-6 border-t border-white/10 text-xs text-white/50">
+    &copy; {year} Bleiche Resort &amp; Spa.
+  </div>
+</footer>

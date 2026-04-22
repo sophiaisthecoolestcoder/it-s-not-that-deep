@@ -1,0 +1,45 @@
+---
+/**
+ * Square image tile with centered serif heading, in the bleiche.de 3-up
+ * tradition. Graceful hover (scale + darken) nudges exploration without
+ * feeling kinetic.
+ */
+interface Props {
+  href: string;
+  title: string;
+  eyebrow?: string;
+  image?: string;
+  /** aspect-ratio override; default is 1:1 square */
+  aspect?: "square" | "portrait" | "landscape";
+}
+
+const {
+  href,
+  title,
+  eyebrow,
+  image = "/assets/images/placeholder-tile.jpg",
+  aspect = "square",
+} = Astro.props;
+
+const aspectClass =
+  aspect === "portrait" ? "aspect-[3/4]" : aspect === "landscape" ? "aspect-[4/3]" : "aspect-square";
+---
+
+<a
+  href={href}
+  class={`group relative block ${aspectClass} overflow-hidden`}
+>
+  <img
+    src={image}
+    alt=""
+    loading="lazy"
+    class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1400ms] ease-out-slow group-hover:scale-105"
+  />
+  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/10 group-hover:from-black/75 transition-colors duration-500"></div>
+  <div class="absolute inset-0 flex flex-col items-center justify-end pb-10 px-6 text-center">
+    {eyebrow && <div class="eyebrow text-white/80 mb-2">{eyebrow}</div>}
+    <h3 class="font-display text-white text-2xl md:text-3xl font-normal leading-tight transition-transform duration-500 ease-out-slow group-hover:-translate-y-1">
+      {title}
+    </h3>
+  </div>
+</a>

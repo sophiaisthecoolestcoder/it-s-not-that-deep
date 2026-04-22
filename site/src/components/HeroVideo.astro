@@ -1,0 +1,79 @@
+---
+/**
+ * Full-bleed hero with a looping, muted, auto-playing video + dark shade +
+ * centred display type. Mirrors the bleiche.de hero style.
+ *
+ * Props let individual pages swap the poster / tagline / subtitle without
+ * touching the markup.
+ */
+interface Props {
+  /** Path under /public, e.g. "/assets/videos/background.mp4". */
+  videoSrc?: string;
+  /** First-frame still image — shown before the video loads. */
+  poster?: string;
+  /** Main tagline, serif display. */
+  tagline?: string;
+  /** Secondary line, small caps tracked-out. */
+  subtitle?: string;
+  /** Shade opacity 0-100 over the video. 30 is the bleiche.de feel. */
+  shade?: number;
+}
+
+const {
+  videoSrc = "/assets/videos/background.mp4",
+  poster = "/assets/images/hero-poster.jpg",
+  tagline = "Verabreden, ankommen. Sein.",
+  subtitle = "Bleiche Resort · Spreewald",
+  shade = 35,
+} = Astro.props;
+---
+
+<section class="relative h-screen w-full overflow-hidden">
+  {/* Video: muted + playsinline + autoplay loop. All four attributes are
+      required for reliable autoplay on iOS Safari. */}
+  <video
+    class="absolute inset-0 w-full h-full object-cover"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    poster={poster}
+    aria-hidden="true"
+  >
+    <source src={videoSrc} type="video/mp4" />
+  </video>
+
+  {/* Warm dark shade over the video — keeps white serif type legible while
+      preserving the mood. */}
+  <div
+    class="absolute inset-0 pointer-events-none"
+    style={`background: linear-gradient(to bottom, rgba(0,0,0,${shade * 0.6 / 100}) 0%, rgba(0,0,0,${shade / 100}) 60%, rgba(0,0,0,${shade * 1.2 / 100}) 100%);`}
+  >
+  </div>
+
+  {/* Centered display type — generously spaced, slow fade-in on load. */}
+  <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 animate-fade-in">
+    <div class="eyebrow text-white/70 mb-6">{subtitle}</div>
+    <h1 class="font-display text-white font-normal text-[clamp(2.5rem,7vw,5.5rem)] leading-[1.05] max-w-3xl">
+      {tagline}
+    </h1>
+    <a
+      href="/rooms"
+      class="mt-10 inline-block font-sans text-xs tracking-widest uppercase text-white border border-white/50 px-6 py-3 hover:bg-white hover:text-ink-500 transition-colors duration-300"
+    >
+      Aufenthalt entdecken
+    </a>
+  </div>
+
+  {/* Scroll invitation — the bleiche.de chevron cue. */}
+  <a
+    href="#chapter-1"
+    class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 text-white/70 hover:text-white"
+    aria-label="Weiter scrollen"
+  >
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="animate-bounce">
+      <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </a>
+</section>

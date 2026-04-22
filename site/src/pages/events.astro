@@ -1,0 +1,33 @@
+---
+/**
+ * Events page — long list of upcoming public events from the backend.
+ * Demonstrates the public API plumbing end-to-end.
+ */
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import EventsWidget from "@/components/islands/EventsWidget.tsx";
+import SmoothScroll from "@/components/islands/SmoothScroll.tsx";
+---
+
+<BaseLayout
+  title="Veranstaltungen · Bleiche Resort"
+  description="Kommende öffentliche Anlässe im Bleiche Resort & Spa."
+>
+  <SmoothScroll client:idle />
+
+  <section class="pt-40 pb-20 bg-sand-50">
+    <div class="max-w-screen-lg mx-auto px-6 md:px-10">
+      <div class="eyebrow mb-4">Veranstaltungen</div>
+      <h1 class="h-display mb-6">Was demnächst geschieht.</h1>
+      <p class="font-serif text-ink-500 leading-relaxed max-w-2xl">
+        Lesungen, Konzerte, Spa-Rituale, saisonale Menüs — eine Auswahl der
+        nächsten 90 Tage. Aktualisiert direkt aus unserem Hauskalender.
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-sand-100 py-24">
+    <div class="max-w-screen-md mx-auto px-6 md:px-10">
+      <EventsWidget client:idle upcomingDays={180} limit={50} />
+    </div>
+  </section>
+</BaseLayout>

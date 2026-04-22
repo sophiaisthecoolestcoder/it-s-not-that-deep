@@ -1,0 +1,68 @@
+---
+/**
+ * BaseLayout — every page renders inside this.
+ *
+ * Responsibilities:
+ *   - <head> + global meta (OG, canonical, font preconnect)
+ *   - Global CSS (tailwind + brand tokens)
+ *   - View Transitions (smooth cross-fade between routes)
+ *   - Top nav, hamburger island, ambient-audio toggle
+ *   - Footer
+ */
+import { ViewTransitions } from "astro:transitions";
+import Nav from "@/components/Nav.astro";
+import Footer from "@/components/Footer.astro";
+import AudioToggle from "@/components/islands/AudioToggle.tsx";
+import "@/styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  /**
+   * Set to true on pages where the hero has a full-bleed dark video — the nav
+   * becomes transparent over the hero and only paints on scroll.
+   */
+  heroOverlay?: boolean;
+}
+
+const {
+  title,
+  description = "Bleiche Resort & Spa — Spreewald. Verabreden, ankommen. Sein.",
+  heroOverlay = false,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/* OG for link-preview polish */}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content="/assets/images/og-cover.jpg" />
+
+    <title>{title}</title>
+
+    <ViewTransitions />
+  </head>
+  <body>
+    <Nav overlay={heroOverlay} />
+    <main class="relative">
+      <slot />
+    </main>
+    <Footer />
+
+    {/* Fixed, unobtrusive ambient-audio toggle in the corner. Gated — browsers
+        block autoplay with sound, so the guest must click to opt in. */}
+    <AudioToggle client:idle src="/assets/audio/background.mp3" />
+  </body>
+</html>

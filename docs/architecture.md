@@ -15,17 +15,20 @@ If you need implementation detail, use the deeper docs in this folder:
 - [Employees (HR)](employees.md) — staff directory + HR view
 - [Cashier / POS](cashier.md) — unified POS across reception, restaurant, spa
 - [fiskaly setup](fiskaly-setup.md) — step-by-step TSE fiscalization setup
+- [Public marketing site](site.md) — Astro-based www.bleiche-resort.de
 - [Operations guide](operations.md)
 
 ## System Shape
 
-The active codebase is a monorepo with two production applications:
+The active codebase is a monorepo with three production applications:
 
 - `backend/` is the authoritative FastAPI + PostgreSQL service.
-- `frontend/` is the React Native client that runs on web, iOS, and Android.
+- `frontend/` is the React Native **platform** (authenticated staff workflows) — runs on web, iOS, and Android.
+- `site/` is the Astro + React + Tailwind **public marketing website** — static build, deployed to a CDN.
 
 The backend owns persistence, authorization, offer export, and assistant tool execution.
-The frontend owns navigation, rendering, localization, clipboard actions, and export UX.
+The platform frontend owns navigation, rendering, localization, clipboard actions, and export UX.
+The site reads only from the backend's unauthenticated `/api/public/*` namespace (rate-limited, explicit opt-in). See [`site.md`](site.md) and [`../site/README.md`](../site/README.md).
 
 ## Main Request Flows
 
@@ -76,18 +79,18 @@ The frontend owns navigation, rendering, localization, clipboard actions, and ex
 4. Signed response (QR data, TSE signature counter, TSS/client/transaction IDs, timestamps) is persisted into `cashier_receipts`; the invoice is locked to `FINALIZED`.
 5. `/invoices` and `/invoices/:id` render history and receipts.
 
-## What Changed From The Old Docs
+## How We Got Here
 
-The historical SPA docs in the nested `bleiche-resort/` directory describe an older local-storage-based stack.
+The codebase started as a local-storage SPA; it has since been rebuilt around a real backend. The current stack:
 
-The active codebase now uses:
-
-- FastAPI instead of the old SPA-only plan,
-- PostgreSQL-backed persistence,
-- assistant tool calling,
+- FastAPI on PostgreSQL for persistence,
+- assistant tool calling for the LLM layer,
 - localization,
 - native/web-friendly clipboard and export helpers,
-- and explicit user-context threading for the chat.
+- explicit user-context threading for chat,
+- a separate Astro site for the public marketing presence.
+
+The hotel's original Word and Excel templates are archived under `docs/_reference/` — the exports produced by the backend and frontend reproduce those section-for-section.
 
 ## Documentation Rule
 
