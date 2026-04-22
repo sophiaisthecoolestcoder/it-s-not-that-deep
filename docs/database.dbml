@@ -238,6 +238,106 @@ Table calendar_event_exceptions {
     }
 }
 
+Enum invoicestatus {
+  open
+  finalized
+  voided
+}
+
+Enum invoicevenue {
+  reception
+  restaurant
+  spa
+  other
+}
+
+Enum paymentmethod {
+  cash
+  card
+  bank_transfer
+  room_charge
+  other
+}
+
+Enum productcategory {
+  accommodation
+  food
+  beverage
+  spa
+  misc
+}
+
+Table cashier_products {
+    id                integer          [pk, increment]
+    sku               varchar(50)      [unique]
+    name              varchar(200)     [not null]
+    category          productcategory  [not null, default: 'misc']
+    venue             invoicevenue     [not null, default: 'other']
+    unit_price_cents  integer          [not null, note: 'VAT-inclusive']
+    vat_rate_bp       integer          [not null, note: '700 = 7.00%, 1900 = 19.00%']
+    active            boolean          [not null, default: true]
+    created_at        timestamptz      [not null, default: `now()`]
+    updated_at        timestamptz      [not null, default: `now()`]
+}
+
+Table cashier_invoices {
+    id                 integer        [pk, increment]
+    number             varchar(32)    [unique, note: 'YYYYMMDD-NNNN']
+    status             invoicestatus  [not null, default: 'open']
+    venue              invoicevenue   [not null, default: 'other']
+    reference          varchar(200)
+    payment_method     paymentmethod
+    cashier_user_id    integer
+    guest_id           integer
+    notes              text
+    subtotal_cents     integer        [not null, default: 0]
+    vat_total_cents    integer        [not null, default: 0]
+    total_cents        integer        [not null, default: 0]
+    currency           varchar(3)     [not null, default: 'EUR']
+    finalized_at       timestamptz
+    created_at         timestamptz    [not null, default: `now()`]
+    updated_at         timestamptz    [not null, default: `now()`]
+
+    indexes {
+        (status, created_at) [name: 'ix_cashier_invoices_status_created']
+        (venue, created_at)  [name: 'ix_cashier_invoices_venue_created']
+    }
+}
+
+Table cashier_invoice_items {
+    id                integer     [pk, increment]
+    invoice_id        integer     [not null]
+    product_id        integer
+    description       varchar(255) [not null]
+    quantity          decimal(10,3) [not null, default: 1]
+    unit_price_cents  integer     [not null]
+    vat_rate_bp       integer     [not null]
+    line_total_cents  integer     [not null]
+    line_vat_cents    integer     [not null]
+
+    indexes {
+        invoice_id [name: 'ix_cashier_items_invoice']
+    }
+}
+
+Table cashier_receipts {
+    id                       integer      [pk, increment]
+    invoice_id               integer      [not null, unique]
+    provider                 varchar(32)  [not null]
+    provider_tss_id          varchar(80)
+    provider_client_id       varchar(80)
+    provider_transaction_id  varchar(80)
+    transaction_number       integer
+    signature_counter        integer
+    qr_code_data             text
+    signature_value          text
+    signature_algorithm      varchar(80)
+    time_start               timestamptz
+    time_end                 timestamptz
+    raw_response             text
+    created_at               timestamptz  [not null, default: `now()`]
+}
+
 Ref: users.employee_id > employees.id
 Ref: conversations.user_id > users.id [delete: cascade]
 Ref: conversation_messages.conversation_id > conversations.id [delete: cascade]
@@ -245,5 +345,10 @@ Ref: calendar_events.created_by_user_id > users.id [delete: set null]
 Ref: calendar_event_participants.event_id > calendar_events.id [delete: cascade]
 Ref: calendar_event_participants.user_id > users.id [delete: cascade]
 Ref: calendar_event_exceptions.event_id > calendar_events.id [delete: cascade]
+Ref: cashier_invoices.cashier_user_id > users.id [delete: set null]
+Ref: cashier_invoices.guest_id > guests.id [delete: set null]
+Ref: cashier_invoice_items.invoice_id > cashier_invoices.id [delete: cascade]
+Ref: cashier_invoice_items.product_id > cashier_products.id [delete: set null]
+Ref: cashier_receipts.invoice_id > cashier_invoices.id [delete: cascade]
 
 //[[vibebase.{"positions":{"employees":{"x":60,"y":60},"guests":{"x":60,"y":320},"offers":{"x":460,"y":60},"daily_briefings":{"x":460,"y":300},"users":{"x":60,"y":620},"staff_members":{"x":460,"y":600},"rooms":{"x":760,"y":60}},"preferences":{"colorScheme":"default","showNotes":true,"showIndexes":true,"showTypes":true,"snapToGrid":true,"gridSize":20},"viewport":{"x":93.21053136610232,"y":15.624702665930954,"zoom":0.6240726250000023},"collapsed":{}}]]

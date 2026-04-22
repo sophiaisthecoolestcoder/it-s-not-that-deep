@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from app.database import engine
-from app.routers import auth, belegung, calendar, conversations, employees, guests, llm, offers
+from app.routers import auth, belegung, calendar, cashier, conversations, employees, guests, llm, offers
 
 
 # ── Logging ──────────────────────────────────────────────────────────────────
@@ -85,6 +85,7 @@ app.include_router(belegung.router, prefix="/api")
 app.include_router(llm.router, prefix="/api")
 app.include_router(conversations.router, prefix="/api")
 app.include_router(calendar.router, prefix="/api")
+app.include_router(cashier.router, prefix="/api")
 
 
 @app.get("/api/health")

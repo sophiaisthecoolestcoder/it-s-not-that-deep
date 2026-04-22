@@ -142,6 +142,22 @@ Routes in `backend/app/routers/calendar.py`:
 
 Recurrence expansion lives in `backend/app/services/calendar_expand.py` and uses `python-dateutil.rrule`. The master event stores an RFC 5545 RRULE string; occurrences are materialized on read. See `docs/calendar.md` for the full data model.
 
+### Cashier / POS
+
+Routes in `backend/app/routers/cashier.py`. Prefix `/api/cashier`.
+
+- `GET    /products?venue=&active=` — catalog list (any cashier role).
+- `POST   /products`, `PATCH /products/{id}`, `DELETE /products/{id}` — admin/manager only.
+- `GET    /invoices?status=&venue=&from=&to=` — invoice summaries.
+- `GET    /invoices/{id}` — full detail incl. items + fiscalized receipt.
+- `POST   /invoices` — create OPEN invoice with items.
+- `PATCH  /invoices/{id}` — edit (OPEN only).
+- `POST   /invoices/{id}/finalize` — assign number, sign via fiscalization provider, lock.
+- `DELETE /invoices/{id}` — hard-delete OPEN invoice (admin/manager).
+- `GET    /summary?from=&to=` — totals by venue / payment / VAT rate (admin/manager).
+
+Fiscalization providers live in `backend/app/services/fiscalization/`. `FiskalyFiscalizationProvider` talks to fiskaly KassenSichV SIGN DE API; `MockFiscalizationProvider` is a deterministic fallback for dev without creds. `get_provider()` auto-selects based on env. See `docs/cashier.md`.
+
 ### Conversations
 
 Routes in `backend/app/routers/conversations.py`:

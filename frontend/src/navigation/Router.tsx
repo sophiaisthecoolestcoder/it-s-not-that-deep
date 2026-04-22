@@ -18,7 +18,10 @@ export type AppScreen =
   | { name: 'days-list' }
   | { name: 'staff-manager' }
   | { name: 'chat'; conversationId?: number }
-  | { name: 'conversations-list' };
+  | { name: 'conversations-list' }
+  | { name: 'cashier' }
+  | { name: 'invoices-list' }
+  | { name: 'invoice-detail'; invoiceId: number };
 
 interface RouterContextValue {
   screen: AppScreen;
@@ -71,6 +74,12 @@ export function screenToPath(s: AppScreen): string {
       return s.conversationId ? `/chat/${s.conversationId}` : '/chat';
     case 'conversations-list':
       return '/conversations';
+    case 'cashier':
+      return '/cashier';
+    case 'invoices-list':
+      return '/invoices';
+    case 'invoice-detail':
+      return `/invoices/${s.invoiceId}`;
   }
 }
 
@@ -124,6 +133,14 @@ export function pathToScreen(path: string): AppScreen {
     }
     case 'conversations':
       return { name: 'conversations-list' };
+    case 'cashier':
+      return { name: 'cashier' };
+    case 'invoices': {
+      if (!a) return { name: 'invoices-list' };
+      const id = Number(a);
+      if (Number.isNaN(id)) return { name: 'invoices-list' };
+      return { name: 'invoice-detail', invoiceId: id };
+    }
     default:
       return { name: 'home' };
   }

@@ -9,9 +9,11 @@ import type { AppScreen } from '../navigation/Router';
 import {
   CalendarDayIcon,
   CalendarIcon,
+  CashierIcon,
   ChatIcon,
   HistoryIcon,
   HomeIcon,
+  InvoiceIcon,
   OffersIcon,
   StaffIcon,
   UsersIcon,
@@ -40,6 +42,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const hasAngebote = user?.modules.includes('angebote');
   const hasBelegung = user?.modules.includes('belegung');
   const hasEmployees = user?.modules.includes('employees');
+  const hasCashier = user?.modules.includes('cashier');
   const hasAssistant = user?.modules.includes('assistant');
 
   function isActive(name: AppScreen['name']): boolean {
@@ -122,6 +125,31 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             {BELEGUNG_ITEMS.map((item) => (
               <NavRow key={item.label} item={item} />
             ))}
+          </View>
+        )}
+
+        {hasCashier && (
+          <View>
+            {collapsed ? (
+              <View style={s.divider} />
+            ) : (
+              <Text style={s.sectionLabel}>{t('nav.cashierSection')}</Text>
+            )}
+            <NavRow
+              item={{
+                screen: { name: 'cashier' },
+                label: t('nav.cashier'),
+                icon: CashierIcon,
+              }}
+            />
+            <NavRow
+              item={{
+                screen: { name: 'invoices-list' },
+                label: t('nav.invoices'),
+                icon: InvoiceIcon,
+                alsoActiveFor: ['invoice-detail'],
+              }}
+            />
           </View>
         )}
 

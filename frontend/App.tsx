@@ -20,6 +20,9 @@ import ConversationsListScreen from './src/screens/ConversationsListScreen';
 import GuestProfileScreen from './src/screens/guests/GuestProfileScreen';
 import EmployeeProfileScreen from './src/screens/employees/EmployeeProfileScreen';
 import EmployeesListScreen from './src/screens/employees/EmployeesListScreen';
+import CashierScreen from './src/screens/cashier/CashierScreen';
+import InvoicesListScreen from './src/screens/cashier/InvoicesListScreen';
+import InvoiceDetailScreen from './src/screens/cashier/InvoiceDetailScreen';
 import { colors } from './src/theme/colors';
 
 // ── Error boundary so crashes show a message instead of blank page ──────────
@@ -86,6 +89,15 @@ function ScreenRouter() {
       break;
     case 'conversations-list':
       body = <ConversationsListScreen />;
+      break;
+    case 'cashier':
+      body = <CashierScreen />;
+      break;
+    case 'invoices-list':
+      body = <InvoicesListScreen />;
+      break;
+    case 'invoice-detail':
+      body = <InvoiceDetailScreen invoiceId={screen.invoiceId} />;
       break;
     default:
       body = <HomeScreen />;

@@ -3,6 +3,17 @@ import { Platform } from 'react-native';
 import type { AskAssistantResponse } from '../types/assistant';
 import type { AuthUser, EmployeeRole } from '../types/auth';
 import type { DailyData, StaffMember } from '../types/belegung';
+import type {
+  Invoice,
+  InvoiceCreateInput,
+  InvoiceFilters,
+  InvoiceSummary,
+  InvoiceUpdateInput,
+  PaymentMethod,
+  Product,
+  ProductInput,
+  SalesTotals,
+} from '../types/cashier';
 import type { Employee, EmployeeFilters, EmployeeInput } from '../types/employee';
 import type { Guest } from '../types/guest';
 import type { Offer, OfferInput } from '../types/offer';
@@ -271,6 +282,49 @@ export const api = {
   deleteConversation: (id: number) =>
     request<void>(`/conversations/${id}`, { method: 'DELETE' }),
   myUsage: (days = 30) => request<UsageSummary>(`/conversations/usage/me?days=${days}`),
+
+  // Cashier / POS
+  listProducts: (params?: { venue?: string; active?: boolean }) => {
+    const q = new URLSearchParams();
+    if (params?.venue) q.set('venue', params.venue);
+    if (params?.active !== undefined) q.set('active', String(params.active));
+    const qs = q.toString();
+    return request<Product[]>(`/cashier/products${qs ? `?${qs}` : ''}`);
+  },
+  createProduct: (payload: ProductInput) =>
+    request<Product>('/cashier/products', { method: 'POST', body: JSON.stringify(payload) }),
+  updateProduct: (id: number, payload: Partial<ProductInput>) =>
+    request<Product>(`/cashier/products/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteProduct: (id: number) =>
+    request<void>(`/cashier/products/${id}`, { method: 'DELETE' }),
+
+  listInvoices: (filters?: InvoiceFilters) => {
+    const q = new URLSearchParams();
+    if (filters?.status) q.set('status', filters.status);
+    if (filters?.venue) q.set('venue', filters.venue);
+    if (filters?.from) q.set('from', filters.from);
+    if (filters?.to) q.set('to', filters.to);
+    if (filters?.skip !== undefined) q.set('skip', String(filters.skip));
+    if (filters?.limit !== undefined) q.set('limit', String(filters.limit));
+    const qs = q.toString();
+    return request<InvoiceSummary[]>(`/cashier/invoices${qs ? `?${qs}` : ''}`);
+  },
+  getInvoice: (id: number) => request<Invoice>(`/cashier/invoices/${id}`),
+  createInvoice: (payload: InvoiceCreateInput) =>
+    request<Invoice>('/cashier/invoices', { method: 'POST', body: JSON.stringify(payload) }),
+  updateInvoice: (id: number, payload: InvoiceUpdateInput) =>
+    request<Invoice>(`/cashier/invoices/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  finalizeInvoice: (id: number, payment_method: PaymentMethod) =>
+    request<Invoice>(`/cashier/invoices/${id}/finalize`, {
+      method: 'POST',
+      body: JSON.stringify({ payment_method }),
+    }),
+  deleteInvoice: (id: number) =>
+    request<void>(`/cashier/invoices/${id}`, { method: 'DELETE' }),
+  salesSummary: (from: string, to: string) => {
+    const q = new URLSearchParams({ from, to });
+    return request<SalesTotals>(`/cashier/summary?${q.toString()}`);
+  },
 
   // Health
   health: () => request<{ status: string }>('/health'),

@@ -14,3 +14,13 @@ from app.models.calendar import (
     CalendarParticipantStatus,
     CalendarExceptionType,
 )
+from app.models.cashier import (
+    Invoice,
+    InvoiceItem,
+    Product,
+    Receipt,
+    InvoiceStatus,
+    InvoiceVenue,
+    PaymentMethod,
+    ProductCategory,
+)

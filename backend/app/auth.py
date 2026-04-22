@@ -137,16 +137,16 @@ def require_roles(*roles: EmployeeRole):
 
 # ── Role → allowed modules / LLM tools ───────────────────────────────────────
 
-ALL_MODULES = ["home", "angebote", "belegung", "staff", "employees", "assistant"]
+ALL_MODULES = ["home", "angebote", "belegung", "staff", "employees", "cashier", "assistant"]
 
 MODULE_ACCESS: dict[str, set[str]] = {
     EmployeeRole.ADMIN.value: set(ALL_MODULES),
     EmployeeRole.MANAGER.value: set(ALL_MODULES),
-    EmployeeRole.RECEPTIONIST.value: {"home", "angebote", "belegung", "assistant"},
+    EmployeeRole.RECEPTIONIST.value: {"home", "angebote", "belegung", "cashier", "assistant"},
     EmployeeRole.CONCIERGE.value: {"home", "belegung", "assistant"},
     EmployeeRole.HOUSEKEEPER.value: {"home", "belegung"},
     EmployeeRole.CHEF.value: {"home", "belegung"},
-    EmployeeRole.WAITER.value: {"home", "belegung"},
+    EmployeeRole.WAITER.value: {"home", "belegung", "cashier"},
     EmployeeRole.SPA_THERAPIST.value: {"home", "belegung"},
     EmployeeRole.MAINTENANCE.value: {"home", "belegung"},
 }

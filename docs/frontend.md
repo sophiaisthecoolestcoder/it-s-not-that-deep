@@ -168,6 +168,16 @@ These screens are linked from assistant references and, for employees, from the 
 
 `frontend/src/screens/employees/EmployeesListScreen.tsx` is the admin/manager overview. Gated on `user.modules.includes('employees')`. Columns: name, role, department, position, employment start, active badge. Filters: department dropdown, role dropdown, active/inactive/all toggle, free-text search. Row click navigates to the profile in view mode.
 
+### Cashier / POS Screens
+
+Gated on `user.modules.includes('cashier')`.
+
+- `frontend/src/screens/cashier/CashierScreen.tsx` — POS UI at `/cashier`. Venue picker + optional reference + product catalog (filtered by venue + search) + custom line form + cart with qty +/− + VAT-aware totals + payment method selector + "Charge + print" finalize.
+- `frontend/src/screens/cashier/InvoicesListScreen.tsx` — sales history at `/invoices`, filterable by status + venue, with payment method and total per row.
+- `frontend/src/screens/cashier/InvoiceDetailScreen.tsx` — receipt-style detail at `/invoices/:id`, showing line items, totals, the signed TSE receipt block (QR code data + TSS ID + transaction number + signature counter + algorithm + provider). Browser print supported.
+
+Backend API surface in `frontend/src/api/client.ts`: `listProducts`, `createProduct`, `updateProduct`, `deleteProduct`, `listInvoices`, `getInvoice`, `createInvoice`, `updateInvoice`, `finalizeInvoice`, `deleteInvoice`, `salesSummary`.
+
 ### Chat Screen
 
 `frontend/src/screens/ChatScreen.tsx` is the assistant entry point.

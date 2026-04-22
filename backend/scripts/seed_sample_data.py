@@ -16,6 +16,11 @@ from app.models.calendar import (
     CalendarAudienceScope,
     CalendarExceptionType,
 )
+from app.models.cashier import (
+    Product,
+    ProductCategory,
+    InvoiceVenue,
+)
 
 
 EMPLOYEES_SEED = [
@@ -342,11 +347,47 @@ def _seed_calendar(session) -> list[str]:
     return out
 
 
+PRODUCTS_SEED = [
+    # Accommodation — reduced 7% VAT in Germany (still in 2026).
+    {"sku": "ACC-KDZ", "name": "Komfort-Doppelzimmer / Nacht", "category": ProductCategory.ACCOMMODATION,
+     "venue": InvoiceVenue.RECEPTION, "unit_price_cents": 19000, "vat_rate_bp": 700},
+    {"sku": "ACC-GDZ", "name": "Gartenzimmer / Nacht", "category": ProductCategory.ACCOMMODATION,
+     "venue": InvoiceVenue.RECEPTION, "unit_price_cents": 24000, "vat_rate_bp": 700},
+    {"sku": "ACC-SUITE", "name": "Bleiche Suite / Nacht", "category": ProductCategory.ACCOMMODATION,
+     "venue": InvoiceVenue.RECEPTION, "unit_price_cents": 39000, "vat_rate_bp": 700},
+    # Restaurant food — 19% standard (dine-in rate post-2024).
+    {"sku": "FOOD-MENU-2", "name": "2-Gang-Menue", "category": ProductCategory.FOOD,
+     "venue": InvoiceVenue.RESTAURANT, "unit_price_cents": 4500, "vat_rate_bp": 1900},
+    {"sku": "FOOD-MENU-4", "name": "4-Gang-Ueberraschungsmenue", "category": ProductCategory.FOOD,
+     "venue": InvoiceVenue.RESTAURANT, "unit_price_cents": 8900, "vat_rate_bp": 1900},
+    {"sku": "FOOD-BREAKFAST", "name": "Fruehstueck a la carte", "category": ProductCategory.FOOD,
+     "venue": InvoiceVenue.RESTAURANT, "unit_price_cents": 2400, "vat_rate_bp": 1900},
+    # Beverages
+    {"sku": "BEV-WINE-GLASS", "name": "Glas Wein (0.15l)", "category": ProductCategory.BEVERAGE,
+     "venue": InvoiceVenue.RESTAURANT, "unit_price_cents": 850, "vat_rate_bp": 1900},
+    {"sku": "BEV-SPARKLING", "name": "Flasche Sekt (0.75l)", "category": ProductCategory.BEVERAGE,
+     "venue": InvoiceVenue.RESTAURANT, "unit_price_cents": 3800, "vat_rate_bp": 1900},
+    {"sku": "BEV-WATER", "name": "Mineralwasser (0.75l)", "category": ProductCategory.BEVERAGE,
+     "venue": InvoiceVenue.RESTAURANT, "unit_price_cents": 650, "vat_rate_bp": 1900},
+    # Spa — 19% standard.
+    {"sku": "SPA-MASSAGE-60", "name": "Klassische Massage (60 Min.)", "category": ProductCategory.SPA,
+     "venue": InvoiceVenue.SPA, "unit_price_cents": 9500, "vat_rate_bp": 1900},
+    {"sku": "SPA-FACIAL", "name": "Bleiche Signature Facial", "category": ProductCategory.SPA,
+     "venue": InvoiceVenue.SPA, "unit_price_cents": 12500, "vat_rate_bp": 1900},
+    {"sku": "SPA-HAMMAM", "name": "Hammam-Ritual (90 Min.)", "category": ProductCategory.SPA,
+     "venue": InvoiceVenue.SPA, "unit_price_cents": 14500, "vat_rate_bp": 1900},
+    # Misc
+    {"sku": "MISC-PARKING", "name": "Parkgebuehr / Tag", "category": ProductCategory.MISC,
+     "venue": InvoiceVenue.RECEPTION, "unit_price_cents": 1200, "vat_rate_bp": 1900},
+]
+
+
 def seed_data() -> None:
     session = SessionLocal()
     inserted_employees: list[Employee] = []
     inserted_guests: list[Guest] = []
     inserted_calendar: list[str] = []
+    inserted_products: list[Product] = []
 
     try:
         for data in EMPLOYEES_SEED:
@@ -368,6 +409,15 @@ def seed_data() -> None:
             inserted_guests.append(row)
 
         inserted_calendar = _seed_calendar(session)
+
+        for data in PRODUCTS_SEED:
+            existing = session.query(Product).filter(Product.sku == data["sku"]).first()
+            if existing:
+                continue
+            row = Product(**data)
+            session.add(row)
+            session.flush()
+            inserted_products.append(row)
 
         session.commit()
 
@@ -393,7 +443,15 @@ def seed_data() -> None:
         for entry in inserted_calendar:
             print(entry)
 
-        if not inserted_employees and not inserted_guests and not inserted_calendar:
+        print("INSERTED_PRODUCTS")
+        for product in inserted_products:
+            print(
+                f"id={product.id};sku={product.sku};name={product.name};"
+                f"category={product.category.value};venue={product.venue.value};"
+                f"price_cents={product.unit_price_cents};vat_bp={product.vat_rate_bp}"
+            )
+
+        if not inserted_employees and not inserted_guests and not inserted_calendar and not inserted_products:
             print("NO_NEW_ROWS")
     finally:
         session.close()

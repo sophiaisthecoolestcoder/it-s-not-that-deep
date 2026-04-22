@@ -112,6 +112,30 @@ export function HistoryIcon(p: IconProps) {
   ));
 }
 
+export function CashierIcon(p: IconProps) {
+  return baseSvg(p, (
+    <>
+      <Rect x="3" y="8" width="18" height="12" rx="1" />
+      <Path d="M6 8V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2" />
+      <Line x1="7" y1="12" x2="9" y2="12" />
+      <Line x1="11" y1="12" x2="13" y2="12" />
+      <Line x1="15" y1="12" x2="17" y2="12" />
+      <Line x1="7" y1="16" x2="17" y2="16" />
+    </>
+  ));
+}
+
+export function InvoiceIcon(p: IconProps) {
+  return baseSvg(p, (
+    <>
+      <Path d="M6 3h12v18l-3-2-3 2-3-2-3 2z" />
+      <Line x1="9" y1="8" x2="15" y2="8" />
+      <Line x1="9" y1="12" x2="15" y2="12" />
+      <Line x1="9" y1="16" x2="13" y2="16" />
+    </>
+  ));
+}
+
 export function ChevronIcon({ size = 14, color = 'currentColor', direction = 'right' as 'left' | 'right' }: IconProps & { direction?: 'left' | 'right' }) {
   const d = direction === 'right' ? 'M9 6l6 6-6 6' : 'M15 6l-6 6 6 6';
   return (
