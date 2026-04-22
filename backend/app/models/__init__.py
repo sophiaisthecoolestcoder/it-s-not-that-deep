@@ -4,3 +4,13 @@ from app.models.user import User
 from app.models.offer import Offer, OfferStatus, Salutation
 from app.models.belegung import DailyBriefing, StaffMember, Room
 from app.models.conversation import Conversation, ConversationMessage
+from app.models.calendar import (
+    CalendarEvent,
+    CalendarEventParticipant,
+    CalendarEventException,
+    CalendarEventType,
+    CalendarAudienceScope,
+    CalendarParticipantRole,
+    CalendarParticipantStatus,
+    CalendarExceptionType,
+)

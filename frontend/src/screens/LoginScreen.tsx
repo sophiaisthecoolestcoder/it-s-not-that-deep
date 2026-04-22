@@ -40,14 +40,12 @@ export default function LoginScreen() {
       <View style={s.card}>
         {/* Brand header */}
         <View style={s.brandArea}>
-          {Platform.OS === 'web' ? (
+          {Platform.OS === 'web' && (
             <Image
-              source={{ uri: '/assets/bleiche-logo-text.png' }}
+              source={{ uri: '/assets/logo_transparent.png' }}
               style={s.brandMark}
               resizeMode="contain"
             />
-          ) : (
-            <View style={s.brandMark} />
           )}
           <Text style={s.brandTitle}>Bleiche Resort & Spa</Text>
           <Text style={s.brandSub}>{t('login.workspace')}</Text>
@@ -128,10 +126,9 @@ const s = StyleSheet.create({
     gap: 8,
   },
   brandMark: {
-    width: 48,
-    height: 48,
-    backgroundColor: colors.brand400,
-    marginBottom: 8,
+    width: 80,
+    height: 80,
+    marginBottom: 12,
   },
   brandTitle: {
     fontFamily: fonts.serif,

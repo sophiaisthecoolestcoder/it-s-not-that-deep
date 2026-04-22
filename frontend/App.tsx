@@ -19,6 +19,7 @@ import ChatScreen from './src/screens/ChatScreen';
 import ConversationsListScreen from './src/screens/ConversationsListScreen';
 import GuestProfileScreen from './src/screens/guests/GuestProfileScreen';
 import EmployeeProfileScreen from './src/screens/employees/EmployeeProfileScreen';
+import EmployeesListScreen from './src/screens/employees/EmployeesListScreen';
 import { colors } from './src/theme/colors';
 
 // ── Error boundary so crashes show a message instead of blank page ──────────
@@ -60,13 +61,16 @@ function ScreenRouter() {
       body = <OffersListScreen />;
       break;
     case 'offer-editor':
-      body = <OfferEditorScreen offerId={screen.offerId} />;
+      body = <OfferEditorScreen offerId={screen.offerId} mode={screen.mode} />;
       break;
     case 'guest-profile':
       body = <GuestProfileScreen guestId={screen.guestId} />;
       break;
+    case 'employees-list':
+      body = <EmployeesListScreen />;
+      break;
     case 'employee-profile':
-      body = <EmployeeProfileScreen employeeId={screen.employeeId} />;
+      body = <EmployeeProfileScreen employeeId={screen.employeeId} mode={screen.mode} />;
       break;
     case 'belegung-editor':
       body = <BelegungEditorScreen initialDate={screen.date} />;
@@ -95,12 +99,15 @@ function ScreenRouter() {
 
 function AppContent() {
   const { user, loading } = useAuth();
-  const { screen, navigate } = useRouter();
+  const { screen, replace } = useRouter();
 
   useEffect(() => {
     if (loading) return;
-    if (user && screen.name === 'login') navigate({ name: 'home' });
-    if (!user && screen.name !== 'login') navigate({ name: 'login' });
+    // Use replace so the auth redirect doesn't pollute browser history:
+    // someone who lands on /offers while logged out shouldn't see /login
+    // show up as a back-target once they sign in.
+    if (user && screen.name === 'login') replace({ name: 'home' });
+    if (!user && screen.name !== 'login') replace({ name: 'login' });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading]);
 

@@ -35,19 +35,22 @@ The app wraps the full interface in the following order:
 
 The router is intentionally simple and stateful.
 
-Screens currently available:
+Screens currently available (path in parens):
 
-- `login`
-- `home`
-- `offers-list`
-- `offer-editor`
-- `guest-profile`
-- `employee-profile`
-- `belegung-editor`
-- `days-list`
-- `staff-manager`
-- `chat` — accepts an optional `conversationId` to resume a specific thread
-- `conversations-list` — lists and manages the current user's past assistant conversations
+- `login` (`/login`)
+- `home` (`/`)
+- `offers-list` (`/offers`)
+- `offer-editor` — view (`/offers/:id`), edit (`/offers/:id/edit`), new (`/offers/new`)
+- `guest-profile` (`/guests/:id`)
+- `employees-list` (`/employees`) — admin/manager HR view
+- `employee-profile` — view (`/employees/:id`), edit (`/employees/:id/edit`)
+- `belegung-editor` (`/belegung[/:date]`)
+- `days-list` (`/days`)
+- `staff-manager` (`/staff`) — Belegung shift-staff dropdown, distinct from HR
+- `chat` (`/chat[/:conversationId]`)
+- `conversations-list` (`/conversations`)
+
+Every screen has a shareable URL. The Router keeps `window.history` in sync via `pushState` / `popstate`, and in-memory history is capped at 50.
 
 Each screen is wrapped in an `ErrorBoundary` keyed by route name, so a failure in one screen does not poison the rest of the app — navigating away resets the boundary. Navigation history is capped at 50 entries.
 
@@ -157,9 +160,13 @@ These handle the daily occupancy data and its supporting staff list.
 ### Profile Screens
 
 - `frontend/src/screens/guests/GuestProfileScreen.tsx`
-- `frontend/src/screens/employees/EmployeeProfileScreen.tsx`
+- `frontend/src/screens/employees/EmployeeProfileScreen.tsx` — view-first with Edit button; edit mode lives at `/employees/:id/edit`.
 
-These screens are linked from assistant references and are intentionally simple detail views.
+These screens are linked from assistant references and, for employees, from the HR list.
+
+### Employees (HR) Screen
+
+`frontend/src/screens/employees/EmployeesListScreen.tsx` is the admin/manager overview. Gated on `user.modules.includes('employees')`. Columns: name, role, department, position, employment start, active badge. Filters: department dropdown, role dropdown, active/inactive/all toggle, free-text search. Row click navigates to the profile in view mode.
 
 ### Chat Screen
 

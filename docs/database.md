@@ -33,15 +33,18 @@ Notes:
 
 ### 2. `employees`
 
-Staff directory table.
+Staff directory table. Also the source of truth for the HR "Employees overview" admin screen.
 
 Key fields:
 
-- `first_name`
-- `last_name`
+- `first_name`, `last_name`
 - `email`
 - `phone`
 - `role`
+- `department`, `position`
+- `employment_started_on`, `employment_ended_on`
+- `active` (defaults to `true`; flips to `false` when someone leaves)
+- `notes`
 - timestamps
 
 Notes:
@@ -49,6 +52,7 @@ Notes:
 - `email` is unique.
 - `role` uses the PostgreSQL `employeerole` enum.
 - This table is the basis for user-role assignment and assistant access rules.
+- `department` is free text for now; can graduate to an enum once vocabulary stabilizes.
 
 ### 3. `guests`
 
@@ -158,6 +162,10 @@ Key fields:
 - `category`
 - `floor`
 
+### 8. `calendar_events`, `calendar_event_participants`, `calendar_event_exceptions`
+
+General-purpose calendar. Shifts, meetings, maintenance windows, holidays, personal reminders — all share `calendar_events`, distinguished by `event_type`. See `docs/calendar.md` for the full data model, recurrence handling (RRULE strings, application-layer expansion), audience scoping (`global` / `role` / `users`), and exception semantics.
+
 ## Enums
 
 ### `employeerole`
@@ -191,6 +199,14 @@ Current values:
 - `accepted`
 - `declined`
 
+### Calendar enums
+
+- `calendareventtype`: `shift`, `meeting`, `maintenance`, `holiday`, `training`, `personal`, `reminder`, `other`
+- `calendaraudiencescope`: `global`, `role`, `users`
+- `calendarparticipantrole`: `organizer`, `attendee`, `observer`
+- `calendarparticipantstatus`: `needs_action`, `accepted`, `declined`, `tentative`
+- `calendarexceptiontype`: `cancelled`, `modified`
+
 ## Migration Notes
 
 The current baseline migration is `backend/alembic/versions/2026a1b2c3d4_add_auth_offers_belegung.py`.
@@ -208,6 +224,12 @@ The earlier migration `44254c85c0fd_create_employees_and_guests_tables.py` creat
 - `employees`
 - `guests`
 
+Later migrations:
+
+- `2026c5e6f7a8_add_tokens_invalidated_before.py` — adds `users.tokens_invalidated_before` for JWT revocation on password change.
+- `2026d1a2b3c4_enrich_employees_hr_fields.py` — adds HR fields to `employees` (`department`, `position`, `employment_started_on`, `employment_ended_on`, `active`, `notes`).
+- `2026e2f3a4b5_create_calendar_tables.py` — creates `calendar_events`, `calendar_event_participants`, `calendar_event_exceptions` and their enums.
+
 ## Relationship Notes
 
 Important relationships:
@@ -215,6 +237,10 @@ Important relationships:
 - `users.employee_id -> employees.id` with `ON DELETE SET NULL`
 - `employees.role` and `users.role` both use `employeerole`
 - `offers` and `guests` are intentionally independent tables
+- `calendar_events.created_by_user_id -> users.id` with `ON DELETE SET NULL`
+- `calendar_event_participants.event_id -> calendar_events.id` / `user_id -> users.id`, both cascade
+- `calendar_event_exceptions.event_id -> calendar_events.id` cascades
+- `calendar_events.visible_to_roles` is an array of `employeerole`; used when `audience_scope = 'role'`
 
 ## Operational Guidance
 

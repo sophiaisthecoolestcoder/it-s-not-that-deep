@@ -1,4 +1,5 @@
 from html import escape
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import HTMLResponse
@@ -10,6 +11,12 @@ from app.models.user import User
 from app.schemas.offer import OfferCreate, OfferRead, OfferUpdate
 from app.auth import require_roles
 from app.models.employee import EmployeeRole
+from app.routers._offer_rooms import (
+    amenities_for_room_id,
+    room_name_by_id,
+    CLOSING_PARAGRAPHS,
+    GENUSSPAUSCHALE,
+)
 
 router = APIRouter(prefix="/offers", tags=["Offers"])
 
@@ -93,72 +100,242 @@ def duplicate_offer(offer_id: int, db: Session = Depends(get_db), user: User = D
     return clone
 
 
+_MONTHS_DE = [
+    "Januar", "Februar", "März", "April", "Mai", "Juni",
+    "Juli", "August", "September", "Oktober", "November", "Dezember",
+]
+
+
+def _format_date_de(iso: Optional[str]) -> str:
+    if not iso:
+        return ""
+    try:
+        y, m, d = iso.split("-")
+        return f"{int(d)}. {_MONTHS_DE[int(m) - 1]} {y}"
+    except (ValueError, IndexError):
+        return iso
+
+
+def _format_euro(raw: Optional[str]) -> str:
+    if not raw:
+        return "—"
+    cleaned = raw.replace(" ", "").replace("€", "").replace(",", ".")
+    try:
+        num = float(cleaned)
+    except ValueError:
+        return raw  # free-text prices ("nach Absprache")
+    int_part, frac = f"{num:.2f}".split(".")
+    groups = []
+    s = int_part.lstrip("-")
+    while len(s) > 3:
+        groups.append(s[-3:])
+        s = s[:-3]
+    groups.append(s)
+    int_formatted = ".".join(reversed(groups))
+    sign = "-" if int_part.startswith("-") else ""
+    return f"{sign}{int_formatted},{frac} €"
+
+
+def _greeting_de(salutation: str, last_name: str) -> str:
+    last = (last_name or "").strip()
+    if salutation == "Herr":
+        return f"Sehr geehrter Herr {last}" if last else "Sehr geehrter Herr"
+    if salutation == "Frau":
+        return f"Sehr geehrte Frau {last}" if last else "Sehr geehrte Frau"
+    if salutation == "Familie":
+        return f"Sehr geehrte Familie {last}" if last else "Sehr geehrte Familie"
+    return "Sehr geehrte Damen und Herren"
+
+
+def _guest_line_de(adults: int, salutation: str, children_ages: list[int]) -> str:
+    word = "Erwachsenen" if adults == 1 and salutation == "Herr" else "Erwachsene"
+    line = f"für {adults} {word}"
+    if children_ages:
+        parts = [f"1 Kind im Alter von {a} {'Jahr' if a == 1 else 'Jahren'}" for a in children_ages]
+        line += " und " + " und ".join(parts)
+    return line
+
+
+_CSS = """
+  @page { size: A4; margin: 18mm 14mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #f5ede3; color: #2d2d2d; }
+  body { font-family: 'Alegreya Sans', 'Noto Sans', Arial, sans-serif; font-size: 14px; line-height: 22px; }
+  .page {
+    max-width: 820px;
+    margin: 24px auto;
+    background: #ffffff;
+    padding: 56px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+  .logo { text-align: center; margin-bottom: 18px; font-weight: 700; letter-spacing: 2px; font-size: 22px; }
+  .logo img { width: 220px; height: auto; }
+  .address { margin-bottom: 10px; }
+  .address strong { font-weight: 700; }
+  .email { margin-bottom: 8px; }
+  .date { text-align: right; margin-bottom: 14px; }
+  h1.doc-title { font-size: 22px; font-weight: 700; color: #2d2d2d; margin: 8px 0 10px; font-family: inherit; }
+  p.para { margin: 0 0 8px; text-align: justify; }
+  hr.sep { border: 0; border-top: 1px solid #EEE5DA; margin: 14px 0; }
+  .row { display: flex; align-items: flex-start; margin-bottom: 2px; }
+  .row .k { width: 110px; flex-shrink: 0; font-weight: 700; padding-top: 2px; }
+  .row .v { flex: 1; }
+  .row.tight { margin-bottom: 14px; }
+  .bullets { margin-left: 110px; padding: 0; list-style: none; }
+  .bullets li { display: flex; margin-bottom: 2px; }
+  .bullets li::before { content: "•"; width: 14px; }
+  .micro { font-size: 11px; color: #787978; margin: 0 0 4px 110px; }
+  .underline { text-decoration: underline; }
+  .signature { margin-top: 20px; }
+  .signature .brand { font-weight: 700; letter-spacing: 1.4px; margin: 0 0 12px; }
+  .signature .sig-row { display: flex; justify-content: space-between; }
+  .signature .sig-row .right { text-align: right; }
+  @media print {
+    body { background: #ffffff; }
+    .page { box-shadow: none; margin: 0; max-width: none; padding: 0; }
+  }
+"""
+
+
 def _offer_export_html(offer: Offer, lang: str = "de") -> str:
-    first = escape(offer.first_name or "")
-    last = escape(offer.last_name or "")
-    salutation = escape(offer.salutation.value if offer.salutation else "")
-    email = escape(offer.email or "")
-    room = escape(offer.custom_room_category or offer.room_category or "-")
-    total = escape(offer.total_price or "-")
-    arrival = offer.arrival_date.isoformat() if offer.arrival_date else "-"
-    departure = offer.departure_date.isoformat() if offer.departure_date else "-"
-    offer_date = offer.offer_date.isoformat() if offer.offer_date else "-"
-    employee = escape(offer.employee_name or "")
+    """Render an offer as a standalone HTML document that matches the Word export.
+
+    `lang` exists only for API compatibility — the offer document is authored in
+    German; passing `lang=en` swaps the greeting/intro/labels but keeps the body.
+    """
+    salutation = offer.salutation.value if offer.salutation else ""
+    first = offer.first_name or ""
+    last = offer.last_name or ""
+    street = offer.street or ""
+    zip_code = offer.zip_code or ""
+    city = offer.city or ""
+    email_v = offer.email or ""
+
+    offer_date = offer.offer_date.isoformat() if offer.offer_date else ""
+    arrival = offer.arrival_date.isoformat() if offer.arrival_date else ""
+    departure = offer.departure_date.isoformat() if offer.departure_date else ""
+
+    room_id = offer.room_category or ""
+    room_display = offer.custom_room_category or room_name_by_id(room_id) or room_id or "—"
+
+    amenities = amenities_for_room_id(room_id)
+    # First bullet is the standard "Übernachtung in Ihrem ausgewählten Wohlfühlzimmer".
+    rendered_amenities = [
+        "Übernachtung in Ihrem ausgewählten Wohlfühlzimmer" if i == 0 else item
+        for i, item in enumerate(amenities)
+    ]
+
+    greeting_line = _greeting_de(salutation, last) + ","
+    intro = (
+        "herzlichen Dank für Ihre Anfrage und für Ihr Interesse an einem Aufenthalt in "
+        "unserem Haus. Gerne übersenden wir Ihnen folgendes Angebot:"
+    )
 
     if lang == "en":
-        title = "Offer"
-        greeting = f"Dear {salutation} {last},".strip()
-        intro = "Thank you for your request and your interest in staying with us."
-        arrival_label = "Arrival"
-        departure_label = "Departure"
-        room_label = "Room"
-        total_label = "Total Price"
-        footer = "Bleiche Resort & Spa"
-    else:
-        title = "Angebot"
-        greeting = f"Sehr geehrte/r {salutation} {last},".strip()
-        intro = "Vielen Dank fuer Ihre Anfrage und Ihr Interesse an einem Aufenthalt in unserem Haus."
-        arrival_label = "Anreise"
-        departure_label = "Abreise"
-        room_label = "Zimmer"
-        total_label = "Preis Gesamt"
-        footer = "Bleiche Resort & Spa"
+        # Keep the same layout; swap greeting + intro to English for non-German guests.
+        last_en = last.strip()
+        greeting_line = (
+            f"Dear {salutation} {last_en}," if last_en else f"Dear {salutation},".strip(", ")
+        )
+        intro = (
+            "Thank you very much for your enquiry and for your interest in staying with us. "
+            "We would be delighted to send you the following offer:"
+        )
 
-    return f"""<!doctype html>
-<html lang=\"{escape(lang)}\">
-    <head>
-        <meta charset=\"utf-8\" />
-        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
-        <title>{title} #{offer.id}</title>
-        <style>
-            body {{ font-family: Arial, sans-serif; color: #2d2d2d; margin: 0; padding: 24px; }}
-            .doc {{ max-width: 840px; margin: 0 auto; border: 1px solid #ddd; padding: 28px; }}
-            .muted {{ color: #666; }}
-            .row {{ display: flex; margin: 6px 0; }}
-            .k {{ width: 160px; font-weight: 700; }}
-            .v {{ flex: 1; }}
-            hr {{ border: 0; border-top: 1px solid #ddd; margin: 14px 0; }}
-            h1 {{ margin: 0 0 8px; font-size: 26px; }}
-        </style>
-    </head>
-    <body>
-        <div class=\"doc\">
-            <h1>{title}</h1>
-            <p class=\"muted\">#{offer.id} • {offer_date}</p>
-            <p><strong>{salutation} {first} {last}</strong><br/>{email}</p>
-            <p>{greeting}</p>
-            <p>{intro}</p>
-            <hr/>
-            <div class=\"row\"><div class=\"k\">{arrival_label}</div><div class=\"v\">{arrival}</div></div>
-            <div class=\"row\"><div class=\"k\">{departure_label}</div><div class=\"v\">{departure}</div></div>
-            <div class=\"row\"><div class=\"k\">{room_label}</div><div class=\"v\">{room}</div></div>
-            <div class=\"row\"><div class=\"k\">{total_label}</div><div class=\"v\"><strong>{total}</strong></div></div>
-            <hr/>
-            <p class=\"muted\">{footer}</p>
-            <p class=\"muted\">{employee}</p>
+    guest_line = _guest_line_de(offer.adults, salutation, list(offer.children_ages or []))
+
+    price_per_night = (
+        f"{_format_euro(offer.price_per_night)} pro Person pro Nacht"
+        if offer.price_per_night
+        else "—"
+    )
+    total_price = _format_euro(offer.total_price) if offer.total_price else "—"
+
+    amenity_bullets = "\n".join(
+        f"          <li>{escape(item)}</li>" for item in rendered_amenities
+    )
+    genuss_bullets = "\n".join(
+        f"          <li>{escape(item)}</li>" for item in GENUSSPAUSCHALE
+    )
+    closing_paragraphs = "\n".join(
+        f'      <p class="para">{escape(p)}</p>' for p in CLOSING_PARAGRAPHS
+    )
+
+    address_email_block = (
+        f'      <p class="email">per E-Mail an {escape(email_v)}</p>' if email_v else ""
+    )
+
+    title = f"Angebot #{offer.id}"
+    body = f"""<!doctype html>
+<html lang="{escape(lang)}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{escape(title)}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>{_CSS}</style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="logo">BLEICHE RESORT &amp; SPA</div>
+
+      <div class="address">
+        <div><strong>{escape(f"{salutation} {first} {last}".strip())}</strong></div>
+        <div><strong>{escape(street)}</strong></div>
+        <div><strong>{escape(f"{zip_code} {city}".strip())}</strong></div>
+      </div>
+{address_email_block}
+      <p class="date">Burg (Spreewald), {escape(_format_date_de(offer_date))}</p>
+
+      <h1 class="doc-title">Angebot</h1>
+
+      <p class="para">{escape(greeting_line)}</p>
+      <p class="para">{escape(intro)}</p>
+
+      <hr class="sep" />
+
+      <div class="row"><div class="k">Anreise:</div><div class="v">{escape(_format_date_de(arrival) or "—")}</div></div>
+      <div class="row tight"><div class="k">Abreise:</div><div class="v">{escape(_format_date_de(departure) or "—")}</div></div>
+
+      <div class="row"><div class="k">Zimmer:</div><div class="v">{escape(room_display)}</div></div>
+      <div class="row tight"><div class="k">&nbsp;</div><div class="v">{escape(guest_line)}</div></div>
+
+      <div class="row tight"><div class="k">Preis:</div><div class="v">{escape(price_per_night)}</div></div>
+
+      <div class="row"><div class="k">Leistungen:</div><div class="v underline">Das ist alles im Zimmerpreis enthalten:</div></div>
+      <ul class="bullets">
+{amenity_bullets}
+      </ul>
+
+      <ul class="bullets" style="margin-top:6px;">
+        <div class="underline" style="margin-bottom:2px;">Das alles ist in unserer Genusspauschale enthalten:</div>
+{genuss_bullets}
+      </ul>
+
+      <hr class="sep" />
+
+      <div class="row"><div class="k"><strong>Preis Gesamt:</strong></div><div class="v"><strong>{escape(total_price)}</strong></div></div>
+      <p class="micro">(zzgl. je € 1,00 Fremdenverkehrsabgabe &amp; je € 2,00 Kurbeitrag pro Nacht)</p>
+
+      <hr class="sep" />
+
+{closing_paragraphs}
+
+      <div class="signature">
+        <p class="para" style="margin-bottom:0;">Mit freundlichen Grüßen</p>
+        <p class="brand">BLEICHE RESORT &amp; SPA</p>
+        <div class="sig-row">
+          <div>Familie Clausing</div>
+          <div class="right">
+            <div>{escape(offer.employee_name or "")}</div>
+            <div>Reservierung</div>
+          </div>
         </div>
-    </body>
+      </div>
+    </main>
+  </body>
 </html>"""
+    return body
 
 
 @router.get("/{offer_id}/export/html", response_class=HTMLResponse)

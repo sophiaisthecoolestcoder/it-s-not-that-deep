@@ -78,11 +78,13 @@ The register endpoint is admin-only.
 
 Routes in `backend/app/routers/employees.py`:
 
-- `GET /api/employees/`
+- `GET /api/employees/?department=&role=&active=&search=&skip=&limit=`
 - `GET /api/employees/{employee_id}`
-- `POST /api/employees/`
-- `PATCH /api/employees/{employee_id}`
-- `DELETE /api/employees/{employee_id}`
+- `POST /api/employees/` (admin / manager)
+- `PATCH /api/employees/{employee_id}` (admin / manager)
+- `DELETE /api/employees/{employee_id}` (admin / manager)
+
+List supports ILIKE text search across first name, last name, email, and position. See `docs/employees.md` for HR-fields documentation.
 
 ### Guests
 
@@ -125,6 +127,20 @@ Routes in `backend/app/routers/llm.py`:
 
 - `POST /api/llm/ask` — accepts `{question, conversation_id?}`, returns `{conversation_id, question, answer, role, tools_available, references, usage}`. Rate-limited per user (short-burst + daily).
 - `GET /api/llm/capabilities` — lists the tools available to the caller's role.
+
+### Calendar
+
+Routes in `backend/app/routers/calendar.py`:
+
+- `GET /api/calendar/events?from=&to=&event_type=&user_id=` — returns expanded occurrences. Max range 366 days. Admins can pass `user_id` to query another user's calendar view.
+- `GET /api/calendar/events/{id}` — master event with participants and exceptions.
+- `POST /api/calendar/events` — any authenticated user; creator becomes sole participant when `audience_scope='users'` and no participants are provided.
+- `PATCH /api/calendar/events/{id}` — creator / admin / manager.
+- `DELETE /api/calendar/events/{id}` — creator / admin / manager; cascades.
+- `POST /api/calendar/events/{id}/exceptions` — cancel / modify a single occurrence of a recurring event.
+- `DELETE /api/calendar/events/{id}/exceptions/{exception_id}` — restore an occurrence.
+
+Recurrence expansion lives in `backend/app/services/calendar_expand.py` and uses `python-dateutil.rrule`. The master event stores an RFC 5545 RRULE string; occurrences are materialized on read. See `docs/calendar.md` for the full data model.
 
 ### Conversations
 

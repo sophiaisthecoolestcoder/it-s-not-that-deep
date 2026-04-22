@@ -14,7 +14,7 @@ import {
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 
-import { getAmenitiesForRoom } from '../data/roomCategories';
+import { ROOM_CATEGORIES, getAmenitiesForRoom } from '../data/roomCategories';
 import type { Offer } from '../types/offer';
 import { formatDateGerman, formatEuro, getGreeting } from './helpers';
 
@@ -267,8 +267,11 @@ export async function generateOfferDocx(offer: Offer): Promise<void> {
     );
   }
 
-  // 9. Zimmer + Gäste
-  const roomName = offer.custom_room_category || offer.room_category || '';
+  // 9. Zimmer + Gäste.
+  // `offer.room_category` is the category *id* (e.g. 'kleines-dz'); resolve it
+  // to the display name so the amenities lookup below picks the right group.
+  const roomCat = ROOM_CATEGORIES.find((r) => r.id === offer.room_category);
+  const roomName = offer.custom_room_category || roomCat?.name || offer.room_category || '';
   content.push(labelValue('Zimmer:', roomName));
 
   const adultWord = offer.adults === 1 && offer.salutation === 'Herr' ? 'Erwachsenen' : 'Erwachsene';

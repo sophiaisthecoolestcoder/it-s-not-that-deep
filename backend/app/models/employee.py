@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, Enum, DateTime
+from sqlalchemy import Column, Integer, String, Enum, DateTime, Date, Boolean, Text
 from sqlalchemy.sql import func
 from app.database import Base
 
@@ -25,5 +25,11 @@ class Employee(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     phone = Column(String(30), nullable=True)
     role = Column(Enum(EmployeeRole), nullable=False)
+    department = Column(String(100), nullable=True)
+    position = Column(String(150), nullable=True)
+    employment_started_on = Column(Date, nullable=True)
+    employment_ended_on = Column(Date, nullable=True)
+    active = Column(Boolean, nullable=False, server_default="true")
+    notes = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

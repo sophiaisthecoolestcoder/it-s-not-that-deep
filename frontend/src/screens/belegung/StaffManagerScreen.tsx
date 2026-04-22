@@ -40,7 +40,7 @@ export default function StaffManagerScreen() {
     const name = newName.trim();
     if (!name) return;
     if (staff.some((s) => s.name.toLowerCase() === name.toLowerCase())) {
-      addToast({ type: 'warning', title: 'Existiert bereits', message: name });
+      addToast({ type: 'warning', title: t('staff.existsTitle'), message: name });
       return;
     }
     setAdding(true);
@@ -49,7 +49,7 @@ export default function StaffManagerScreen() {
       .then((member) => {
         setStaff((prev) => [...prev, member]);
         setNewName('');
-        addToast({ type: 'success', title: 'Hinzugefügt', message: name });
+        addToast({ type: 'success', title: t('staff.addedTitle'), message: name });
       })
       .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }))
       .finally(() => setAdding(false));
@@ -60,7 +60,7 @@ export default function StaffManagerScreen() {
       .removeStaff(member.id as number)
       .then(() => {
         setStaff((prev) => prev.filter((s) => s.id !== member.id));
-        addToast({ type: 'success', title: 'Entfernt', message: member.name });
+        addToast({ type: 'success', title: t('staff.removedTitle'), message: member.name });
       })
       .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }));
   }
@@ -72,20 +72,20 @@ export default function StaffManagerScreen() {
       {/* Header */}
       <View style={s.topBar}>
         <Text style={s.pageTitle}>{t('staff.title')}</Text>
-        <Text style={s.subtitle}>Diese Namen stehen in der Belegungsliste zur Auswahl</Text>
+        <Text style={s.subtitle}>{t('staff.subtitle')}</Text>
       </View>
 
       {/* Add form */}
       <View style={s.addCard}>
-        <Text style={s.addLabel}>Neuen Mitarbeiter hinzufügen</Text>
+        <Text style={s.addLabel}>{t('staff.addTitle')}</Text>
         <View style={s.addRow}>
           <View style={s.addInputWrap}>
-            <Text style={s.fieldLabel}>Name</Text>
+            <Text style={s.fieldLabel}>{t('belegung.name')}</Text>
             <TextInput
               style={s.addInput}
               value={newName}
               onChangeText={setNewName}
-              placeholder="Vor- und Nachname..."
+              placeholder={t('staff.namePlaceholder')}
               placeholderTextColor={colors.dark300}
               onSubmitEditing={handleAdd}
               returnKeyType="done"
@@ -97,7 +97,7 @@ export default function StaffManagerScreen() {
             disabled={!newName.trim() || adding}
           >
             <Text style={s.btnPrimaryText}>
-              {adding ? 'Füge hinzu...' : '+ Hinzufügen'}
+              {adding ? t('common.adding') : t('staff.addAction')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -106,16 +106,14 @@ export default function StaffManagerScreen() {
       {/* Staff list */}
       <View style={s.listCard}>
         <View style={s.listHeader}>
-          <Text style={s.listHeaderText}>Mitarbeiter ({staff.length})</Text>
+          <Text style={s.listHeaderText}>{t('staff.listHeader', { count: String(staff.length) })}</Text>
         </View>
 
         {loading ? (
           <ActivityIndicator style={{ margin: 24 }} color={colors.brand600} />
         ) : sorted.length === 0 ? (
           <View style={s.empty}>
-            <Text style={s.emptyText}>
-              Noch keine Mitarbeiter angelegt. Fügen Sie oben einen neuen hinzu.
-            </Text>
+            <Text style={s.emptyText}>{t('staff.empty')}</Text>
           </View>
         ) : (
           <ScrollView>
@@ -126,7 +124,7 @@ export default function StaffManagerScreen() {
                   style={s.removeBtn}
                   onPress={() => handleRemove(member)}
                 >
-                  <Text style={s.removeBtnText}>× Entfernen</Text>
+                  <Text style={s.removeBtnText}>{t('staff.removeAction')}</Text>
                 </TouchableOpacity>
               </View>
             ))}

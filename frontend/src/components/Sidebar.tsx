@@ -1,15 +1,28 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Platform } from 'react-native';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/typography';
 import { useRouter } from '../navigation/Router';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n/I18nContext';
 import type { AppScreen } from '../navigation/Router';
+import {
+  CalendarDayIcon,
+  CalendarIcon,
+  ChatIcon,
+  HistoryIcon,
+  HomeIcon,
+  OffersIcon,
+  StaffIcon,
+  UsersIcon,
+} from './nav/NavIcons';
 
 interface NavItem {
   screen: AppScreen;
   label: string;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
+  /** Additional screen names that should also highlight this item as active. */
+  alsoActiveFor?: AppScreen['name'][];
 }
 
 interface SidebarProps {
@@ -17,88 +30,88 @@ interface SidebarProps {
   onToggle: () => void;
 }
 
+const ICON_SIZE = 20;
+
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { screen, navigate } = useRouter();
   const { user, logout } = useAuth();
   const { t, locale, setLocale } = useI18n();
 
-  const ANGEBOTE_ITEMS: NavItem[] = [
-    { screen: { name: 'offer-editor' }, label: t('nav.newOffer') },
-    { screen: { name: 'offers-list' }, label: t('nav.allOffers') },
-  ];
-
-  const BELEGUNG_ITEMS: NavItem[] = [
-    { screen: { name: 'belegung-editor' }, label: t('nav.dayView') },
-    { screen: { name: 'days-list' }, label: t('nav.allDays') },
-    { screen: { name: 'staff-manager' }, label: t('nav.staff') },
-  ];
-
   const hasAngebote = user?.modules.includes('angebote');
   const hasBelegung = user?.modules.includes('belegung');
+  const hasEmployees = user?.modules.includes('employees');
   const hasAssistant = user?.modules.includes('assistant');
 
-  function isActive(name: AppScreen['name']) {
+  function isActive(name: AppScreen['name']): boolean {
     return screen.name === name;
   }
+  function matchesAny(names: AppScreen['name'][]): boolean {
+    return names.some(isActive);
+  }
 
-  function NavRow({ item, active }: { item: NavItem; active: boolean }) {
+  function NavRow({ item }: { item: NavItem }) {
+    const activeNames: AppScreen['name'][] = [item.screen.name, ...(item.alsoActiveFor ?? [])];
+    const active = matchesAny(activeNames);
+    const color = active ? colors.brand400 : colors.dark300;
+    const Icon = item.icon;
     return (
       <TouchableOpacity
         style={[s.navRow, active && s.navRowActive]}
         onPress={() => navigate(item.screen)}
+        accessibilityRole="button"
+        accessibilityLabel={item.label}
       >
         <View style={[s.activeLine, active && s.activeLineLit]} />
+        <View style={s.iconWrap}>
+          <Icon size={ICON_SIZE} color={color} />
+        </View>
         {!collapsed && (
-          <Text style={[s.navText, active && s.navTextActive]}>
-            {item.label}
-          </Text>
+          <Text style={[s.navText, active && s.navTextActive]}>{item.label}</Text>
         )}
       </TouchableOpacity>
     );
   }
 
+  const BELEGUNG_ITEMS: NavItem[] = [
+    { screen: { name: 'belegung-editor' }, label: t('nav.dayView'), icon: CalendarDayIcon },
+    { screen: { name: 'days-list' }, label: t('nav.allDays'), icon: CalendarIcon },
+    { screen: { name: 'staff-manager' }, label: t('nav.staff'), icon: StaffIcon },
+  ];
+
   return (
     <View style={[s.sidebar, collapsed ? s.collapsed : s.expanded]}>
-      {/* Logo area */}
+      {/* Logo */}
       <TouchableOpacity style={s.logoArea} onPress={() => navigate({ name: 'home' })}>
-        <View style={s.logoMark} />
+        {Platform.OS === 'web' ? (
+          <Image
+            source={{ uri: '/assets/logo_transparent.png' }}
+            style={s.logoMark}
+            resizeMode="contain"
+          />
+        ) : (
+          <View style={s.logoMark} />
+        )}
         {!collapsed && <Text style={s.logoText}>Bleiche Resort & Spa</Text>}
       </TouchableOpacity>
 
-      {/* Nav items */}
+      {/* Nav */}
       <ScrollView style={s.nav} showsVerticalScrollIndicator={false}>
-        {/* Home */}
-        <TouchableOpacity
-          style={[s.navRow, isActive('home') && s.navRowActive]}
-          onPress={() => navigate({ name: 'home' })}
-        >
-          <View style={[s.activeLine, isActive('home') && s.activeLineLit]} />
-          {!collapsed && (
-            <Text style={[s.navText, isActive('home') && s.navTextActive]}>
-              {t('nav.home')}
-            </Text>
-          )}
-        </TouchableOpacity>
+        <NavRow item={{ screen: { name: 'home' }, label: t('nav.home'), icon: HomeIcon }} />
 
-        {/* Angebote */}
         {hasAngebote && (
           <View>
-            {collapsed ? (
-              <View style={s.divider} />
-            ) : (
-              <Text style={s.sectionLabel}>{t('nav.offers')}</Text>
-            )}
-            {ANGEBOTE_ITEMS.map((item) => (
-              <NavRow
-                key={item.label}
-                item={item}
-                active={isActive(item.screen.name)}
-              />
-            ))}
+            {collapsed ? <View style={s.divider} /> : null}
+            <NavRow
+              item={{
+                screen: { name: 'offers-list' },
+                label: t('nav.offers'),
+                icon: OffersIcon,
+                alsoActiveFor: ['offer-editor'],
+              }}
+            />
           </View>
         )}
 
-        {/* Belegungsliste */}
         {hasBelegung && (
           <View>
             {collapsed ? (
@@ -107,16 +120,29 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <Text style={s.sectionLabel}>{t('nav.occupancy')}</Text>
             )}
             {BELEGUNG_ITEMS.map((item) => (
-              <NavRow
-                key={item.label}
-                item={item}
-                active={isActive(item.screen.name)}
-              />
+              <NavRow key={item.label} item={item} />
             ))}
           </View>
         )}
 
-        {/* Assistant */}
+        {hasEmployees && (
+          <View>
+            {collapsed ? (
+              <View style={s.divider} />
+            ) : (
+              <Text style={s.sectionLabel}>{t('nav.hr')}</Text>
+            )}
+            <NavRow
+              item={{
+                screen: { name: 'employees-list' },
+                label: t('nav.employees'),
+                icon: UsersIcon,
+                alsoActiveFor: ['employee-profile'],
+              }}
+            />
+          </View>
+        )}
+
         {hasAssistant && (
           <View>
             {collapsed ? (
@@ -124,35 +150,27 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             ) : (
               <Text style={s.sectionLabel}>{t('nav.assistant')}</Text>
             )}
-            <TouchableOpacity
-              style={[s.navRow, isActive('chat') && s.navRowActive]}
-              onPress={() => navigate({ name: 'chat' })}
-            >
-              <View style={[s.activeLine, isActive('chat') && s.activeLineLit]} />
-              {!collapsed && (
-                <Text style={[s.navText, isActive('chat') && s.navTextActive]}>
-                  {t('nav.assistant')}
-                </Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[s.navRow, isActive('conversations-list') && s.navRowActive]}
-              onPress={() => navigate({ name: 'conversations-list' })}
-            >
-              <View style={[s.activeLine, isActive('conversations-list') && s.activeLineLit]} />
-              {!collapsed && (
-                <Text style={[s.navText, isActive('conversations-list') && s.navTextActive]}>
-                  {t('chat.history')}
-                </Text>
-              )}
-            </TouchableOpacity>
+            <NavRow
+              item={{
+                screen: { name: 'chat' },
+                label: t('nav.assistant'),
+                icon: ChatIcon,
+              }}
+            />
+            <NavRow
+              item={{
+                screen: { name: 'conversations-list' },
+                label: t('chat.history'),
+                icon: HistoryIcon,
+              }}
+            />
           </View>
         )}
       </ScrollView>
 
       {/* Bottom bar */}
       <View style={s.bottomBar}>
-        <TouchableOpacity onPress={onToggle} style={s.toggleBtn}>
+        <TouchableOpacity onPress={onToggle} style={s.toggleBtn} accessibilityLabel="Toggle sidebar">
           <Text style={s.toggleArrow}>{collapsed ? '›' : '‹'}</Text>
         </TouchableOpacity>
         {!collapsed && (
@@ -210,9 +228,7 @@ const s = StyleSheet.create({
   logoMark: {
     width: 36,
     height: 36,
-    backgroundColor: colors.brand400,
     flexShrink: 0,
-    borderRadius: 0,
   },
   logoText: {
     fontFamily: fonts.serif,
@@ -253,18 +269,24 @@ const s = StyleSheet.create({
   },
   activeLine: {
     width: 2,
-    height: 18,
+    height: 22,
     backgroundColor: 'transparent',
-    marginRight: 14,
+    marginRight: 12,
     marginLeft: 0,
   },
   activeLineLit: {
     backgroundColor: colors.brand400,
   },
+  iconWrap: {
+    width: ICON_SIZE + 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   navText: {
     fontFamily: fonts.sans,
     fontSize: 13,
     color: colors.dark300,
+    marginLeft: 10,
   },
   navTextActive: {
     color: colors.brand400,

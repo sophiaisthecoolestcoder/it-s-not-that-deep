@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import type { AskAssistantResponse } from '../types/assistant';
 import type { AuthUser, EmployeeRole } from '../types/auth';
 import type { DailyData, StaffMember } from '../types/belegung';
-import type { Employee } from '../types/employee';
+import type { Employee, EmployeeFilters, EmployeeInput } from '../types/employee';
 import type { Guest } from '../types/guest';
 import type { Offer, OfferInput } from '../types/offer';
 import { storage } from '../utils/storage';
@@ -194,9 +194,23 @@ export const api = {
 
   // Employees / guests
   getEmployees: () => request<Employee[]>('/employees/'),
+  listEmployees: (filters?: EmployeeFilters) => {
+    const q = new URLSearchParams();
+    if (filters?.department) q.set('department', filters.department);
+    if (filters?.role) q.set('role', filters.role);
+    if (filters?.active !== undefined) q.set('active', String(filters.active));
+    if (filters?.search) q.set('search', filters.search);
+    const qs = q.toString();
+    return request<Employee[]>(`/employees/${qs ? `?${qs}` : ''}`);
+  },
+  getEmployee: (id: number) => request<Employee>(`/employees/${id}`),
+  createEmployee: (payload: EmployeeInput) =>
+    request<Employee>('/employees/', { method: 'POST', body: JSON.stringify(payload) }),
+  updateEmployee: (id: number, payload: Partial<EmployeeInput>) =>
+    request<Employee>(`/employees/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteEmployee: (id: number) => request<void>(`/employees/${id}`, { method: 'DELETE' }),
   getGuests: () => request<Guest[]>('/guests/'),
   getGuest: (id: number) => request<Guest>(`/guests/${id}`),
-  getEmployee: (id: number) => request<Employee>(`/employees/${id}`),
 
   // Offers
   listOffers: () => request<Offer[]>('/offers/'),

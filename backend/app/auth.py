@@ -137,7 +137,7 @@ def require_roles(*roles: EmployeeRole):
 
 # ── Role → allowed modules / LLM tools ───────────────────────────────────────
 
-ALL_MODULES = ["home", "angebote", "belegung", "staff", "assistant"]
+ALL_MODULES = ["home", "angebote", "belegung", "staff", "employees", "assistant"]
 
 MODULE_ACCESS: dict[str, set[str]] = {
     EmployeeRole.ADMIN.value: set(ALL_MODULES),

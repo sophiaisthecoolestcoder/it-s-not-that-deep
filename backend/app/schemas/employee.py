@@ -1,24 +1,29 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 from pydantic import BaseModel, EmailStr
 from app.models.employee import EmployeeRole
 
 
-class EmployeeCreate(BaseModel):
+class EmployeeBase(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
     phone: Optional[str] = None
     role: EmployeeRole
+    department: Optional[str] = None
+    position: Optional[str] = None
+    employment_started_on: Optional[date] = None
+    employment_ended_on: Optional[date] = None
+    active: bool = True
+    notes: Optional[str] = None
 
 
-class EmployeeRead(BaseModel):
+class EmployeeCreate(EmployeeBase):
+    pass
+
+
+class EmployeeRead(EmployeeBase):
     id: int
-    first_name: str
-    last_name: str
-    email: str
-    phone: Optional[str]
-    role: EmployeeRole
     created_at: datetime
     updated_at: datetime
 
@@ -31,3 +36,9 @@ class EmployeeUpdate(BaseModel):
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
     role: Optional[EmployeeRole] = None
+    department: Optional[str] = None
+    position: Optional[str] = None
+    employment_started_on: Optional[date] = None
+    employment_ended_on: Optional[date] = None
+    active: Optional[bool] = None
+    notes: Optional[str] = None

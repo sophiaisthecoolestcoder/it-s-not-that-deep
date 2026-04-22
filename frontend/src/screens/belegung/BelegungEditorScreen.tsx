@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { api } from '../../api/client';
 import { useToast } from '../../components/ui/Toast';
+import { useI18n } from '../../i18n/I18nContext';
 import { BleicheSelect } from '../../components/ui/NativeSelect';
 import type {
   DailyData,
@@ -123,8 +124,8 @@ function MiniInput({
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
-    <View style={t.sectionHeader}>
-      <Text style={t.sectionHeaderText}>{children}</Text>
+    <View style={tStyles.sectionHeader}>
+      <Text style={tStyles.sectionHeaderText}>{children}</Text>
     </View>
   );
 }
@@ -133,15 +134,15 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
 
 function Th({ width, children }: { width: number; children?: React.ReactNode }) {
   return (
-    <View style={[t.th, { width }]}>
-      <Text style={t.thText}>{children}</Text>
+    <View style={[tStyles.th, { width }]}>
+      <Text style={tStyles.thText}>{children}</Text>
     </View>
   );
 }
 
 function Td({ width, children, flex }: { width?: number; children?: React.ReactNode; flex?: number }) {
   return (
-    <View style={[t.td, flex ? { flex } : { width: width ?? 60 }]}>
+    <View style={[tStyles.td, flex ? { flex } : { width: width ?? 60 }]}>
       {children}
     </View>
   );
@@ -165,12 +166,13 @@ interface GuestTableProps {
 }
 
 function GuestTable({ rows, onUpdate, onRemove, onAdd }: GuestTableProps) {
+  const { t } = useI18n();
   return (
     <View>
       <ScrollView horizontal showsHorizontalScrollIndicator>
         <View>
           {/* Header */}
-          <View style={t.tr}>
+          <View style={tStyles.tr}>
             <Th width={52}>#</Th>
             <Th width={44}>Kat</Th>
             <Th width={110}>Name</Th>
@@ -190,12 +192,12 @@ function GuestTable({ rows, onUpdate, onRemove, onAdd }: GuestTableProps) {
           </View>
           {/* Rows */}
           {rows.map((row) => (
-            <View key={row.id} style={t.tr}>
+            <View key={row.id} style={tStyles.tr}>
               <Td width={52}>
                 <MiniInput width={46} value={row.roomNr} onChange={(v) => onUpdate(row.id, { roomNr: v })} />
               </Td>
               <Td width={44}>
-                <Text style={t.catText}>{row.category}</Text>
+                <Text style={tStyles.catText}>{row.category}</Text>
               </Td>
               <Td width={110}>
                 <MiniInput width={104} value={row.name} onChange={(v) => onUpdate(row.id, { name: v })} />
@@ -254,21 +256,21 @@ function GuestTable({ rows, onUpdate, onRemove, onAdd }: GuestTableProps) {
               <Td width={60}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
                   <MiniInput width={26} value={row.visitCount} onChange={(v) => onUpdate(row.id, { visitCount: v })} center />
-                  <Text style={t.catText}>x</Text>
+                  <Text style={tStyles.catText}>x</Text>
                 </View>
                 <MiniInput width={44} value={row.lastVisit} onChange={(v) => onUpdate(row.id, { lastVisit: v })} placeholder="MM/YY" center />
               </Td>
               <Td width={28}>
                 <TouchableOpacity onPress={() => onRemove(row.id)}>
-                  <Text style={t.removeBtn}>×</Text>
+                  <Text style={tStyles.removeBtn}>×</Text>
                 </TouchableOpacity>
               </Td>
             </View>
           ))}
         </View>
       </ScrollView>
-      <TouchableOpacity onPress={onAdd} style={t.addRowBtn}>
-        <Text style={t.addRowText}>+ Zeile hinzufügen</Text>
+      <TouchableOpacity onPress={onAdd} style={tStyles.addRowBtn}>
+        <Text style={tStyles.addRowText}>{t('common.addRow')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -286,27 +288,28 @@ interface OpsSectionProps {
 }
 
 function OpsSection({ entries, onAdd, onUpdate, onRemove }: OpsSectionProps) {
+  const { t } = useI18n();
   return (
     <View style={{ marginLeft: 8, marginBottom: 4 }}>
       {entries.length > 0 && (
         <View>
           {entries.map((e, idx) => (
-            <View key={e.id} style={[t.tr, { marginBottom: 1 }]}>
-              <Td width={24}><Text style={t.catText}>{idx + 1}</Text></Td>
+            <View key={e.id} style={[tStyles.tr, { marginBottom: 1 }]}>
+              <Td width={24}><Text style={tStyles.catText}>{idx + 1}</Text></Td>
               <Td width={56}><MiniInput value={e.roomNr} onChange={(v) => onUpdate(e.id, { roomNr: v })} placeholder="#" /></Td>
               <Td width={110}><MiniInput value={e.name} onChange={(v) => onUpdate(e.id, { name: v })} placeholder="Name" /></Td>
               <Td flex={1}><MiniInput value={e.info} onChange={(v) => onUpdate(e.id, { info: v })} placeholder="Info" /></Td>
               <Td width={24}>
                 <TouchableOpacity onPress={() => onRemove(e.id)}>
-                  <Text style={t.removeBtn}>×</Text>
+                  <Text style={tStyles.removeBtn}>×</Text>
                 </TouchableOpacity>
               </Td>
             </View>
           ))}
         </View>
       )}
-      <TouchableOpacity onPress={onAdd} style={t.addRowBtn}>
-        <Text style={t.addRowText}>+ Eintrag</Text>
+      <TouchableOpacity onPress={onAdd} style={tStyles.addRowBtn}>
+        <Text style={tStyles.addRowText}>{t('common.addEntry')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -322,6 +325,7 @@ interface Props {
 
 export default function BelegungEditorScreen({ initialDate }: Props) {
   const { addToast } = useToast();
+  const { t } = useI18n();
   const [currentDate, setCurrentDate] = useState(initialDate || todayISO());
   const [data, setData] = useState<DailyData>(emptyData(currentDate));
   const [, setStaff] = useState<{ id: number | string; name: string }[]>([]);
@@ -378,8 +382,8 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
   function handleSave() {
     setSaving(true);
     api.upsertDay(currentDate, data)
-      .then(() => addToast({ type: 'success', title: 'Gespeichert', message: 'Belegungsliste gespeichert.' }))
-      .catch((e: Error) => addToast({ type: 'error', title: 'Fehler', message: e.message }))
+      .then(() => addToast({ type: 'success', title: t('belegung.saved'), message: t('belegung.savedBody') }))
+      .catch((e: Error) => addToast({ type: 'error', title: t('common.error'), message: e.message }))
       .finally(() => setSaving(false));
   }
 
@@ -389,14 +393,14 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
 
   async function handleExportExcel() {
     if (Platform.OS !== 'web') {
-      addToast({ type: 'error', title: 'Fehler', message: 'Excel-Export nur im Web verfügbar' });
+      addToast({ type: 'error', title: t('common.error'), message: t('belegung.excelOnlyWeb') });
       return;
     }
     try {
       await exportBelegung(data);
       addToast({ type: 'success', title: 'Excel', message: `${currentDate}.xlsx` });
     } catch (e: any) {
-      addToast({ type: 'error', title: 'Fehler', message: e?.message || 'Excel-Export fehlgeschlagen' });
+      addToast({ type: 'error', title: t('common.error'), message: e?.message || t('belegung.excelFailed') });
     }
   }
 
@@ -418,17 +422,17 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
           style={s.dateInput}
           value={currentDate}
           onChangeText={setCurrentDate}
-          placeholder="JJJJ-MM-TT"
+          placeholder={t('belegung.datePlaceholder')}
           placeholderTextColor={colors.dark300}
         />
         <TouchableOpacity style={[s.btnPrimary, saving && { opacity: 0.6 }]} onPress={handleSave} disabled={saving}>
-          <Text style={s.btnPrimaryText}>{saving ? 'Speichern...' : 'Speichern'}</Text>
+          <Text style={s.btnPrimaryText}>{saving ? t('common.saving') : t('common.save')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={s.btnSecondary} onPress={handleExportExcel}>
-          <Text style={s.btnSecondaryText}>Excel (.xlsx)</Text>
+          <Text style={s.btnSecondaryText}>{t('belegung.exportExcel')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={s.btnSecondary} onPress={handlePrint}>
-          <Text style={s.btnSecondaryText}>Drucken</Text>
+          <Text style={s.btnSecondaryText}>{t('common.print')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -441,42 +445,42 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
             {/* Col 1: Stand */}
             <View style={{ gap: 4 }}>
               <View style={s.headerRow}>
-                <Text style={s.headerLabel}>Stand:</Text>
+                <Text style={s.headerLabel}>{t('belegung.stand')}:</Text>
                 <MiniInput width={100} value={data.header.standDate} onChange={(v) => setHeader('standDate', v)} />
               </View>
               <View style={s.headerRow}>
-                <Text style={s.headerLabel}>Uhrzeit:</Text>
+                <Text style={s.headerLabel}>{t('belegung.time')}:</Text>
                 <MiniInput width={80} value={data.header.standTime} onChange={(v) => setHeader('standTime', v)} />
               </View>
             </View>
             {/* Col 2: TK / HSK */}
             <View style={{ gap: 4 }}>
               <View style={s.headerRow}>
-                <Text style={s.headerLabel}>TK:</Text>
-                <MiniInput width={120} value={data.header.tkName} onChange={(v) => setHeader('tkName', v)} placeholder="Name" />
-                <MiniInput width={70} value={data.header.tkTimeRange} onChange={(v) => setHeader('tkTimeRange', v)} placeholder="Zeit" />
+                <Text style={s.headerLabel}>{t('belegung.tk')}:</Text>
+                <MiniInput width={120} value={data.header.tkName} onChange={(v) => setHeader('tkName', v)} placeholder={t('belegung.name')} />
+                <MiniInput width={70} value={data.header.tkTimeRange} onChange={(v) => setHeader('tkTimeRange', v)} placeholder={t('belegung.time')} />
               </View>
               <View style={s.headerRow}>
-                <Text style={s.headerLabel}>HSK:</Text>
-                <MiniInput width={120} value={data.header.hskName} onChange={(v) => setHeader('hskName', v)} placeholder="Name" />
-                <MiniInput width={70} value={data.header.hskTimeRange} onChange={(v) => setHeader('hskTimeRange', v)} placeholder="Zeit" />
+                <Text style={s.headerLabel}>{t('belegung.hsk')}:</Text>
+                <MiniInput width={120} value={data.header.hskName} onChange={(v) => setHeader('hskName', v)} placeholder={t('belegung.name')} />
+                <MiniInput width={70} value={data.header.hskTimeRange} onChange={(v) => setHeader('hskTimeRange', v)} placeholder={t('belegung.time')} />
               </View>
             </View>
             {/* Col 3: Chef */}
             <View style={{ gap: 4 }}>
-              <Text style={[s.headerLabel, { fontWeight: '700' }]}>Chef der Nacht</Text>
+              <Text style={[s.headerLabel, { fontWeight: '700' }]}>{t('belegung.chefOfNight')}</Text>
               <View style={s.headerRow}>
-                <MiniInput width={120} value={data.header.chefDerNacht} onChange={(v) => setHeader('chefDerNacht', v)} placeholder="Name" />
-                <MiniInput width={70} value={data.header.chefTimeRange} onChange={(v) => setHeader('chefTimeRange', v)} placeholder="Zeit" />
+                <MiniInput width={120} value={data.header.chefDerNacht} onChange={(v) => setHeader('chefDerNacht', v)} placeholder={t('belegung.name')} />
+                <MiniInput width={70} value={data.header.chefTimeRange} onChange={(v) => setHeader('chefTimeRange', v)} placeholder={t('belegung.time')} />
               </View>
             </View>
           </View>
         </View>
 
         {/* B. Day Title */}
-        <View style={t.sectionHeader}>
-          <Text style={[t.sectionHeaderText, { textAlign: 'center' }]}>
-            Tagesinformation für {formatWeekday(currentDate)}, {formatDateShort(currentDate)}
+        <View style={tStyles.sectionHeader}>
+          <Text style={[tStyles.sectionHeaderText, { textAlign: 'center' }]}>
+            {t('belegung.dayTitle', { weekday: formatWeekday(currentDate), date: formatDateShort(currentDate) })}
           </Text>
         </View>
 
@@ -484,13 +488,13 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ borderBottomWidth: 1, borderBottomColor: colors.belBorder }}>
           <View style={{ flexDirection: 'row' }}>
             {([
-              ['Anr. Zi/Per', 'anrZi', 'anrPer'],
-              ['Abr. Zi/Per', 'abrZi', 'abrPer'],
-              ['Bleiber Zi/Per', 'bleiberZi', 'bleiberPer'],
-              ['ÜN Zi/Per', 'uenZi', 'uenPer'],
-            ] as const).map(([label, f1, f2]) => (
-              <View key={label} style={s.statCell}>
-                <Text style={s.statLabel}>{label}</Text>
+              ['belegung.stats.arrZiPer', 'anrZi', 'anrPer'],
+              ['belegung.stats.depZiPer', 'abrZi', 'abrPer'],
+              ['belegung.stats.stayZiPer', 'bleiberZi', 'bleiberPer'],
+              ['belegung.stats.nightsZiPer', 'uenZi', 'uenPer'],
+            ] as const).map(([labelKey, f1, f2]) => (
+              <View key={labelKey} style={s.statCell}>
+                <Text style={s.statLabel}>{t(labelKey)}</Text>
                 <View style={{ flexDirection: 'row', gap: 2 }}>
                   <MiniInput width={40} value={(data.stats as any)[f1]} onChange={(v) => setStat(f1, v)} center />
                   <MiniInput width={40} value={(data.stats as any)[f2]} onChange={(v) => setStat(f2, v)} center />
@@ -498,12 +502,12 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
               </View>
             ))}
             {([
-              ['Frühanreisen', 'fruehAnreisen'],
-              ['Spätabreisen', 'spaetAbreisen'],
-              ['Spätanreisen', 'spaetAnreisen'],
-            ] as const).map(([label, field]) => (
-              <View key={label} style={s.statCell}>
-                <Text style={s.statLabel}>{label}</Text>
+              ['belegung.stats.earlyArrivals', 'fruehAnreisen'],
+              ['belegung.stats.lateDepartures', 'spaetAbreisen'],
+              ['belegung.stats.lateArrivals', 'spaetAnreisen'],
+            ] as const).map(([labelKey, field]) => (
+              <View key={labelKey} style={s.statCell}>
+                <Text style={s.statLabel}>{t(labelKey)}</Text>
                 <MiniInput width={40} value={(data.stats as any)[field]} onChange={(v) => setStat(field, v)} center />
               </View>
             ))}
@@ -512,7 +516,7 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
 
         {/* D. Weekly Occupancy */}
         <View style={[s.weeklyRow, { borderBottomWidth: 1, borderBottomColor: colors.belBorder }]}>
-          <Text style={s.weeklyLabel}>Wöchentliche{'\n'}Belegung-Gäste</Text>
+          <Text style={s.weeklyLabel}>{t('belegung.weeklyOccupancy')}</Text>
           <View style={s.weeklyGrid}>
             {(['mo', 'di', 'mi', 'do_', 'fr', 'sa', 'so'] as const).map((day) => (
               <View key={day} style={s.weeklyCell}>
@@ -524,22 +528,26 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
         </View>
 
         {/* E. Arrivals */}
-        <SectionHeader>Anreisen ({data.arrivals.length} Zimmer)</SectionHeader>
+        <SectionHeader>
+          {t('belegung.section.arrivals')} ({t('belegung.section.roomsCount', { count: String(data.arrivals.length) })})
+        </SectionHeader>
         <View style={{ paddingHorizontal: 4, paddingBottom: 8 }}>
           <GuestTable rows={data.arrivals} onUpdate={updateArrival} onRemove={removeArrival} onAdd={addArrival} />
         </View>
 
         {/* F. Stayers */}
-        <SectionHeader>Bleiber ({data.stayers.length} Zimmer)</SectionHeader>
+        <SectionHeader>
+          {t('belegung.section.stayers')} ({t('belegung.section.roomsCount', { count: String(data.stayers.length) })})
+        </SectionHeader>
         <View style={{ paddingHorizontal: 4, paddingBottom: 8 }}>
           <GuestTable rows={data.stayers} onUpdate={updateStayer} onRemove={removeStayer} onAdd={addStayer} />
         </View>
 
         {/* G. Frühschicht */}
         <View style={s.opsSection}>
-          <Text style={s.opsTitle}>Frühschicht:</Text>
+          <Text style={s.opsTitle}>{t('belegung.ops.fruehschicht')}:</Text>
           <View style={s.opsExternRow}>
-            <Text style={s.opsExternLabel}>extern</Text>
+            <Text style={s.opsExternLabel}>{t('belegung.ops.extern')}</Text>
             <MiniInput value={data.fruehExtern} onChange={(v) => updateData({ fruehExtern: v })} />
           </View>
           <OpsSection entries={data.fruehOps} onAdd={() => addOps('fruehOps')} onUpdate={(id, u) => updateOps('fruehOps', id, u)} onRemove={(id) => removeOps('fruehOps', id)} />
@@ -547,9 +555,9 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
 
         {/* H. Spätschicht */}
         <View style={s.opsSection}>
-          <Text style={s.opsTitle}>Spätschicht:</Text>
+          <Text style={s.opsTitle}>{t('belegung.ops.spaetschicht')}:</Text>
           <View style={s.opsExternRow}>
-            <Text style={s.opsExternLabel}>AE extern:</Text>
+            <Text style={s.opsExternLabel}>{t('belegung.ops.aeExtern')}</Text>
             <MiniInput value={data.spaetAeExtern} onChange={(v) => updateData({ spaetAeExtern: v })} />
           </View>
           <OpsSection entries={data.spaetOps} onAdd={() => addOps('spaetOps')} onUpdate={(id, u) => updateOps('spaetOps', id, u)} onRemove={(id) => removeOps('spaetOps', id)} />
@@ -557,20 +565,26 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
 
         {/* I. Küche */}
         <View style={s.opsSection}>
-          <Text style={s.opsTitle}>Küche:</Text>
+          <Text style={s.opsTitle}>{t('belegung.ops.kueche')}:</Text>
           <View style={s.opsExternRow}>
-            <Text style={s.opsExternLabel}>FS extern:</Text>
+            <Text style={s.opsExternLabel}>{t('belegung.ops.fsExtern')}</Text>
             <MiniInput value={data.kuecheFsExtern} onChange={(v) => updateData({ kuecheFsExtern: v })} />
           </View>
           <View style={s.opsExternRow}>
-            <Text style={s.opsExternLabel}>AE extern:</Text>
+            <Text style={s.opsExternLabel}>{t('belegung.ops.aeExtern')}</Text>
             <MiniInput value={data.kuecheAeExtern} onChange={(v) => updateData({ kuecheAeExtern: v })} />
           </View>
           {/* Dietary grid */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               {(['kuecheLaktose', 'kuecheGluten', 'kuecheAllergien', 'kuecheUnvertraeglichkeiten', 'kuecheSonstiges'] as const).map((key) => {
-                const labels: Record<string, string> = { kuecheLaktose: 'Laktose', kuecheGluten: 'Gluten', kuecheAllergien: 'Allergien', kuecheUnvertraeglichkeiten: 'Unverträglichk.', kuecheSonstiges: 'Sonstiges' };
+                const labels: Record<string, string> = {
+                  kuecheLaktose: t('belegung.diet.laktose'),
+                  kuecheGluten: t('belegung.diet.gluten'),
+                  kuecheAllergien: t('belegung.diet.allergies'),
+                  kuecheUnvertraeglichkeiten: t('belegung.diet.intolerances'),
+                  kuecheSonstiges: t('belegung.diet.other'),
+                };
                 return (
                   <View key={key} style={{ width: 140 }}>
                     <Text style={s.dietLabel}>{labels[key]}</Text>
@@ -583,12 +597,12 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
                           }}
                         />
                         <TouchableOpacity onPress={() => removeOps(key, e.id)}>
-                          <Text style={t.removeBtn}>×</Text>
+                          <Text style={tStyles.removeBtn}>×</Text>
                         </TouchableOpacity>
                       </View>
                     ))}
                     <TouchableOpacity onPress={() => addOps(key)}>
-                      <Text style={t.addRowText}>+ Zeile</Text>
+                      <Text style={tStyles.addRowText}>{t('common.addRow')}</Text>
                     </TouchableOpacity>
                   </View>
                 );
@@ -600,7 +614,7 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
 
         {/* J. Veranstaltungen */}
         <View style={s.opsSection}>
-          <Text style={s.opsTitle}>Veranstaltungen/Bankett:</Text>
+          <Text style={s.opsTitle}>{t('belegung.ops.events')}:</Text>
           <View style={{ marginLeft: 8 }}>
             <MiniInput value={data.veranstaltungenBankett} onChange={(v) => updateData({ veranstaltungenBankett: v })} />
           </View>
@@ -608,9 +622,9 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
 
         {/* K. Tischwünsche */}
         <View style={s.opsSection}>
-          <Text style={s.opsTitle}>Tischwünsche:</Text>
+          <Text style={s.opsTitle}>{t('belegung.ops.tableWishes')}:</Text>
           <View style={s.opsExternRow}>
-            <Text style={s.opsExternLabel}>AE extern:</Text>
+            <Text style={s.opsExternLabel}>{t('belegung.ops.aeExtern')}</Text>
             <MiniInput value={data.tischwuenscheAeExtern} onChange={(v) => updateData({ tischwuenscheAeExtern: v })} />
           </View>
           <OpsSection entries={data.tischwuenscheOps} onAdd={() => addOps('tischwuenscheOps')} onUpdate={(id, u) => updateOps('tischwuenscheOps', id, u)} onRemove={(id) => removeOps('tischwuenscheOps', id)} />
@@ -618,7 +632,7 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
 
         {/* L. Englische Menükarten */}
         <View style={s.opsSection}>
-          <Text style={s.opsTitle}>Englische Menükarten:</Text>
+          <Text style={s.opsTitle}>{t('belegung.ops.englishMenus')}:</Text>
           <View style={{ marginLeft: 8 }}>
             <MiniInput value={data.englischeMenuekarten} onChange={(v) => updateData({ englischeMenuekarten: v })} />
           </View>
@@ -626,32 +640,32 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
 
         {/* M. Geburtstage */}
         <View style={s.opsSection}>
-          <Text style={s.opsTitle}>Geburtstag/besondere Anlässe:</Text>
+          <Text style={s.opsTitle}>{t('belegung.ops.birthdays')}:</Text>
           <OpsSection entries={data.geburtstage} onAdd={() => addOps('geburtstage')} onUpdate={(id, u) => updateOps('geburtstage', id, u)} onRemove={(id) => removeOps('geburtstage', id)} />
         </View>
 
         {/* N. Housekeeping */}
         <View style={s.opsSection}>
-          <Text style={s.opsTitle}>Housekeeping:</Text>
+          <Text style={s.opsTitle}>{t('belegung.ops.housekeeping')}:</Text>
           <Text style={[s.opsExternLabel, { marginLeft: 8, marginBottom: 4, fontStyle: 'italic' }]}>
-            Liebe Hausdamen, bei Abreisezimmern immer auf WLAN-Cubes achten und an die Rezi bringen! Danke!
+            {t('belegung.ops.housekeepingNote')}
           </Text>
           <OpsSection entries={data.housekeeping} onAdd={() => addOps('housekeeping')} onUpdate={(id, u) => updateOps('housekeeping', id, u)} onRemove={(id) => removeOps('housekeeping', id)} />
         </View>
 
         {/* O. Empfang/Chauffeure */}
         <View style={s.opsSection}>
-          <Text style={s.opsTitle}>Empfang/Chauffeure:</Text>
+          <Text style={s.opsTitle}>{t('belegung.ops.reception')}:</Text>
           <OpsSection entries={data.empfangChauffeure} onAdd={() => addOps('empfangChauffeure')} onUpdate={(id, u) => updateOps('empfangChauffeure', id, u)} onRemove={(id) => removeOps('empfangChauffeure', id)} />
           <View style={s.opsExternRow}>
-            <Text style={s.opsExternLabel}>LT extern:</Text>
+            <Text style={s.opsExternLabel}>{t('belegung.ops.ltExtern')}</Text>
             <MiniInput value={data.ltExtern} onChange={(v) => updateData({ ltExtern: v })} />
           </View>
         </View>
 
         {/* P. E-Auto */}
         <View style={s.opsSection}>
-          <Text style={s.opsTitle}>E-Auto:</Text>
+          <Text style={s.opsTitle}>{t('belegung.ops.eCar')}:</Text>
           <View style={{ marginLeft: 8 }}>
             <MiniInput value={data.eAuto} onChange={(v) => updateData({ eAuto: v })} />
           </View>
@@ -659,10 +673,10 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
 
         {/* Q. Landtherme */}
         <View style={s.opsSection}>
-          <Text style={s.opsTitle}>Landtherme:</Text>
+          <Text style={s.opsTitle}>{t('belegung.ops.landtherme')}:</Text>
           <OpsSection entries={data.landtherme} onAdd={() => addOps('landtherme')} onUpdate={(id, u) => updateOps('landtherme', id, u)} onRemove={(id) => removeOps('landtherme', id)} />
           <View style={s.opsExternRow}>
-            <Text style={s.opsExternLabel}>LT EXTERN:</Text>
+            <Text style={s.opsExternLabel}>{t('belegung.ops.ltExtern')}</Text>
             <MiniInput value={data.landthermeLtExtern} onChange={(v) => updateData({ landthermeLtExtern: v })} />
           </View>
         </View>
@@ -670,11 +684,11 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
         {/* ── Bottom Sections ─────────────────────────────────────────────── */}
 
         {/* Zeitungen */}
-        <SectionHeader>Zeitungen</SectionHeader>
+        <SectionHeader>{t('belegung.section.newspapers')}</SectionHeader>
         <View style={{ paddingHorizontal: 4, paddingBottom: 8 }}>
           <ScrollView horizontal showsHorizontalScrollIndicator>
             <View>
-              <View style={t.tr}>
+              <View style={tStyles.tr}>
                 <Th width={70}>Zimmer-Nr.</Th>
                 <Th width={110}>Zeitung</Th>
                 <Th width={160}>WANN? von — bis —</Th>
@@ -682,31 +696,31 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
                 <Th width={28}></Th>
               </View>
               {data.newspapers.map((row) => (
-                <View key={row.id} style={t.tr}>
+                <View key={row.id} style={tStyles.tr}>
                   <Td width={70}><MiniInput value={row.roomNr} onChange={(v) => updateData({ newspapers: data.newspapers.map((r) => r.id === row.id ? { ...r, roomNr: v } : r) })} /></Td>
                   <Td width={110}><MiniInput value={row.newspaper} onChange={(v) => updateData({ newspapers: data.newspapers.map((r) => r.id === row.id ? { ...r, newspaper: v } : r) })} /></Td>
                   <Td width={160}><MiniInput value={row.dateRange} onChange={(v) => updateData({ newspapers: data.newspapers.map((r) => r.id === row.id ? { ...r, dateRange: v } : r) })} /></Td>
                   <Td width={200}><MiniInput value={row.remarks} onChange={(v) => updateData({ newspapers: data.newspapers.map((r) => r.id === row.id ? { ...r, remarks: v } : r) })} /></Td>
                   <Td width={28}>
                     <TouchableOpacity onPress={() => updateData({ newspapers: data.newspapers.filter((r) => r.id !== row.id) })}>
-                      <Text style={t.removeBtn}>×</Text>
+                      <Text style={tStyles.removeBtn}>×</Text>
                     </TouchableOpacity>
                   </Td>
                 </View>
               ))}
             </View>
           </ScrollView>
-          <TouchableOpacity onPress={() => updateData({ newspapers: [...data.newspapers, emptyNewspaper()] })} style={t.addRowBtn}>
-            <Text style={t.addRowText}>+ Zeile hinzufügen</Text>
+          <TouchableOpacity onPress={() => updateData({ newspapers: [...data.newspapers, emptyNewspaper()] })} style={tStyles.addRowBtn}>
+            <Text style={tStyles.addRowText}>{t('common.addRow')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Neue Gäste */}
-        <SectionHeader>Neue Gäste</SectionHeader>
+        <SectionHeader>{t('belegung.section.newGuests')}</SectionHeader>
         <View style={{ paddingHorizontal: 4, paddingBottom: 8 }}>
           <ScrollView horizontal showsHorizontalScrollIndicator>
             <View>
-              <View style={t.tr}>
+              <View style={tStyles.tr}>
                 {['#', 'Kat', 'Name', 'E', 'K', 'Gruppe', 'Arr', 'Anr', 'Abr', 'Preis', 'Ti-#', 'Booking', 'Ort/KFZ', 'Notizen', ''].map((h, i) => (
                   <Th key={i} width={i === 2 ? 110 : i === 12 ? 80 : i === 13 ? 110 : i === 14 ? 28 : 56}>{h}</Th>
                 ))}
@@ -718,9 +732,9 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
                   updateData({ newGuests: data.newGuests.map((r) => r.id === row.id ? updated : r) });
                 };
                 return (
-                  <View key={row.id} style={t.tr}>
+                  <View key={row.id} style={tStyles.tr}>
                     <Td width={56}><MiniInput value={row.roomNr} onChange={(v) => setNG({ roomNr: v })} /></Td>
-                    <Td width={56}><Text style={t.catText}>{row.category}</Text></Td>
+                    <Td width={56}><Text style={tStyles.catText}>{row.category}</Text></Td>
                     <Td width={110}><MiniInput value={row.name} onChange={(v) => setNG({ name: v })} /></Td>
                     <Td width={56}><MiniInput value={row.adults ? String(row.adults) : ''} onChange={(v) => setNG({ adults: parseInt(v) || 0 })} center /></Td>
                     <Td width={56}><MiniInput value={row.children ? String(row.children) : ''} onChange={(v) => setNG({ children: parseInt(v) || 0 })} center /></Td>
@@ -735,7 +749,7 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
                     <Td width={110}><MiniInput value={row.notes} onChange={(v) => setNG({ notes: v })} /></Td>
                     <Td width={28}>
                       <TouchableOpacity onPress={() => updateData({ newGuests: data.newGuests.filter((r) => r.id !== row.id) })}>
-                        <Text style={t.removeBtn}>×</Text>
+                        <Text style={tStyles.removeBtn}>×</Text>
                       </TouchableOpacity>
                     </Td>
                   </View>
@@ -743,42 +757,42 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
               })}
             </View>
           </ScrollView>
-          <TouchableOpacity onPress={() => updateData({ newGuests: [...data.newGuests, emptyNewGuest()] })} style={t.addRowBtn}>
-            <Text style={t.addRowText}>+ Zeile hinzufügen</Text>
+          <TouchableOpacity onPress={() => updateData({ newGuests: [...data.newGuests, emptyNewGuest()] })} style={tStyles.addRowBtn}>
+            <Text style={tStyles.addRowText}>{t('common.addRow')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Freie Zimmer */}
-        <SectionHeader>Freie Zimmer</SectionHeader>
+        <SectionHeader>{t('belegung.section.freeRooms')}</SectionHeader>
         <View style={{ paddingHorizontal: 4, paddingBottom: 16 }}>
           <ScrollView horizontal showsHorizontalScrollIndicator>
             <View>
-              <View style={t.tr}>
+              <View style={tStyles.tr}>
                 <Th width={80}>Zimmer-Nr.</Th>
                 <Th width={60}>Kat</Th>
                 <Th width={200}>out of order</Th>
                 <Th width={28}></Th>
               </View>
               {data.freeRooms.map((row) => (
-                <View key={row.id} style={t.tr}>
+                <View key={row.id} style={tStyles.tr}>
                   <Td width={80}>
                     <MiniInput value={row.roomNr} onChange={(v) => {
                       updateData({ freeRooms: data.freeRooms.map((r) => r.id === row.id ? { ...r, roomNr: v, category: getRoomCategory(v) } : r) });
                     }} />
                   </Td>
-                  <Td width={60}><Text style={t.catText}>{row.category}</Text></Td>
+                  <Td width={60}><Text style={tStyles.catText}>{row.category}</Text></Td>
                   <Td width={200}><MiniInput value={row.outOfOrder} onChange={(v) => updateData({ freeRooms: data.freeRooms.map((r) => r.id === row.id ? { ...r, outOfOrder: v } : r) })} /></Td>
                   <Td width={28}>
                     <TouchableOpacity onPress={() => updateData({ freeRooms: data.freeRooms.filter((r) => r.id !== row.id) })}>
-                      <Text style={t.removeBtn}>×</Text>
+                      <Text style={tStyles.removeBtn}>×</Text>
                     </TouchableOpacity>
                   </Td>
                 </View>
               ))}
             </View>
           </ScrollView>
-          <TouchableOpacity onPress={() => updateData({ freeRooms: [...data.freeRooms, emptyFreeRoom()] })} style={t.addRowBtn}>
-            <Text style={t.addRowText}>+ Zeile hinzufügen</Text>
+          <TouchableOpacity onPress={() => updateData({ freeRooms: [...data.freeRooms, emptyFreeRoom()] })} style={tStyles.addRowBtn}>
+            <Text style={tStyles.addRowText}>{t('common.addRow')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -789,7 +803,7 @@ export default function BelegungEditorScreen({ initialDate }: Props) {
 
 // ── Table styles ─────────────────────────────────────────────────────────
 
-const t = StyleSheet.create({
+const tStyles = StyleSheet.create({
   sectionHeader: {
     backgroundColor: colors.belSection,
     paddingHorizontal: 8,

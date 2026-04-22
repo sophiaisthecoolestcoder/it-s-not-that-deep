@@ -15,20 +15,22 @@ import { useToast } from '../../components/ui/Toast';
 import { useI18n } from '../../i18n/I18nContext';
 import { BleicheSelect } from '../../components/ui/NativeSelect';
 import type { Offer, OfferStatus } from '../../types/offer';
-import { STATUS_LABELS, STATUS_BG, STATUS_FG } from '../../types/offer';
+import { STATUS_BG, STATUS_FG } from '../../types/offer';
+import { offerStatusLabel } from '../../utils/offerStatus';
 import { formatDateGerman, formatEuro, getOfferNumber } from '../../utils/helpers';
 import { colors } from '../../theme/colors';
 import { fonts } from '../../theme/typography';
 
-const STATUS_OPTIONS = (['draft', 'sent', 'accepted', 'declined'] as OfferStatus[]).map((s) => ({
-  value: s,
-  label: STATUS_LABELS[s],
-}));
+const STATUS_VALUES: OfferStatus[] = ['draft', 'sent', 'accepted', 'declined'];
 
 export default function OffersListScreen() {
   const { navigate } = useRouter();
   const { addToast } = useToast();
   const { t } = useI18n();
+  const STATUS_OPTIONS = STATUS_VALUES.map((s) => ({
+    value: s,
+    label: offerStatusLabel(s, t),
+  }));
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -98,7 +100,7 @@ export default function OffersListScreen() {
       .updateOffer(id, { status })
       .then((updated) => {
         setOffers((prev) => prev.map((x) => (x.id === id ? updated : x)));
-        addToast({ type: 'info', title: t('offers.statusChanged'), message: STATUS_LABELS[status] });
+        addToast({ type: 'info', title: t('offers.statusChanged'), message: offerStatusLabel(status, t) });
       })
       .catch((e: Error) => {
         setOffers(previous);
@@ -192,7 +194,7 @@ export default function OffersListScreen() {
                       ]}
                     >
                       <Text style={[s.badgeText, { color: STATUS_FG[offer.status] }]}>
-                        {STATUS_LABELS[offer.status]}
+                        {offerStatusLabel(offer.status, t)}
                       </Text>
                     </View>
                   </View>

@@ -21,7 +21,7 @@ export const ROLE_LABELS: Record<EmployeeRole, string> = {
   maintenance: 'Haustechnik',
 };
 
-export type ModuleKey = 'home' | 'angebote' | 'belegung' | 'staff' | 'assistant';
+export type ModuleKey = 'home' | 'angebote' | 'belegung' | 'staff' | 'employees' | 'assistant';
 
 export interface AuthUser {
   id: number;

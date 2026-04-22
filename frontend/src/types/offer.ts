@@ -32,12 +32,8 @@ export interface Offer {
 
 export type OfferInput = Omit<Offer, 'id' | 'created_at' | 'updated_at'>;
 
-export const STATUS_LABELS: Record<OfferStatus, string> = {
-  draft: 'Entwurf',
-  sent: 'Gesendet',
-  accepted: 'Angenommen',
-  declined: 'Abgelehnt',
-};
+// Status label is looked up via i18n (`offer.status.<value>` keys). Use
+// `offerStatusLabel(status, t)` from `utils/offerStatus.ts` for UI rendering.
 
 export const STATUS_BG: Record<OfferStatus, string> = {
   draft: '#ececec',
