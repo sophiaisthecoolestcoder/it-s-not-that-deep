@@ -28,6 +28,7 @@ Usage: python -m scripts.extract_floor_plans
 """
 from __future__ import annotations
 
+import html
 import re
 import sys
 import unicodedata
@@ -85,42 +86,59 @@ LAYER_BLACKLIST = {
 # columns, windows, roof, generic outlines) get a subdued mocha tone so they
 # stay visible without dominating the page.
 THEME_CSS = """\
-/* Notes on selectors:
+/* Selector strategy:
 
-   `[data-layer="…"]` targets the non-namespaced `data-layer` attribute that
-   `add_data_layer_attrs` mirrors from each group's `inkscape:label`. This
-   works reliably across browsers when the SVG is loaded via `<img>`,
-   unlike `[*|label]` / `[inkscape|label]` which depend on each browser's
-   XML namespace handling.
+   `[data-layer="…"]` targets the non-namespaced attribute that
+   `add_data_layer_attrs` mirrors from each group's `inkscape:label`. The
+   value is HTML-decoded before being written, so the literal Unicode form
+   ("Möblierung 3D") matches every group regardless of whether PyMuPDF
+   originally emitted it as entities or literal characters.
 
-   `!important` is required to override the `stroke="#000000"` /
-   `fill="…"` presentation attributes PyMuPDF puts on every element.
+   `!important` is required to beat the `stroke="#000000"` / `fill="…"`
+   presentation attributes PyMuPDF puts on every drawing element. */
 
-   The first rule is an aggressive default: re-paint EVERY path/line in the
-   warm-dark theme so anything that survives the OCG cleanup but doesn't
-   sit in a recognised named layer (the source CAD has 30+ unnamed
-   "Undefiniert" groups) still picks up the brand palette. The per-layer
-   rules below then upgrade specific groups (walls get a fill, rooms get a
-   cream fill, fixtures shift to mocha). */
+/* ── Hide everything we never want in the read-only floor-plan view ───────
 
-/* Hide layers we never want in the read-only view. Although the OCG is
-   already disabled at PDF level, PyMuPDF emits the geometry into the SVG
-   anyway — so hide it again here. */
+   - <image> = embedded raster blobs (carpet textures, decorative photos
+     baked into the source PDF). 29 of these in EG alone — they pixelate
+     at any zoom past 100% because they're rasters, so we kill them.
+   - <text>/<tspan> = ALL text labels (room numbers, dimensions, scale
+     bars, north arrows). The user wants a clean design plan with no
+     measurements showing.
+   - Layer groups we explicitly don't want: 3D furniture symbols, door
+     swing arcs and window/door macros (the "technical things" — arrows
+     showing which way doors open), residual labels, undefined dumping
+     ground, and the out-of-scope drawings (already OCG-disabled but
+     re-hidden for safety). */
+image,
+text,
+tspan,
 g[data-layer="Möblierung 3D"],
 g[data-layer="Text Allgemein"],
-g[data-layer="Undefiniert"] {
+g[data-layer="Undefiniert"],
+g[data-layer="Fenstermakro, Türmakro"],
+g[data-layer="WÄNDE_ÖFFNUNGEN"],
+g[data-layer="Sanitär"],
+g[data-layer="ANSICHT"],
+g[data-layer="BEBAUUNGSPLAN_2008"],
+g[data-layer="LAGEPLAN"] {
     display: none !important;
 }
 
-/* Catch-all default — every visible stroke becomes warm-dark, hairline. */
+/* ── Catch-all default ───────────────────────────────────────────────────
+
+   ~73% of paths in EG are NOT inside any labelled layer (PyMuPDF emits
+   loose paths in unlabelled `<g>` blocks). This rule re-paints every
+   path/line in the warm-dark theme so the unlabelled remainder also gets
+   themed instead of staying PyMuPDF's default black. Per-layer rules
+   below then upgrade the named layers we care about. */
 path, line, polyline, polygon {
     stroke: #3a2e22 !important;
     stroke-width: 0.4 !important;
     fill: none !important;
 }
 
-/* Walls — same warm-dark stroke, with a solid taupe fill so wall masses
-   read clearly. */
+/* ── Walls — taupe fill + warm-dark hairline stroke. ─────────────────── */
 g[data-layer="Wand"] path,
 g[data-layer="Wand"] line {
     stroke: #3a2e22 !important;
@@ -128,22 +146,22 @@ g[data-layer="Wand"] line {
     fill: #6b5a44 !important;
 }
 
-/* Filled rooms / surfaces — slightly warmer cream than the page so rooms
-   read "deeper" than the empty page background behind them. */
+/* ── Style fills (Stilfläche): the warm-dark hatch / fill on walls. ──── */
+g[data-layer="Stilfläche"] path {
+    stroke: none !important;
+    fill: #6b5a44 !important;
+}
+
+/* ── Filled rooms / surfaces — slightly warmer cream than the page. ───── */
 g[data-layer="Füllfläche"] path {
     fill: #f5ede3 !important;
     stroke: none !important;
 }
 
-/* Brand mocha for windows, doors, plumbing, columns, roof, generic
-   outlines — visible without dominating. */
-g[data-layer="Sanitär"] path,
-g[data-layer="WÄNDE_ÖFFNUNGEN"] path,
+/* ── Columns + structural outlines — brand mocha hairline. ───────────── */
 g[data-layer="Stütze"] path,
-g[data-layer="Stilfläche"] path,
 g[data-layer="GRUNDRISS"] path,
 g[data-layer="Allgemein01"] path,
-g[data-layer="Fenstermakro, Türmakro"] path,
 g[data-layer="Dach"] path {
     stroke: #b09570 !important;
     stroke-width: 0.3 !important;
@@ -166,17 +184,27 @@ _LABEL_RE = re.compile(r'inkscape:label="([^"]*)"')
 def add_data_layer_attrs(svg: str) -> str:
     """Mirror every `inkscape:label="X"` as a non-namespaced `data-layer="X"`.
 
-    `inkscape:label` is a namespaced attribute. CSS attribute selectors
-    against namespaced attributes (`[*|label="…"]`, `[inkscape|label="…"]`)
-    are inconsistently honoured across browsers when the SVG is loaded via
-    `<img>` and parsed in strict XML mode. A plain non-namespaced `data-*`
-    attribute on the same group is matched reliably in every browser, so we
-    duplicate the label as `data-layer` and target THAT in the theme.
+    `inkscape:label` is namespaced. CSS attribute selectors against
+    namespaced attributes (`[*|label="…"]`) are inconsistently honoured
+    across browsers when the SVG is loaded via `<img>` in strict XML mode,
+    so we duplicate the label as a plain `data-layer` attribute that works
+    everywhere.
+
+    HTML entities in the source label (PyMuPDF writes `M&#xF6;blierung 3D`
+    for some groups and `Möblierung 3D` for others) are decoded before
+    being copied so every group ends up with the same literal Unicode
+    string. This is what made earlier theme attempts only catch ~1% of the
+    "Möblierung 3D" groups.
     """
-    return _LABEL_RE.sub(
-        lambda m: f'inkscape:label="{m.group(1)}" data-layer="{m.group(1)}"',
-        svg,
-    )
+
+    def replace(m: re.Match[str]) -> str:
+        original = m.group(1)
+        decoded = html.unescape(original)
+        # Re-escape for a safe XML attribute value (only " and & matter).
+        attr_value = decoded.replace("&", "&amp;").replace('"', "&quot;")
+        return f'inkscape:label="{original}" data-layer="{attr_value}"'
+
+    return _LABEL_RE.sub(replace, svg)
 
 
 def inject_theme(svg: str) -> str:

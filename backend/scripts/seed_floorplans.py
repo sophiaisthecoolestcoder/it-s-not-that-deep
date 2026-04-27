@@ -93,7 +93,13 @@ def seed_floorplans() -> int:
                 print(f"[seed_floorplans]   !! no SVG matches token '{token}' — skipping")
                 continue
             width, height = read_svg_dimensions(svg)
-            image_url = f"{URL_PREFIX}/{svg.name}"
+            # Append the file's mtime as a cache-buster: when the SVG is
+            # re-rendered (theme change, OCG cleanup change), the URL also
+            # changes and the browser refetches instead of serving a stale
+            # `<img>` cache. The static asset itself is unchanged URL-wise
+            # at the filesystem; the query string just bypasses HTTP cache.
+            mtime = int(svg.stat().st_mtime)
+            image_url = f"{URL_PREFIX}/{svg.name}?v={mtime}"
 
             layer = (
                 session.query(MapLayer)

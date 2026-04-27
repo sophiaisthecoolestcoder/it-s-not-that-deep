@@ -464,8 +464,14 @@ function WebCanvas({
               width: layer.width,
               height: layer.height,
               pointerEvents: 'none',
-              willChange: 'transform',
-              backfaceVisibility: 'hidden',
+              // Deliberately NO `will-change: transform` / `translate3d` /
+              // `backface-visibility: hidden`. All three promote this
+              // subtree to a GPU texture layer cached at the *current*
+              // rasterised size. When the user zooms in, the browser
+              // stretches that cached texture instead of re-rasterising
+              // the SVG — that's exactly what causes the pixelation we
+              // saw. Plain 2D transforms let the browser re-rasterise on
+              // every scale change.
             } as unknown as React.CSSProperties
           }
         >
