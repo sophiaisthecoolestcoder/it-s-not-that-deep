@@ -7,6 +7,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  type StyleProp,
+  type TextStyle,
 } from 'react-native';
 
 import { BleicheSelect } from '../../components/ui/NativeSelect';
@@ -141,7 +143,7 @@ function InlineText({
   mode: 'view' | 'edit';
   onChange: (v: string) => void;
   placeholder?: string;
-  style?: any;
+  style?: StyleProp<TextStyle>;
   width?: number | string;
   bold?: boolean;
   align?: 'left' | 'right' | 'center';

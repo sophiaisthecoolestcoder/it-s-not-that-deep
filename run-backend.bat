@@ -30,8 +30,8 @@ if not exist "venv\Scripts\activate.bat" (
 
 call "venv\Scripts\activate.bat" || exit /b 1
 
-echo [Bleiche] Installing dependencies...
-python -m pip install -q -r requirements.txt || exit /b 1
+echo [Bleiche] Installing dependencies (showing progress; large native wheels like pymupdf can take a minute)...
+python -m pip install -r requirements.txt || exit /b 1
 
 echo [Bleiche] Running database migrations...
 alembic upgrade head || exit /b 1

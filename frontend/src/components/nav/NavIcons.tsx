@@ -136,6 +136,28 @@ export function InvoiceIcon(p: IconProps) {
   ));
 }
 
+export function MapIcon(p: IconProps) {
+  return baseSvg(p, (
+    <>
+      <Path d="M3 6.5l6-2 6 2 6-2v13l-6 2-6-2-6 2z" />
+      <Line x1="9" y1="4.5" x2="9" y2="19.5" />
+      <Line x1="15" y1="6.5" x2="15" y2="21.5" />
+    </>
+  ));
+}
+
+export function TreeIcon(p: IconProps) {
+  return baseSvg(p, (
+    <>
+      <Rect x="9.5" y="3" width="5" height="4" />
+      <Rect x="3" y="15" width="5" height="4" />
+      <Rect x="10" y="15" width="4" height="4" />
+      <Rect x="16" y="15" width="5" height="4" />
+      <Path d="M12 7v4M5.5 11h13v4" />
+    </>
+  ));
+}
+
 export function ChevronIcon({ size = 14, color = 'currentColor', direction = 'right' as 'left' | 'right' }: IconProps & { direction?: 'left' | 'right' }) {
   const d = direction === 'right' ? 'M9 6l6 6-6 6' : 'M15 6l-6 6 6 6';
   return (

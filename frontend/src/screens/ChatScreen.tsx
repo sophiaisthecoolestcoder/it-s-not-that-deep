@@ -403,6 +403,9 @@ export default function ChatScreen({ conversationId: initialConversationId }: Pr
     sendQuestion(preceding.content, { replaceAssistantId: messageId });
   };
 
+  // RN TextInput on web fires DOM-style key events; type as `any` because RN's
+  // TextInputKeyPressEvent doesn't expose `shiftKey` / `preventDefault`, which
+  // we need on web.
   const handleKeyDown = (e: any) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();

@@ -1,5 +1,5 @@
-import React, { createElement } from 'react';
-import { Platform, TextInput, StyleSheet } from 'react-native';
+import React, { createElement, type CSSProperties, type ChangeEvent } from 'react';
+import { Platform, TextInput, StyleSheet, type StyleProp, type TextStyle } from 'react-native';
 import { colors } from '../../theme/colors';
 import { fonts } from '../../theme/typography';
 
@@ -15,7 +15,7 @@ interface SelectProps {
   groups?: { label: string; options: SelectOption[] }[];
   placeholder?: string;
   mini?: boolean;
-  style?: any;
+  style?: StyleProp<TextStyle>;
 }
 
 export function BleicheSelect({
@@ -28,7 +28,7 @@ export function BleicheSelect({
   style,
 }: SelectProps) {
   if (Platform.OS === 'web') {
-    const baseStyle: any = {
+    const baseStyle: CSSProperties = {
       fontFamily: fonts.sans,
       fontSize: mini ? 11 : 14,
       border: 'none',
@@ -39,13 +39,15 @@ export function BleicheSelect({
       color: colors.textPrimary,
       height: mini ? 22 : 34,
       paddingLeft: mini ? 2 : 4,
-      ...style,
+      ...(style as CSSProperties),
     };
+
+    const handleChange = (e: ChangeEvent<HTMLSelectElement>) => onChange(e.target.value);
 
     if (groups) {
       return createElement(
         'select',
-        { value, onChange: (e: any) => onChange(e.target.value), style: baseStyle },
+        { value, onChange: handleChange, style: baseStyle },
         placeholder ? createElement('option', { key: '', value: '' }, placeholder) : null,
         ...groups.map((g) =>
           createElement(
@@ -61,7 +63,7 @@ export function BleicheSelect({
 
     return createElement(
       'select',
-      { value, onChange: (e: any) => onChange(e.target.value), style: baseStyle },
+      { value, onChange: handleChange, style: baseStyle },
       placeholder ? createElement('option', { key: '', value: '' }, placeholder) : null,
       ...options.map((o) =>
         createElement('option', { key: o.value, value: o.value }, o.label),

@@ -8,6 +8,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   Platform,
+  type KeyboardTypeOptions,
+  type TextStyle,
 } from 'react-native';
 import { api } from '../../api/client';
 import { useToast } from '../../components/ui/Toast';
@@ -81,7 +83,7 @@ function emptyData(date: string): DailyData {
 
 // ── Shared mini-input style ───────────────────────────────────────────────
 
-const MI: any = {
+const MI: TextStyle = {
   height: 22,
   borderBottomWidth: 1,
   borderBottomColor: colors.belSoftBorder,
@@ -105,7 +107,7 @@ function MiniInput({
   onChange: (v: string) => void;
   width?: number;
   placeholder?: string;
-  keyboardType?: any;
+  keyboardType?: KeyboardTypeOptions;
   center?: boolean;
 }) {
   return (

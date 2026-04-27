@@ -170,6 +170,10 @@ General-purpose calendar. Shifts, meetings, maintenance windows, holidays, perso
 
 Unified POS. Sales across reception / restaurant / spa share one invoice table; each finalized invoice has a 1:1 fiscalized `cashier_receipts` row carrying the TSE QR code, signature counter, and provider transaction IDs. See `docs/cashier.md` for fiskaly integration details and the provider abstraction.
 
+### 10. `locations`, `maps`, `map_layers`, `location_shapes`
+
+Hierarchical place registry + polygon overlays on floor-plan images. `locations` is an adjacency-list tree (`parent_id` self-FK, `ON DELETE RESTRICT`) carrying `name`, `description`, `environment` (`indoor` | `outdoor`), `category` (`building` | `floor` | `room`), `room_number`, and `sort_order`. The optional `source_id` (UNIQUE) holds an external UUID so the canonical JSON export at `docs/_reference/floorplans/locations_for_import.json` can be re-imported into any database while preserving logical identity (see `docs/locations.md` for the importer). `maps` groups one or more `map_layers`; each layer carries an `image_url` (typically a `/static/floorplans/...` path) or inline `svg_content`, plus the native pixel `width`/`height` that `location_shapes.points` live in. Multiple shapes per `(location, layer)` pair are allowed, so a single location can appear as two separate polygons on the same plan. See `docs/locations.md` for the full model, editor behavior, and the PDF→PNG/SVG extraction script.
+
 ## Enums
 
 ### `employeerole`
@@ -241,6 +245,8 @@ Later migrations:
 - `2026d1a2b3c4_enrich_employees_hr_fields.py` — adds HR fields to `employees` (`department`, `position`, `employment_started_on`, `employment_ended_on`, `active`, `notes`).
 - `2026e2f3a4b5_create_calendar_tables.py` — creates `calendar_events`, `calendar_event_participants`, `calendar_event_exceptions` and their enums.
 - `2026f3a4b5c6_create_cashier_tables.py` — creates `cashier_products`, `cashier_invoices`, `cashier_invoice_items`, `cashier_receipts` and the four cashier enums.
+- `202704a1b2c3_calendar_events_add_public.py` — adds `calendar_events.public` for marketing-site visibility.
+- `202705b2c3d4_create_locations_maps_shapes.py` — creates `locations`, `maps`, `map_layers`, `location_shapes`.
 
 ## Relationship Notes
 

@@ -16,6 +16,17 @@ import type {
 } from '../types/cashier';
 import type { Employee, EmployeeFilters, EmployeeInput } from '../types/employee';
 import type { Guest } from '../types/guest';
+import type {
+  HotelMap,
+  Location,
+  LocationInput,
+  LocationShape,
+  LocationShapeInput,
+  LocationTreeNode,
+  MapInput,
+  MapLayer,
+  MapLayerInput,
+} from '../types/location';
 import type { Offer, OfferInput } from '../types/offer';
 import { storage } from '../utils/storage';
 
@@ -34,6 +45,17 @@ const BASE_URL =
   'http://localhost:8000/api';
 
 const TOKEN_KEY = 'bleiche_auth_token';
+
+// Backend host without the `/api` suffix — used to resolve static asset paths
+// like `/static/floorplans/...` returned from the API.
+const BACKEND_HOST = BASE_URL.replace(/\/api\/?$/, '');
+
+/** Resolve a backend-relative path (e.g. `/static/foo.png`) to a full URL. Absolute URLs pass through. */
+export function assetUrl(path: string | null | undefined): string {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${BACKEND_HOST}${path.startsWith('/') ? '' : '/'}${path}`;
+}
 
 export function getToken(): string | null {
   return storage.get(TOKEN_KEY);
@@ -325,6 +347,59 @@ export const api = {
     const q = new URLSearchParams({ from, to });
     return request<SalesTotals>(`/cashier/summary?${q.toString()}`);
   },
+
+  // Locations
+  listLocations: () => request<Location[]>('/locations'),
+  getLocationsTree: () => request<LocationTreeNode[]>('/locations/tree'),
+  getLocation: (id: number) => request<Location>(`/locations/${id}`),
+  getLocationSubtree: (id: number) => request<LocationTreeNode>(`/locations/${id}/subtree`),
+  createLocation: (payload: LocationInput) =>
+    request<Location>('/locations', { method: 'POST', body: JSON.stringify(payload) }),
+  updateLocation: (id: number, payload: Partial<LocationInput>) =>
+    request<Location>(`/locations/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteLocation: (id: number, force = false) =>
+    request<void>(`/locations/${id}${force ? '?force=true' : ''}`, { method: 'DELETE' }),
+
+  // Maps + layers
+  listMaps: () => request<HotelMap[]>('/maps'),
+  getMap: (id: number) => request<HotelMap>(`/maps/${id}`),
+  createMap: (payload: MapInput) =>
+    request<HotelMap>('/maps', { method: 'POST', body: JSON.stringify(payload) }),
+  updateMap: (id: number, payload: Partial<MapInput>) =>
+    request<HotelMap>(`/maps/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteMap: (id: number) => request<void>(`/maps/${id}`, { method: 'DELETE' }),
+
+  listMapLayers: (mapId?: number) => {
+    const q = mapId != null ? `?map_id=${mapId}` : '';
+    return request<MapLayer[]>(`/map-layers${q}`);
+  },
+  getMapLayer: (id: number) => request<MapLayer>(`/map-layers/${id}`),
+  createMapLayer: (payload: MapLayerInput) =>
+    request<MapLayer>('/map-layers', { method: 'POST', body: JSON.stringify(payload) }),
+  updateMapLayer: (id: number, payload: Partial<MapLayerInput>) =>
+    request<MapLayer>(`/map-layers/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteMapLayer: (id: number) => request<void>(`/map-layers/${id}`, { method: 'DELETE' }),
+  getLayerShapes: (layerId: number) =>
+    request<LocationShape[]>(`/map-layers/${layerId}/shapes`),
+  replaceLayerShapes: (layerId: number, shapes: LocationShapeInput[]) =>
+    request<LocationShape[]>(`/map-layers/${layerId}/shapes`, {
+      method: 'PUT',
+      body: JSON.stringify({ shapes }),
+    }),
+
+  // Individual shape endpoints (rarely needed — prefer bulk replace)
+  listShapes: (filter?: { location_id?: number; layer_id?: number }) => {
+    const q = new URLSearchParams();
+    if (filter?.location_id != null) q.set('location_id', String(filter.location_id));
+    if (filter?.layer_id != null) q.set('layer_id', String(filter.layer_id));
+    const qs = q.toString();
+    return request<LocationShape[]>(`/location-shapes${qs ? `?${qs}` : ''}`);
+  },
+  createShape: (payload: LocationShapeInput) =>
+    request<LocationShape>('/location-shapes', { method: 'POST', body: JSON.stringify(payload) }),
+  updateShape: (id: number, payload: Partial<LocationShapeInput>) =>
+    request<LocationShape>(`/location-shapes/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteShape: (id: number) => request<void>(`/location-shapes/${id}`, { method: 'DELETE' }),
 
   // Health
   health: () => request<{ status: string }>('/health'),

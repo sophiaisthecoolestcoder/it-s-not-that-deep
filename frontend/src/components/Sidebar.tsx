@@ -14,8 +14,10 @@ import {
   HistoryIcon,
   HomeIcon,
   InvoiceIcon,
+  MapIcon,
   OffersIcon,
   StaffIcon,
+  TreeIcon,
   UsersIcon,
 } from './nav/NavIcons';
 
@@ -43,7 +45,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const hasBelegung = user?.modules.includes('belegung');
   const hasEmployees = user?.modules.includes('employees');
   const hasCashier = user?.modules.includes('cashier');
+  const hasLocations = user?.modules.includes('locations');
   const hasAssistant = user?.modules.includes('assistant');
+  // Admin / manager get the location tree + map editor; everyone else with the
+  // locations module sees only the read-only floor-plan viewer. Mirrors the
+  // backend's require_roles(ADMIN, MANAGER) on the mutating endpoints.
+  const canManageLocations = user?.role === 'admin' || user?.role === 'manager';
 
   function isActive(name: AppScreen['name']): boolean {
     return screen.name === name;
@@ -150,6 +157,32 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 alsoActiveFor: ['invoice-detail'],
               }}
             />
+          </View>
+        )}
+
+        {hasLocations && (
+          <View>
+            {collapsed ? (
+              <View style={s.divider} />
+            ) : (
+              <Text style={s.sectionLabel}>{t('nav.locations')}</Text>
+            )}
+            <NavRow
+              item={{
+                screen: { name: 'floor-plans' },
+                label: t('nav.floorPlans'),
+                icon: MapIcon,
+              }}
+            />
+            {canManageLocations && (
+              <NavRow
+                item={{
+                  screen: { name: 'locations-tree' },
+                  label: t('nav.locationsTree'),
+                  icon: TreeIcon,
+                }}
+              />
+            )}
           </View>
         )}
 

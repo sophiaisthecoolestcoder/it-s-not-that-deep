@@ -28,6 +28,7 @@ export type ModuleKey =
   | 'staff'
   | 'employees'
   | 'cashier'
+  | 'locations'
   | 'assistant';
 
 export interface AuthUser {

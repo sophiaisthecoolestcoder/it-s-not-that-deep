@@ -1,0 +1,2662 @@
+[
+  {
+    "id": "33c1d18c-8c7b-43de-a1d6-440d3fddca18",
+    "parent_id": null,
+    "name": "Bleichehaus",
+    "description": null,
+    "environment": "indoor",
+    "category": "building",
+    "room_number": null,
+    "sort_order": 15
+  },
+  {
+    "id": "6e1f9083-28fd-4917-be85-049d654cd08b",
+    "parent_id": null,
+    "name": "Residenzhaus",
+    "description": null,
+    "environment": "indoor",
+    "category": "building",
+    "room_number": null,
+    "sort_order": 46
+  },
+  {
+    "id": "cd864815-efa2-4f9b-83ef-ac6915161c60",
+    "parent_id": null,
+    "name": "Weberhaus",
+    "description": null,
+    "environment": "indoor",
+    "category": "building",
+    "room_number": null,
+    "sort_order": 48
+  },
+  {
+    "id": "2baef958-0d14-44b2-9f7b-2168fe1d0433",
+    "parent_id": null,
+    "name": "Empfangshaus",
+    "description": null,
+    "environment": "indoor",
+    "category": "building",
+    "room_number": null,
+    "sort_order": 50
+  },
+  {
+    "id": "57956c3b-b3b1-4ea6-a8f0-4c421d99b99b",
+    "parent_id": null,
+    "name": "Grünes Gewölbe",
+    "description": null,
+    "environment": "indoor",
+    "category": "building",
+    "room_number": null,
+    "sort_order": 54
+  },
+  {
+    "id": "3148d385-7e2c-417b-818b-ad482e0f571a",
+    "parent_id": null,
+    "name": "Landtherme",
+    "description": null,
+    "environment": "indoor",
+    "category": "building",
+    "room_number": null,
+    "sort_order": 62
+  },
+  {
+    "id": "70b8ab6f-c5c1-4782-839e-153ab8e373ac",
+    "parent_id": null,
+    "name": "Verbindungsgang",
+    "description": null,
+    "environment": "indoor",
+    "category": "building",
+    "room_number": null,
+    "sort_order": 11031
+  },
+  {
+    "id": "50508d02-2d5a-4edc-bc07-b8fb2f32fdcc",
+    "parent_id": null,
+    "name": "Orangerie",
+    "description": null,
+    "environment": "indoor",
+    "category": "building",
+    "room_number": null,
+    "sort_order": 22000
+  },
+  {
+    "id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "parent_id": null,
+    "name": "Außenflächen",
+    "description": null,
+    "environment": "outdoor",
+    "category": "building",
+    "room_number": null,
+    "sort_order": 39000
+  },
+  {
+    "id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "parent_id": "6e1f9083-28fd-4917-be85-049d654cd08b",
+    "name": "1. OG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 1000
+  },
+  {
+    "id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "parent_id": "cd864815-efa2-4f9b-83ef-ac6915161c60",
+    "name": "1. OG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 1000
+  },
+  {
+    "id": "ff80ba59-5851-4a06-bbd5-6648ace79d23",
+    "parent_id": "2baef958-0d14-44b2-9f7b-2168fe1d0433",
+    "name": "1. OG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 1000
+  },
+  {
+    "id": "d6769a83-600a-425d-b36b-1742e2181d42",
+    "parent_id": "33c1d18c-8c7b-43de-a1d6-440d3fddca18",
+    "name": "1. OG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 1000
+  },
+  {
+    "id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "parent_id": "3148d385-7e2c-417b-818b-ad482e0f571a",
+    "name": "1. OG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 1000
+  },
+  {
+    "id": "a6a2c96f-9277-41c4-b361-1661528cff84",
+    "parent_id": "701c8e99-5d14-4ad2-9ed2-c58e75fa1f16",
+    "name": "Acht Weisen",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 1000
+  },
+  {
+    "id": "7a8a064d-9eab-4d5b-b36a-93572bd6086d",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Biergarten",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 1000
+  },
+  {
+    "id": "8ecaa693-4a32-4300-a79a-501a1236d92e",
+    "parent_id": "ff80ba59-5851-4a06-bbd5-6648ace79d23",
+    "name": "Büro",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.",
+    "sort_order": 1000
+  },
+  {
+    "id": "b8c3f5a8-9283-44b3-9682-02f280b74506",
+    "parent_id": "70b8ab6f-c5c1-4782-839e-153ab8e373ac",
+    "name": "EG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 1000
+  },
+  {
+    "id": "701c8e99-5d14-4ad2-9ed2-c58e75fa1f16",
+    "parent_id": "50508d02-2d5a-4edc-bc07-b8fb2f32fdcc",
+    "name": "EG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 1000
+  },
+  {
+    "id": "3c817cd5-f06c-4a9c-b77b-8ba22a941192",
+    "parent_id": "57956c3b-b3b1-4ea6-a8f0-4c421d99b99b",
+    "name": "EG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 1000
+  },
+  {
+    "id": "e599f8b3-6bee-4a75-b588-03789a363a6e",
+    "parent_id": "b8c3f5a8-9283-44b3-9682-02f280b74506",
+    "name": "Eingang",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.01",
+    "sort_order": 1000
+  },
+  {
+    "id": "d31c8e0f-3311-47dc-8f8d-c3be24710795",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Empfang",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.01",
+    "sort_order": 1000
+  },
+  {
+    "id": "354eb14f-6d3b-415f-be09-eca5be662b72",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.01.1",
+    "sort_order": 1000
+  },
+  {
+    "id": "b7772270-f7e1-4b27-a3ba-5e2d0d6281d9",
+    "parent_id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.",
+    "sort_order": 1000
+  },
+  {
+    "id": "890725dc-c594-47bd-84cb-64cb194244ff",
+    "parent_id": "d67cd169-3fc4-4c88-9d58-c271f64fa561",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.01",
+    "sort_order": 1000
+  },
+  {
+    "id": "19f352bc-eaf3-482a-887a-6117b14f0a28",
+    "parent_id": "2541f045-50f8-411b-94e8-78871f3a899a",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.",
+    "sort_order": 1000
+  },
+  {
+    "id": "3e4c7a58-46c7-4c0b-8fba-00d4c8339d77",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.03",
+    "sort_order": 1000
+  },
+  {
+    "id": "5749925a-b69b-4374-ba7d-43ed00217265",
+    "parent_id": "d6769a83-600a-425d-b36b-1742e2181d42",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.01",
+    "sort_order": 1000
+  },
+  {
+    "id": "f8b15a54-c31c-44ce-a2ac-914c4361cc0d",
+    "parent_id": "bafa0369-9c2e-4f82-8cdb-1993f2e30811",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "3.01",
+    "sort_order": 1000
+  },
+  {
+    "id": "a34cb082-43fd-4218-8637-1bb8769ccd95",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.01",
+    "sort_order": 1000
+  },
+  {
+    "id": "62802593-601e-4309-b29b-03b59092a165",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Flur Bleichehaus",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.01",
+    "sort_order": 1000
+  },
+  {
+    "id": "609e015d-27b4-4bad-a23d-7abd42089f74",
+    "parent_id": "3c817cd5-f06c-4a9c-b77b-8ba22a941192",
+    "name": "Grünes Gewölbe",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.01",
+    "sort_order": 1000
+  },
+  {
+    "id": "7c82da60-9bec-4935-8c2f-42d450bf1fae",
+    "parent_id": "24f4e64a-6764-4ffa-a654-a0704c11d781",
+    "name": "Lobby",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.01",
+    "sort_order": 1000
+  },
+  {
+    "id": "79c008b9-19c9-4cd9-8dea-51bbe12c8b4a",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 204",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.204",
+    "sort_order": 1000
+  },
+  {
+    "id": "94bfc562-5671-45df-b650-5ef35fd4fa87",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 301",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.301",
+    "sort_order": 1000
+  },
+  {
+    "id": "d7f6cfae-633a-4924-aae8-526e210fd2c2",
+    "parent_id": "cabd00c6-e084-47d0-9bb4-c8c2f6e32d6e",
+    "name": "Zimmer 705",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.705",
+    "sort_order": 1000
+  },
+  {
+    "id": "221b5938-6b0a-47ce-9314-ba8c1fdf01dc",
+    "parent_id": "64cf5c4e-0df1-4010-9ea2-cd4eb418cd7c",
+    "name": "Zimmer 708",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.708",
+    "sort_order": 1000
+  },
+  {
+    "id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "parent_id": "cd864815-efa2-4f9b-83ef-ac6915161c60",
+    "name": "2. OG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 2000
+  },
+  {
+    "id": "d67cd169-3fc4-4c88-9d58-c271f64fa561",
+    "parent_id": "3148d385-7e2c-417b-818b-ad482e0f571a",
+    "name": "2. OG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 2000
+  },
+  {
+    "id": "2541f045-50f8-411b-94e8-78871f3a899a",
+    "parent_id": "6e1f9083-28fd-4917-be85-049d654cd08b",
+    "name": "2. OG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 2000
+  },
+  {
+    "id": "cabd00c6-e084-47d0-9bb4-c8c2f6e32d6e",
+    "parent_id": "2baef958-0d14-44b2-9f7b-2168fe1d0433",
+    "name": "2. OG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 2000
+  },
+  {
+    "id": "64cf5c4e-0df1-4010-9ea2-cd4eb418cd7c",
+    "parent_id": "33c1d18c-8c7b-43de-a1d6-440d3fddca18",
+    "name": "2. OG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 2000
+  },
+  {
+    "id": "2e24d9b5-6153-4701-a59a-86761fd0b4c2",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.01.2",
+    "sort_order": 2000
+  },
+  {
+    "id": "7a65319a-1ccd-45e7-aef9-cb2fd94bc3e5",
+    "parent_id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.2",
+    "sort_order": 2000
+  },
+  {
+    "id": "4f28be54-5ab7-4ccd-a29b-d409a89ffbba",
+    "parent_id": "d67cd169-3fc4-4c88-9d58-c271f64fa561",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.03",
+    "sort_order": 2000
+  },
+  {
+    "id": "8228d6a0-7843-4631-90df-b5f4b6ab02df",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Flur/Spabereich",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.05",
+    "sort_order": 2000
+  },
+  {
+    "id": "f75c74cd-789f-44eb-a2d6-a291fdd1c71a",
+    "parent_id": "ff80ba59-5851-4a06-bbd5-6648ace79d23",
+    "name": "Galerie",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.01",
+    "sort_order": 2000
+  },
+  {
+    "id": "6d3d36e1-c6a3-4e2b-b1e1-97464b6d4289",
+    "parent_id": "b8c3f5a8-9283-44b3-9682-02f280b74506",
+    "name": "Gang Restaurant",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.02",
+    "sort_order": 2000
+  },
+  {
+    "id": "a726fcf9-7d3b-4096-b7b1-5f6a0c628d85",
+    "parent_id": "701c8e99-5d14-4ad2-9ed2-c58e75fa1f16",
+    "name": "Gewächshaus",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 2000
+  },
+  {
+    "id": "aa74e52d-723c-453a-a35d-7e69e200dc8b",
+    "parent_id": "24f4e64a-6764-4ffa-a654-a0704c11d781",
+    "name": "Kommunikationsherz",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.03",
+    "sort_order": 2000
+  },
+  {
+    "id": "abbdcdf1-c398-4f59-b871-0030a7754ff2",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Personal",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.01.2",
+    "sort_order": 2000
+  },
+  {
+    "id": "cad52ed1-7565-4c17-93f4-4afced999e40",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Restaurant Veranda",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.02",
+    "sort_order": 2000
+  },
+  {
+    "id": "5a07e8ce-1c5d-497c-aac9-6b565d72fd7f",
+    "parent_id": "d6769a83-600a-425d-b36b-1742e2181d42",
+    "name": "Speisen-P",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.02",
+    "sort_order": 2000
+  },
+  {
+    "id": "0aba520a-e218-4a32-860f-ed956a637bb3",
+    "parent_id": "2541f045-50f8-411b-94e8-78871f3a899a",
+    "name": "Treppenhaus",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.",
+    "sort_order": 2000
+  },
+  {
+    "id": "fa3cbb46-687e-4c8e-8036-e0b13eec8593",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Wiese Brunnenterrasse",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 2000
+  },
+  {
+    "id": "b2633f30-3d81-4986-9a99-e329010f19ee",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 104",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.104",
+    "sort_order": 2000
+  },
+  {
+    "id": "313da4bf-f2bd-414b-a327-2322b5b83d6a",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 205",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.205",
+    "sort_order": 2000
+  },
+  {
+    "id": "9a9f3ee2-22fc-4c49-9624-fe2415fac31d",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 302",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.302",
+    "sort_order": 2000
+  },
+  {
+    "id": "4b575baf-ad26-4d59-86cf-4cb6f7efa634",
+    "parent_id": "bafa0369-9c2e-4f82-8cdb-1993f2e30811",
+    "name": "Zimmer 404",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "3.404",
+    "sort_order": 2000
+  },
+  {
+    "id": "c945413a-32f4-474f-8c38-cae9bd33e02c",
+    "parent_id": "cabd00c6-e084-47d0-9bb4-c8c2f6e32d6e",
+    "name": "Zimmer 706",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.706",
+    "sort_order": 2000
+  },
+  {
+    "id": "d27d6d97-0257-433f-ba13-2b0c555ceaef",
+    "parent_id": "64cf5c4e-0df1-4010-9ea2-cd4eb418cd7c",
+    "name": "Zimmer 709",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.709",
+    "sort_order": 2000
+  },
+  {
+    "id": "bafa0369-9c2e-4f82-8cdb-1993f2e30811",
+    "parent_id": "cd864815-efa2-4f9b-83ef-ac6915161c60",
+    "name": "3. OG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 3000
+  },
+  {
+    "id": "5abd43aa-af87-41af-843c-8f21813b6082",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Buffet",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.03",
+    "sort_order": 3000
+  },
+  {
+    "id": "b9a17719-ae78-4aac-9526-1a2daed7a94a",
+    "parent_id": "ff80ba59-5851-4a06-bbd5-6648ace79d23",
+    "name": "Büro",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.02",
+    "sort_order": 3000
+  },
+  {
+    "id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "parent_id": "3148d385-7e2c-417b-818b-ad482e0f571a",
+    "name": "EG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 3000
+  },
+  {
+    "id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "parent_id": "33c1d18c-8c7b-43de-a1d6-440d3fddca18",
+    "name": "EG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 3000
+  },
+  {
+    "id": "24f4e64a-6764-4ffa-a654-a0704c11d781",
+    "parent_id": "2baef958-0d14-44b2-9f7b-2168fe1d0433",
+    "name": "EG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 3000
+  },
+  {
+    "id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "parent_id": "6e1f9083-28fd-4917-be85-049d654cd08b",
+    "name": "EG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 3000
+  },
+  {
+    "id": "6ca903b5-3d00-41e7-ae89-ff6d89c92210",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.06",
+    "sort_order": 3000
+  },
+  {
+    "id": "fe0d2fbd-155a-4e46-8e5e-1d7e78048954",
+    "parent_id": "24f4e64a-6764-4ffa-a654-a0704c11d781",
+    "name": "Flur/Treppe",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.04",
+    "sort_order": 3000
+  },
+  {
+    "id": "ed895cd2-ba58-4fbf-8810-d554beae1759",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Laden",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.02",
+    "sort_order": 3000
+  },
+  {
+    "id": "25a1d675-0810-45c2-abfe-4404faf67771",
+    "parent_id": "701c8e99-5d14-4ad2-9ed2-c58e75fa1f16",
+    "name": "Orangerie",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 3000
+  },
+  {
+    "id": "86199e06-1343-447b-a170-f029441a3af2",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Treppenhaus",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.01.3",
+    "sort_order": 3000
+  },
+  {
+    "id": "a1cedefd-a659-4fa4-9d64-22493c777555",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Weberhaus Außenfläche",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 3000
+  },
+  {
+    "id": "09d3fe57-a72c-4ac3-950d-2a57107a1426",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 105",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.105",
+    "sort_order": 3000
+  },
+  {
+    "id": "159070a8-b83e-432e-a849-77c0eb2232cc",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 208",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.208",
+    "sort_order": 3000
+  },
+  {
+    "id": "34aafeee-ca8b-4d1e-a97d-b96ef5a30261",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 303",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.303",
+    "sort_order": 3000
+  },
+  {
+    "id": "bb03ebd5-a858-4e05-9a99-8afaa731088d",
+    "parent_id": "bafa0369-9c2e-4f82-8cdb-1993f2e30811",
+    "name": "Zimmer 405",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "3.405",
+    "sort_order": 3000
+  },
+  {
+    "id": "7a3571fa-fd16-41e8-88a2-d7c244131e73",
+    "parent_id": "d67cd169-3fc4-4c88-9d58-c271f64fa561",
+    "name": "Zimmer 510",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.510",
+    "sort_order": 3000
+  },
+  {
+    "id": "f43ffcf1-dfc9-46a1-a4bf-8048a36c9399",
+    "parent_id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "name": "Zimmer 601",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.601",
+    "sort_order": 3000
+  },
+  {
+    "id": "10535438-4dd6-43b1-93e6-2693998aadfc",
+    "parent_id": "d6769a83-600a-425d-b36b-1742e2181d42",
+    "name": "Zimmer 609",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.609",
+    "sort_order": 3000
+  },
+  {
+    "id": "b377262b-6796-4556-98e6-d925fcb32212",
+    "parent_id": "2541f045-50f8-411b-94e8-78871f3a899a",
+    "name": "Zimmer 701",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.701",
+    "sort_order": 3000
+  },
+  {
+    "id": "93938fda-25e0-47c0-8b96-cc329b4b5bde",
+    "parent_id": "cabd00c6-e084-47d0-9bb4-c8c2f6e32d6e",
+    "name": "Zimmer 707",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.707",
+    "sort_order": 3000
+  },
+  {
+    "id": "24847583-90cb-41fe-8791-cca575bb4501",
+    "parent_id": "64cf5c4e-0df1-4010-9ea2-cd4eb418cd7c",
+    "name": "Zimmer 710",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.710",
+    "sort_order": 3000
+  },
+  {
+    "id": "a1472d5b-6201-4e14-8d31-9889df5e835e",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Burgrestaurant",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.03",
+    "sort_order": 4000
+  },
+  {
+    "id": "3b2b5185-af12-4fef-8996-db7c8617a989",
+    "parent_id": "ff80ba59-5851-4a06-bbd5-6648ace79d23",
+    "name": "Büro",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.03",
+    "sort_order": 4000
+  },
+  {
+    "id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "parent_id": "cd864815-efa2-4f9b-83ef-ac6915161c60",
+    "name": "EG",
+    "description": null,
+    "environment": "indoor",
+    "category": "floor",
+    "room_number": null,
+    "sort_order": 4000
+  },
+  {
+    "id": "ffe95f02-0cf4-4082-bc44-351393e687d8",
+    "parent_id": "24f4e64a-6764-4ffa-a654-a0704c11d781",
+    "name": "Gäste-WC/D",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.05",
+    "sort_order": 4000
+  },
+  {
+    "id": "b18bdd75-1a94-4024-ad99-86c3f04a1e31",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Hotelhalle",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.02",
+    "sort_order": 4000
+  },
+  {
+    "id": "ea64bf58-4ed3-4bc2-90d2-c9d6c4a06514",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Personal",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.02.2",
+    "sort_order": 4000
+  },
+  {
+    "id": "59604199-a68f-45eb-8b10-b38550273098",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Spa II",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.10",
+    "sort_order": 4000
+  },
+  {
+    "id": "9e7001e9-4b89-450a-9e86-4105e25b0c56",
+    "parent_id": "33c1d18c-8c7b-43de-a1d6-440d3fddca18",
+    "name": "Treppenhaus Bleichehaus",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 4000
+  },
+  {
+    "id": "59154981-b474-428e-9cb4-92e07b121ad9",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Weberhaus Außenbereich",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 4000
+  },
+  {
+    "id": "76844ce4-ad4c-4308-8602-660c3d607ba9",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 110",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.110",
+    "sort_order": 4000
+  },
+  {
+    "id": "6ed254d8-ee6e-460c-9879-13565c6f6d7f",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 209",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.209",
+    "sort_order": 4000
+  },
+  {
+    "id": "44f9d450-60aa-411d-9efd-2c2c2c2a8a9e",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 304",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.304",
+    "sort_order": 4000
+  },
+  {
+    "id": "d31d0b88-3103-4949-a5ba-981ae14f5289",
+    "parent_id": "bafa0369-9c2e-4f82-8cdb-1993f2e30811",
+    "name": "Zimmer 409",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "3.409",
+    "sort_order": 4000
+  },
+  {
+    "id": "b8bb9ac2-557b-4a8e-9afe-713786253c33",
+    "parent_id": "d67cd169-3fc4-4c88-9d58-c271f64fa561",
+    "name": "Zimmer 511",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.511",
+    "sort_order": 4000
+  },
+  {
+    "id": "a6c45f69-6020-4d36-bc09-28f5e5f6c4c3",
+    "parent_id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "name": "Zimmer 602",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.602",
+    "sort_order": 4000
+  },
+  {
+    "id": "862b3829-13ee-43ff-8ae7-76539d33ee0a",
+    "parent_id": "d6769a83-600a-425d-b36b-1742e2181d42",
+    "name": "Zimmer 610",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.610",
+    "sort_order": 4000
+  },
+  {
+    "id": "e6fdef22-dadf-4ac0-9e23-3de663a445e6",
+    "parent_id": "2541f045-50f8-411b-94e8-78871f3a899a",
+    "name": "Zimmer 702",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.702",
+    "sort_order": 4000
+  },
+  {
+    "id": "aba96f93-69df-417e-95ff-f89e2ae1aabf",
+    "parent_id": "64cf5c4e-0df1-4010-9ea2-cd4eb418cd7c",
+    "name": "Zimmer 711",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.711",
+    "sort_order": 4000
+  },
+  {
+    "id": "e69886de-8ef6-412a-8c11-42524a779744",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Bibliothek",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.03",
+    "sort_order": 5000
+  },
+  {
+    "id": "bcddf80d-82f6-4e9d-be28-35ad8562cc8d",
+    "parent_id": "ff80ba59-5851-4a06-bbd5-6648ace79d23",
+    "name": "Flur-P",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.04",
+    "sort_order": 5000
+  },
+  {
+    "id": "9c8401c9-1e7e-43f6-b8a1-9fe865b7d0ef",
+    "parent_id": "24f4e64a-6764-4ffa-a654-a0704c11d781",
+    "name": "Gäste-WC/H",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.06",
+    "sort_order": 5000
+  },
+  {
+    "id": "6cd10271-d697-44ec-97d6-e01fafd75722",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Kaminzimmer",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.04",
+    "sort_order": 5000
+  },
+  {
+    "id": "2ea19339-288e-4a41-96fb-b5581b4999b8",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Käsekammer",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.04",
+    "sort_order": 5000
+  },
+  {
+    "id": "35f611f2-6d48-4cd0-b25a-3482e6f601e4",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Linke",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.13",
+    "sort_order": 5000
+  },
+  {
+    "id": "3064ce8d-cc68-49c9-bbed-fb8e91ed1e5d",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Villa Schmetterling",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 5000
+  },
+  {
+    "id": "6aaba65d-1452-4b51-b66d-ffd41f2985aa",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 111",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.111",
+    "sort_order": 5000
+  },
+  {
+    "id": "9fd5d9ec-69b2-4fbc-b3d6-a83a2a0df23a",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 211",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.211",
+    "sort_order": 5000
+  },
+  {
+    "id": "97a1b291-117a-4dc3-b40a-9fb84f517edd",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 305",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.305",
+    "sort_order": 5000
+  },
+  {
+    "id": "ce89d6ef-e03b-48a1-bf6f-f06e9fa7c9a1",
+    "parent_id": "bafa0369-9c2e-4f82-8cdb-1993f2e30811",
+    "name": "Zimmer 410",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "3.410",
+    "sort_order": 5000
+  },
+  {
+    "id": "460a1e5a-29b9-43fa-9fe8-e1ace5373bcc",
+    "parent_id": "d67cd169-3fc4-4c88-9d58-c271f64fa561",
+    "name": "Zimmer 512",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.512",
+    "sort_order": 5000
+  },
+  {
+    "id": "d04614c5-0a34-4f6f-b94e-ac96128492f3",
+    "parent_id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "name": "Zimmer 603",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.603",
+    "sort_order": 5000
+  },
+  {
+    "id": "804aab7d-8eff-453a-91f5-14a99e4066e0",
+    "parent_id": "d6769a83-600a-425d-b36b-1742e2181d42",
+    "name": "Zimmer 611",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.611",
+    "sort_order": 5000
+  },
+  {
+    "id": "cfdcec08-215f-41f1-a1ff-54b57df78da0",
+    "parent_id": "2541f045-50f8-411b-94e8-78871f3a899a",
+    "name": "Zimmer 703",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.703",
+    "sort_order": 5000
+  },
+  {
+    "id": "b81576f7-eb76-4fe7-ab5e-2c3f0013d14d",
+    "parent_id": "64cf5c4e-0df1-4010-9ea2-cd4eb418cd7c",
+    "name": "Zimmer 712",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.712",
+    "sort_order": 5000
+  },
+  {
+    "id": "df9e715a-7c28-4b37-9f80-2126357f080d",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Bibliothek",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.03.1",
+    "sort_order": 6000
+  },
+  {
+    "id": "05afa85e-6342-4bb5-8840-ecaab801d549",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Poolbereich",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.05",
+    "sort_order": 6000
+  },
+  {
+    "id": "bb0e45e1-994f-4f55-a016-52c2adb5197c",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Rechte",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.14",
+    "sort_order": 6000
+  },
+  {
+    "id": "67268b1b-8608-4fce-ae06-c43864795470",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Thermchen",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 6000
+  },
+  {
+    "id": "d61c06bb-15e7-477c-a922-3cd6fdc2df06",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Wendenstube",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.04",
+    "sort_order": 6000
+  },
+  {
+    "id": "e3f70014-d47e-4fb5-9ca8-80bbcd70e3ce",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 112",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.112",
+    "sort_order": 6000
+  },
+  {
+    "id": "a1a36be5-e647-45e8-924f-776aaf96a9e4",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 212",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.212",
+    "sort_order": 6000
+  },
+  {
+    "id": "41c96c54-b575-4b29-8405-025fcf34fb16",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 307",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.307",
+    "sort_order": 6000
+  },
+  {
+    "id": "4df81208-8501-49b2-a68a-1b45f0043040",
+    "parent_id": "bafa0369-9c2e-4f82-8cdb-1993f2e30811",
+    "name": "Zimmer 412",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "3.412",
+    "sort_order": 6000
+  },
+  {
+    "id": "f00b55bc-d337-4903-9f2c-20a26739bd15",
+    "parent_id": "d67cd169-3fc4-4c88-9d58-c271f64fa561",
+    "name": "Zimmer 513",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.513",
+    "sort_order": 6000
+  },
+  {
+    "id": "9ac5f81b-c7f7-48c5-a3ff-1ff01591cade",
+    "parent_id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "name": "Zimmer 604",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.604",
+    "sort_order": 6000
+  },
+  {
+    "id": "ad43a2a4-122b-4491-8072-e89251c5d3cb",
+    "parent_id": "d6769a83-600a-425d-b36b-1742e2181d42",
+    "name": "Zimmer 612",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.612",
+    "sort_order": 6000
+  },
+  {
+    "id": "6ada137b-e0f9-451e-a2c3-53dc7092dd68",
+    "parent_id": "2541f045-50f8-411b-94e8-78871f3a899a",
+    "name": "Zimmer 706",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.706",
+    "sort_order": 6000
+  },
+  {
+    "id": "8a1505bd-f503-48c8-8974-9e7619c33cdd",
+    "parent_id": "64cf5c4e-0df1-4010-9ea2-cd4eb418cd7c",
+    "name": "Zimmer 713",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.713",
+    "sort_order": 6000
+  },
+  {
+    "id": "c8c94b2a-7d12-4158-a995-6db2e7c30d40",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Bistro",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.07",
+    "sort_order": 7000
+  },
+  {
+    "id": "4d49bb27-1351-4b9d-9721-6acd5d9e3e27",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Ecke",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.15",
+    "sort_order": 7000
+  },
+  {
+    "id": "22d8232f-386d-4fae-9ab1-e8d0be858166",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Restaurant 1750",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.05",
+    "sort_order": 7000
+  },
+  {
+    "id": "36b8f93e-26d7-45fe-9806-de19bafb407d",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Terrasse Hotelhalle",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 7000
+  },
+  {
+    "id": "2e3c4aeb-c1d1-44f7-9a29-e34d139a2b49",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Weissbiereck",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.04.1",
+    "sort_order": 7000
+  },
+  {
+    "id": "3c18ba34-bc4a-4b9c-ae7b-f4711bd8038e",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 113",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.113",
+    "sort_order": 7000
+  },
+  {
+    "id": "d0a7985b-8c2d-4b7c-b68e-a2645404f7ee",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 213",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.213",
+    "sort_order": 7000
+  },
+  {
+    "id": "ac68ffef-74b5-406f-a851-18160b49fe70",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 308",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.308",
+    "sort_order": 7000
+  },
+  {
+    "id": "d31a383a-07cd-4dba-b16f-d65460b39ca7",
+    "parent_id": "bafa0369-9c2e-4f82-8cdb-1993f2e30811",
+    "name": "Zimmer 420",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "3.420",
+    "sort_order": 7000
+  },
+  {
+    "id": "4915294c-c788-478e-9dc5-ea918a4f70ec",
+    "parent_id": "d67cd169-3fc4-4c88-9d58-c271f64fa561",
+    "name": "Zimmer 514",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.514",
+    "sort_order": 7000
+  },
+  {
+    "id": "666060a3-dc88-4098-b8ab-842eb814b6ad",
+    "parent_id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "name": "Zimmer 605",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.605",
+    "sort_order": 7000
+  },
+  {
+    "id": "594c9978-1d40-4ec6-b527-c6b3d38cf518",
+    "parent_id": "d6769a83-600a-425d-b36b-1742e2181d42",
+    "name": "Zimmer 613",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.613",
+    "sort_order": 7000
+  },
+  {
+    "id": "16a9881d-1267-4d6a-afb3-417a805aedf8",
+    "parent_id": "2541f045-50f8-411b-94e8-78871f3a899a",
+    "name": "Zimmer 707",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.707",
+    "sort_order": 7000
+  },
+  {
+    "id": "f321dd48-1134-4d4c-a972-e790ebedbba6",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Rotweinkeller",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.06",
+    "sort_order": 8000
+  },
+  {
+    "id": "5e23748a-264e-4f38-9837-07912b79f258",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Ruhezone",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.08",
+    "sort_order": 8000
+  },
+  {
+    "id": "0d23a74b-24b7-48cf-ac19-90037c18c03a",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Separee",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.05.1",
+    "sort_order": 8000
+  },
+  {
+    "id": "c1aaf921-0bfa-4d38-9dc5-0a8937a282a6",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Terrasse Grünes Gewölbe",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 8000
+  },
+  {
+    "id": "c42768ad-881f-41a3-bb13-e3daa815f918",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Weisse",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.16",
+    "sort_order": 8000
+  },
+  {
+    "id": "54d5605d-155c-4e8c-b189-7a9ff1b93b27",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 114",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.114",
+    "sort_order": 8000
+  },
+  {
+    "id": "3fa43005-0762-47bf-afdf-1d715e0e5c7e",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 215",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.215",
+    "sort_order": 8000
+  },
+  {
+    "id": "5a240074-cf81-4f5e-a58d-6d391e5a996a",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 309",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.309",
+    "sort_order": 8000
+  },
+  {
+    "id": "dd21f914-28e4-4671-bc46-1fe0d9de4542",
+    "parent_id": "d67cd169-3fc4-4c88-9d58-c271f64fa561",
+    "name": "Zimmer 515",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.515",
+    "sort_order": 8000
+  },
+  {
+    "id": "95c6b995-70e8-4a53-a361-e3735372baef",
+    "parent_id": "d6769a83-600a-425d-b36b-1742e2181d42",
+    "name": "Zimmer 614",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.614",
+    "sort_order": 8000
+  },
+  {
+    "id": "12506df6-717b-45f3-9fe8-321b26e1106b",
+    "parent_id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "name": "Zimmer 615",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.615",
+    "sort_order": 8000
+  },
+  {
+    "id": "a7cebcb7-0bac-4417-8b9b-50e1b69b80ef",
+    "parent_id": "2541f045-50f8-411b-94e8-78871f3a899a",
+    "name": "Zimmer 715",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.715",
+    "sort_order": 8000
+  },
+  {
+    "id": "c84528e1-fec1-4c92-8893-445fabb141af",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Empfang Landtherme",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.09.1",
+    "sort_order": 9000
+  },
+  {
+    "id": "1668a27d-d842-48c0-8b7f-b9aa63a28f45",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Kahnschuppen",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.07",
+    "sort_order": 9000
+  },
+  {
+    "id": "032eb0b7-28f7-4d21-974f-1712f9902256",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Kaufladen",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.05.2.1",
+    "sort_order": 9000
+  },
+  {
+    "id": "e41db8de-16dd-4d24-a3d6-4d32cdddb106",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Oxi",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.17",
+    "sort_order": 9000
+  },
+  {
+    "id": "fe463215-4b0f-412e-b975-6c8f2821dfbd",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Schänke",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 9000
+  },
+  {
+    "id": "971c938c-b735-4e30-87ba-04a2e0454d69",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 115",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.115",
+    "sort_order": 9000
+  },
+  {
+    "id": "cbb47b86-41cc-43ff-950e-c94bb6d38fc9",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 217",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.217",
+    "sort_order": 9000
+  },
+  {
+    "id": "c1f60c31-af9e-4d7a-a935-073895308849",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 310",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.310",
+    "sort_order": 9000
+  },
+  {
+    "id": "c76555a3-09cd-4aa4-8145-e18ec018875d",
+    "parent_id": "d67cd169-3fc4-4c88-9d58-c271f64fa561",
+    "name": "Zimmer 520",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.520",
+    "sort_order": 9000
+  },
+  {
+    "id": "caba7650-e393-46ba-90d5-d9b052e6b66f",
+    "parent_id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "name": "Zimmer 616",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.616",
+    "sort_order": 9000
+  },
+  {
+    "id": "a6a5a046-dd78-4ad7-bde4-6f9552f3382f",
+    "parent_id": "2541f045-50f8-411b-94e8-78871f3a899a",
+    "name": "Zimmer 716",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.716",
+    "sort_order": 9000
+  },
+  {
+    "id": "5d439179-a0c5-424f-9552-0055a82a7da3",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Blaue Küche",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.07",
+    "sort_order": 10000
+  },
+  {
+    "id": "8e8df42b-f446-404a-bb5c-6162902d6b1d",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Fischerstube",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.08.1",
+    "sort_order": 10000
+  },
+  {
+    "id": "8435078e-6416-47e2-95dc-a3e47a8d5e7a",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Kino II",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.10",
+    "sort_order": 10000
+  },
+  {
+    "id": "80579f8e-fca9-4931-bf35-8a924aa66092",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Kombi",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.18",
+    "sort_order": 10000
+  },
+  {
+    "id": "3b8958a8-37a6-42f3-b329-1a330aba3f4b",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Sauna Außenbereich",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 10000
+  },
+  {
+    "id": "2fe3cf95-7306-4d20-becb-45b2431899c6",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 116",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.116",
+    "sort_order": 10000
+  },
+  {
+    "id": "1db9ae0f-9477-444a-afa9-3e772e8acf9e",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 218",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.218",
+    "sort_order": 10000
+  },
+  {
+    "id": "cbeacc58-04e1-4c75-b56b-cea3e77778da",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 311",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.311",
+    "sort_order": 10000
+  },
+  {
+    "id": "4f4babee-7352-4308-bdb8-adbd31764d87",
+    "parent_id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "name": "Zimmer 617",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.617",
+    "sort_order": 10000
+  },
+  {
+    "id": "3d3ff787-6953-4dce-ad56-77114ea143a9",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "DW",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.19.1",
+    "sort_order": 11000
+  },
+  {
+    "id": "f7623d83-c7ef-443c-ac4b-ca93eb41f1bc",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Raucherpavillon",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 11000
+  },
+  {
+    "id": "3c026409-a58c-47b3-bbb5-4007eb272ec2",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Sommerküche",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.08.2",
+    "sort_order": 11000
+  },
+  {
+    "id": "ebc749b3-77ad-4734-86a9-f48b11ce8fe1",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Speisekammer",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.07.1",
+    "sort_order": 11000
+  },
+  {
+    "id": "8c21c487-06b1-407b-892b-ae467438cb97",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "West-östlicher Diwan",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.12",
+    "sort_order": 11000
+  },
+  {
+    "id": "b0478716-138f-4890-9a1c-643ae83d000e",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 117",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.117",
+    "sort_order": 11000
+  },
+  {
+    "id": "a0091724-5ca8-45a2-bd0b-e4871c434d55",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 219",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.219",
+    "sort_order": 11000
+  },
+  {
+    "id": "c1c46247-8b55-40e2-be66-87547226dc54",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 312",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.312",
+    "sort_order": 11000
+  },
+  {
+    "id": "aa59da10-6a36-40df-aab1-309a963df7f0",
+    "parent_id": "bb85bea6-651e-46ab-962a-6af2e3d450db",
+    "name": "Zimmer 618",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.618",
+    "sort_order": 11000
+  },
+  {
+    "id": "7cfe9c89-c172-4f6b-b1db-c39f95a4cb6b",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Adebar",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 12000
+  },
+  {
+    "id": "3b5dc4ac-3e13-4dea-8611-d2c7fda93727",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Parkplatz",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 12000
+  },
+  {
+    "id": "7c3a5287-7266-498c-af1d-d09e0ceae9e0",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Spa I",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.20",
+    "sort_order": 12000
+  },
+  {
+    "id": "0bebeff7-3a39-4b09-8978-9111a71a2d12",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Umkleiden Ext. Gäste",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.13",
+    "sort_order": 12000
+  },
+  {
+    "id": "e14e9b9c-3d42-455c-8b53-f1e966f8d958",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Weissweinkeller",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.09",
+    "sort_order": 12000
+  },
+  {
+    "id": "9ad6d116-d6a5-49c7-ba83-f2f6725463e2",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 118",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.118",
+    "sort_order": 12000
+  },
+  {
+    "id": "c622c1d5-4e96-4a31-a815-0bc173756f24",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 222",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.222",
+    "sort_order": 12000
+  },
+  {
+    "id": "58e05da0-2847-4136-b685-e8d1cf9bf95a",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 313",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.313",
+    "sort_order": 12000
+  },
+  {
+    "id": "a16a8348-6b11-4557-8b43-afe082b9de78",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 13000
+  },
+  {
+    "id": "d39c9965-4dc4-4834-b2ab-42276317cfac",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Guss-/Spritzraum",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.21",
+    "sort_order": 13000
+  },
+  {
+    "id": "e387dfb0-ba72-412f-84ae-59cd13c68d56",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Kräutergarten",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 13000
+  },
+  {
+    "id": "774abb36-b038-4104-8a8f-8a2d8d7415da",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Kühlraum",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 13000
+  },
+  {
+    "id": "672e3773-4953-4edf-8140-c849d97c03a3",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Umkleiden Ext. Gäste",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.14",
+    "sort_order": 13000
+  },
+  {
+    "id": "6cbc9cd4-a973-4de2-a5cf-fc066696f13d",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 119",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.119",
+    "sort_order": 13000
+  },
+  {
+    "id": "aa49bd26-a2bc-42ae-917d-fee34a2ca89c",
+    "parent_id": "7fb738c8-0312-4807-983e-9b3846e6f02d",
+    "name": "Zimmer 225",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.225",
+    "sort_order": 13000
+  },
+  {
+    "id": "01f78162-043c-49ee-867f-19428ddd35cf",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 314",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.314",
+    "sort_order": 13000
+  },
+  {
+    "id": "20da5864-45e2-46a4-977a-30045892c36a",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Bad",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.22",
+    "sort_order": 14000
+  },
+  {
+    "id": "e3e3dfef-9b7b-4235-95fa-de0ad84990aa",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Ext. Gäste",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.15",
+    "sort_order": 14000
+  },
+  {
+    "id": "93d79774-d68b-447d-a85c-0ba8607cf3b8",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Foyer / Engelsgarten",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 14000
+  },
+  {
+    "id": "e23814b0-3bd7-4583-9979-6baabc138163",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Hotelpark Wiese",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 14000
+  },
+  {
+    "id": "2b381df1-249d-48cf-990d-03e01b67ec8c",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Offene Küche",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 14000
+  },
+  {
+    "id": "94ed4597-617a-4783-9586-3429957c7a5a",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Zimmer 121",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.121",
+    "sort_order": 14000
+  },
+  {
+    "id": "1e135810-f30f-4fd1-811e-72e6aa40eb86",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 315",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.315",
+    "sort_order": 14000
+  },
+  {
+    "id": "182913a6-4123-405b-810f-8a1e99bd7e27",
+    "parent_id": "18508258-6d95-43d7-927c-449e32c8c727",
+    "name": "Gang vor Adebar",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 15000
+  },
+  {
+    "id": "3f822561-cfd7-485c-a10f-6b7335c6d181",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Hoteleingang",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 15000
+  },
+  {
+    "id": "1a12e6e1-c447-421e-b9bb-929fcc99c5d5",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Junges Bad",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.23",
+    "sort_order": 15000
+  },
+  {
+    "id": "4231b49b-bf0b-4f21-975c-98bb9fb0b05f",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Lager",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.16",
+    "sort_order": 15000
+  },
+  {
+    "id": "62564926-2e44-441c-84ab-2fc94ad0cc10",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Patisserie",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 15000
+  },
+  {
+    "id": "9c72cad8-b19c-4b3a-8920-bcabb75923c1",
+    "parent_id": "4dbc273d-0bd7-445f-ac4c-a1b154c1f97d",
+    "name": "Treppenhaus",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 15000
+  },
+  {
+    "id": "789be498-2e69-46b9-bf81-ac94746fcd77",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 316",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.316",
+    "sort_order": 15000
+  },
+  {
+    "id": "e623dd74-4afd-46bd-b5dd-3faf6cd5d5f7",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Gewächshaus Terrasse",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 16000
+  },
+  {
+    "id": "ad66c654-17ee-4f9b-8175-03dd0ef82a24",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Japanbecken",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.17",
+    "sort_order": 16000
+  },
+  {
+    "id": "1a413115-4484-4a57-90d4-63bea9768b24",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Rote Küche",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 16000
+  },
+  {
+    "id": "880a2602-f9b4-4360-8412-73d567443d69",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Süden",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.25",
+    "sort_order": 16000
+  },
+  {
+    "id": "57f09365-27e2-4636-a626-13917044427a",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 317",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.317",
+    "sort_order": 16000
+  },
+  {
+    "id": "816261e2-6436-47dd-a4af-d20acf023da6",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Dampfbad",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.18",
+    "sort_order": 17000
+  },
+  {
+    "id": "6819803d-80d6-4a4e-b558-794de892a1d4",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Fitness Außenbereich",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 17000
+  },
+  {
+    "id": "7cdcb131-de02-4900-9295-fe8d81aaea2d",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Sonne",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.26",
+    "sort_order": 17000
+  },
+  {
+    "id": "00c876e6-e301-44f2-9593-3c028b6e2032",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Spülküche",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 17000
+  },
+  {
+    "id": "bd42ebda-1430-45ae-939a-f7c07517c909",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 318",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.318",
+    "sort_order": 17000
+  },
+  {
+    "id": "4f0a9e94-14c3-4d89-b2b5-395b27fbb4e3",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Familienpool Außenbereich",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 18000
+  },
+  {
+    "id": "2ced9b13-aaf5-4d83-bc86-5751d7b47388",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Hamam-Zone",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.19",
+    "sort_order": 18000
+  },
+  {
+    "id": "a65de955-4998-49fc-bd05-d7ee839f2017",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Mond",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.27",
+    "sort_order": 18000
+  },
+  {
+    "id": "0f6fd70d-56aa-46a1-9674-11a70f8d5c81",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Steakrestaurant / Schänke",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 18000
+  },
+  {
+    "id": "09a417a2-1b77-41db-9973-b0c723a24177",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 319",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.319",
+    "sort_order": 18000
+  },
+  {
+    "id": "3bf99dc8-95ec-4e96-a835-27a45d5f7d82",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Brunnenterrasse",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 19000
+  },
+  {
+    "id": "c2d3450f-764c-4245-97a2-85a390f2d440",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Gang",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.25",
+    "sort_order": 19000
+  },
+  {
+    "id": "60c46e41-5e2b-4019-ac73-25d69321bbf5",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Spreeblick",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.28",
+    "sort_order": 19000
+  },
+  {
+    "id": "7711f54a-0ad2-4aea-9cef-940f4df05137",
+    "parent_id": "176d8df9-e11c-46af-aa0b-18b3a7c9b0c2",
+    "name": "Vorbereitung/Produktion",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 19000
+  },
+  {
+    "id": "a98eebc5-abe7-4c98-aca6-14e107a2e872",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 320",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.320",
+    "sort_order": 19000
+  },
+  {
+    "id": "a01306ed-a52d-437d-8c12-ea33b0da2c9a",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Außenpool",
+    "description": null,
+    "environment": "outdoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 20000
+  },
+  {
+    "id": "71e295ab-a4a6-4ffa-ae15-912752a2e4d6",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Treppe",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.50",
+    "sort_order": 20000
+  },
+  {
+    "id": "321d5a9c-1322-443e-9089-f7940137af31",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "WC",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.25.1",
+    "sort_order": 20000
+  },
+  {
+    "id": "08cb3300-b00f-43d4-982e-813242e6074d",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 321",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.321",
+    "sort_order": 20000
+  },
+  {
+    "id": "f68a18ce-6211-420c-8c6a-fbe5d68ae7d8",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Eingangshalle",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 21000
+  },
+  {
+    "id": "7862b653-23e7-48a8-a3ca-fabe5a2a1396",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Poolbereich",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.26",
+    "sort_order": 21000
+  },
+  {
+    "id": "3c0b6e46-0e07-49d9-b502-105604c304b0",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 322",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.322",
+    "sort_order": 21000
+  },
+  {
+    "id": "b9211d4b-24f1-4f64-bdbf-1b0426386644",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Zimmer 501",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.501",
+    "sort_order": 21000
+  },
+  {
+    "id": "3dc0cf7b-a6fa-45e6-a440-efcb3865bfaa",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Einfahrt",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 22000
+  },
+  {
+    "id": "63b109a2-e90e-4144-b839-62df571bce80",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Saunagang",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.27",
+    "sort_order": 22000
+  },
+  {
+    "id": "45e04e96-25b5-4024-9acb-d80a626bf232",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 323",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.323",
+    "sort_order": 22000
+  },
+  {
+    "id": "228c6ae7-5494-4633-9048-68dbe261ec9b",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Zimmer 503",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.503",
+    "sort_order": 22000
+  },
+  {
+    "id": "bc93de6d-7596-4f06-9f22-dc5d3c1a7884",
+    "parent_id": "adf72acc-0d64-4dd1-be72-b80cc3ee8b2e",
+    "name": "Privathaus Clausing",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 23000
+  },
+  {
+    "id": "57ebe51e-278a-430e-be46-bc86468a5218",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Saline",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.27.3",
+    "sort_order": 23000
+  },
+  {
+    "id": "98691014-29b2-45f4-82f9-f3c5682b46c9",
+    "parent_id": "fdbab82e-1c58-4905-a60d-8eefdf2ecf28",
+    "name": "Zimmer 325",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "2.325",
+    "sort_order": 23000
+  },
+  {
+    "id": "5822bf8f-fb72-4264-a941-93a9df6f2a6e",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Zimmer 505",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.505",
+    "sort_order": 23000
+  },
+  {
+    "id": "414bba98-4d2b-472d-ab1b-d99d2dffe262",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Sauna 90°",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.27.4",
+    "sort_order": 24000
+  },
+  {
+    "id": "5b893130-ac8d-44f6-8399-a8aa892ba9de",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Zimmer 507",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.507",
+    "sort_order": 24000
+  },
+  {
+    "id": "cb48340f-06cd-49ea-b6fa-3910d22948fa",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Kräuterkammer",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.30",
+    "sort_order": 25000
+  },
+  {
+    "id": "ead7874f-ac99-4817-8d72-94c1a2931829",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Zimmer 509",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.509",
+    "sort_order": 25000
+  },
+  {
+    "id": "1b6fb36b-b18a-4a41-bb88-c3fb03bd1fba",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Banja",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.31",
+    "sort_order": 26000
+  },
+  {
+    "id": "93a9cb07-b109-4652-98ca-ad4959ba9244",
+    "parent_id": "8a390f63-a65d-4330-81ca-10d24d311040",
+    "name": "Treppe",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "1.51",
+    "sort_order": 26000
+  },
+  {
+    "id": "604c44c9-9ecd-4062-95e7-b3ae3cac7bdb",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Banja",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.31.2",
+    "sort_order": 27000
+  },
+  {
+    "id": "1e1e6378-27bc-410c-8411-6c831e222f0a",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Flur",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.33",
+    "sort_order": 28000
+  },
+  {
+    "id": "2b8b2827-d516-45cc-996f-1e09d935ff38",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Ruheraum/Kino",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.34",
+    "sort_order": 29000
+  },
+  {
+    "id": "3f698f8c-f0cb-42ca-8008-e97b056072dd",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Meditation",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.35",
+    "sort_order": 30000
+  },
+  {
+    "id": "75ecfdbd-30e1-4e54-bd41-bdfb680c2783",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Treppe/Ausgang",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": "0.50",
+    "sort_order": 31000
+  },
+  {
+    "id": "3f990765-5aa4-45c9-bf88-783eca7753ad",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Aussenzugang Kino",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 32000
+  },
+  {
+    "id": "ea0f6058-8ef3-4740-90f7-2dee3d1c3052",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "Coaching",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 33000
+  },
+  {
+    "id": "a1ea101c-84a7-4606-8a73-baafa34bfb04",
+    "parent_id": "76e733e7-c0a0-4e48-8e17-c559b6293179",
+    "name": "WC",
+    "description": null,
+    "environment": "indoor",
+    "category": "room",
+    "room_number": null,
+    "sort_order": 34000
+  }
+]

@@ -12,6 +12,8 @@ Historical artifacts kept in the repo as a reference for what the active code re
 
 - **`AUDIT.md`** — output of an earlier whole-codebase audit (data model, backend, frontend). Useful if you want to see which issues had been flagged and which were resolved.
 
+- **`floorplans/`** — the hotel's original floor-plan PDFs (one per floor: EG, 1OG, 2OG, DG) plus `locations_for_import.json`, the canonical 266-entry hierarchy (9 buildings, 19 floors, 238 rooms) used to seed the `locations` table on any database. `backend/scripts/extract_floor_plans.py` rasterizes the PDFs into `backend/static/floorplans/` as PNGs (rendering) + SVGs (vector fallback); `backend/scripts/load_locations.py` imports the JSON. The JSON uses external UUIDs as identity so the same export reseeds two databases to the same logical hierarchy. If the floor plans or the location tree change, replace the matching file in this folder and re-run the extractor / importer.
+
 ## Replacing
 
 If the hotel's templates change:

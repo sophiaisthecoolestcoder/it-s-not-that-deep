@@ -19,9 +19,9 @@ else
   source venv/bin/activate
 fi
 
-# Install/update dependencies
+# Install/update dependencies — show progress; native wheels like pymupdf can take a minute on first install.
 echo "📦 Installing dependencies..."
-pip install -q -r requirements.txt
+pip install -r requirements.txt
 
 # Run migrations
 echo "🗄️  Running database migrations..."

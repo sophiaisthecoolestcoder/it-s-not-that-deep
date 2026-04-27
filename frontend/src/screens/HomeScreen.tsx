@@ -31,6 +31,7 @@ export default function HomeScreen() {
 
   const hasAngebote = user?.modules.includes('angebote');
   const hasBelegung = user?.modules.includes('belegung');
+  const hasLocations = user?.modules.includes('locations');
   const hasAssistant = user?.modules.includes('assistant');
 
   return (
@@ -59,6 +60,13 @@ export default function HomeScreen() {
             title={t('nav.occupancy')}
             description={t('home.occupancyDesc')}
             onPress={() => navigate({ name: 'belegung-editor' })}
+          />
+        )}
+        {hasLocations && (
+          <ModuleCard
+            title={t('nav.locations')}
+            description={t('home.locationsDesc')}
+            onPress={() => navigate({ name: 'maps-list' })}
           />
         )}
         {hasAssistant && (

@@ -23,6 +23,10 @@ import EmployeesListScreen from './src/screens/employees/EmployeesListScreen';
 import CashierScreen from './src/screens/cashier/CashierScreen';
 import InvoicesListScreen from './src/screens/cashier/InvoicesListScreen';
 import InvoiceDetailScreen from './src/screens/cashier/InvoiceDetailScreen';
+import LocationsTreeScreen from './src/screens/locations/LocationsTreeScreen';
+import MapsListScreen from './src/screens/locations/MapsListScreen';
+import MapEditorScreen from './src/screens/locations/MapEditorScreen';
+import MapViewerScreen from './src/screens/locations/MapViewerScreen';
 import { colors } from './src/theme/colors';
 
 // ── Error boundary so crashes show a message instead of blank page ──────────
@@ -99,6 +103,18 @@ function ScreenRouter() {
     case 'invoice-detail':
       body = <InvoiceDetailScreen invoiceId={screen.invoiceId} />;
       break;
+    case 'locations-tree':
+      body = <LocationsTreeScreen />;
+      break;
+    case 'maps-list':
+      body = <MapsListScreen />;
+      break;
+    case 'map-editor':
+      body = <MapEditorScreen layerId={screen.layerId} />;
+      break;
+    case 'floor-plans':
+      body = <MapViewerScreen />;
+      break;
     default:
       body = <HomeScreen />;
   }
@@ -135,8 +151,12 @@ function AppContent() {
     return <LoginScreen />;
   }
 
+  // Screens whose primary surface is a self-sized canvas need to bypass the
+  // page-level ScrollView so `flex: 1` resolves against the real viewport.
+  const fullBleed = screen.name === 'floor-plans';
+
   return (
-    <Layout>
+    <Layout fullBleed={fullBleed}>
       <ScreenRouter />
     </Layout>
   );

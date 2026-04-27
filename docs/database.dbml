@@ -351,4 +351,72 @@ Ref: cashier_invoice_items.invoice_id > cashier_invoices.id [delete: cascade]
 Ref: cashier_invoice_items.product_id > cashier_products.id [delete: set null]
 Ref: cashier_receipts.invoice_id > cashier_invoices.id [delete: cascade]
 
+// ── Locations, maps, polygons ──────────────────────────────────────────────
+
+Table locations {
+    id            integer      [pk, increment]
+    parent_id     integer      [null, note: 'self-FK; ON DELETE RESTRICT']
+    source_id     varchar(64)  [unique, note: 'external UUID — JSON imports keep identity across DBs']
+    name          varchar(200) [not null]
+    description   text
+    environment   varchar(16)  [not null, default: 'indoor', note: 'indoor | outdoor']
+    category      varchar(32)  [not null, default: 'room', note: 'building | floor | room (extensible; validated in Pydantic)']
+    room_number   varchar(64)  [note: 'free-form room label, e.g. "0.30", "1.604"']
+    sort_order    integer      [not null, default: 0]
+    created_at    timestamptz  [not null, default: `now()`]
+    updated_at    timestamptz  [not null, default: `now()`]
+
+    indexes {
+        parent_id
+        source_id [unique]
+    }
+}
+
+Table maps {
+    id            integer      [pk, increment]
+    name          varchar(200) [not null]
+    description   text
+    sort_order    integer      [not null, default: 0]
+    created_at    timestamptz  [not null, default: `now()`]
+    updated_at    timestamptz  [not null, default: `now()`]
+}
+
+Table map_layers {
+    id            integer      [pk, increment]
+    map_id        integer      [not null]
+    name          varchar(200) [not null]
+    image_url     varchar(500) [note: 'one of image_url / svg_content must be set']
+    svg_content   text
+    width         integer      [not null]
+    height        integer      [not null]
+    sort_order    integer      [not null, default: 0]
+    created_at    timestamptz  [not null, default: `now()`]
+    updated_at    timestamptz  [not null, default: `now()`]
+
+    indexes {
+        map_id
+    }
+}
+
+Table location_shapes {
+    id            integer      [pk, increment]
+    location_id   integer      [not null]
+    layer_id      integer      [not null]
+    points        jsonb        [not null, note: '[[x,y], [x,y], …] in layer native coords']
+    style         jsonb        [note: '{fill, stroke, opacity} overrides']
+    label         varchar(200)
+    created_at    timestamptz  [not null, default: `now()`]
+    updated_at    timestamptz  [not null, default: `now()`]
+
+    indexes {
+        location_id
+        layer_id
+    }
+}
+
+Ref: locations.parent_id > locations.id [delete: restrict]
+Ref: map_layers.map_id > maps.id [delete: cascade]
+Ref: location_shapes.location_id > locations.id [delete: cascade]
+Ref: location_shapes.layer_id > map_layers.id [delete: cascade]
+
 //[[vibebase.{"positions":{"employees":{"x":60,"y":60},"guests":{"x":60,"y":320},"offers":{"x":460,"y":60},"daily_briefings":{"x":460,"y":300},"users":{"x":60,"y":620},"staff_members":{"x":460,"y":600},"rooms":{"x":760,"y":60}},"preferences":{"colorScheme":"default","showNotes":true,"showIndexes":true,"showTypes":true,"snapToGrid":true,"gridSize":20},"viewport":{"x":93.21053136610232,"y":15.624702665930954,"zoom":0.6240726250000023},"collapsed":{}}]]

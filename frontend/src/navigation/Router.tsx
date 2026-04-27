@@ -21,7 +21,11 @@ export type AppScreen =
   | { name: 'conversations-list' }
   | { name: 'cashier' }
   | { name: 'invoices-list' }
-  | { name: 'invoice-detail'; invoiceId: number };
+  | { name: 'invoice-detail'; invoiceId: number }
+  | { name: 'locations-tree' }
+  | { name: 'maps-list' }
+  | { name: 'map-editor'; layerId: number }
+  | { name: 'floor-plans' };
 
 interface RouterContextValue {
   screen: AppScreen;
@@ -80,6 +84,14 @@ export function screenToPath(s: AppScreen): string {
       return '/invoices';
     case 'invoice-detail':
       return `/invoices/${s.invoiceId}`;
+    case 'locations-tree':
+      return '/locations';
+    case 'maps-list':
+      return '/maps';
+    case 'map-editor':
+      return `/maps/layer/${s.layerId}/edit`;
+    case 'floor-plans':
+      return '/floor-plans';
   }
 }
 
@@ -89,7 +101,7 @@ export function pathToScreen(path: string): AppScreen {
   const parts = clean.split('/').filter(Boolean);
   if (parts.length === 0) return { name: 'home' };
 
-  const [head, a, b] = parts;
+  const [head, a, b, c] = parts;
 
   switch (head) {
     case 'login':
@@ -141,6 +153,19 @@ export function pathToScreen(path: string): AppScreen {
       if (Number.isNaN(id)) return { name: 'invoices-list' };
       return { name: 'invoice-detail', invoiceId: id };
     }
+    case 'locations':
+      return { name: 'locations-tree' };
+    case 'maps': {
+      if (!a) return { name: 'maps-list' };
+      // /maps/layer/:id/edit
+      if (a === 'layer') {
+        const id = Number(b);
+        if (!Number.isNaN(id) && c === 'edit') return { name: 'map-editor', layerId: id };
+      }
+      return { name: 'maps-list' };
+    }
+    case 'floor-plans':
+      return { name: 'floor-plans' };
     default:
       return { name: 'home' };
   }

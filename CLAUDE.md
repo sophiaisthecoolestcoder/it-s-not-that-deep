@@ -28,6 +28,7 @@ The two frontends share the same backend but hit different namespaces: `frontend
 - `docs/cashier.md`
 - `docs/fiskaly-setup.md`
 - `docs/site.md`
+- `docs/locations.md`
 - `docs/operations.md`
 
 ## Current Runtime Picture

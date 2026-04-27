@@ -3,13 +3,16 @@ import os
 import time
 import uuid
 
+from pathlib import Path
+
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 
 from app.database import engine
-from app.routers import auth, belegung, calendar, cashier, conversations, employees, guests, llm, offers, public
+from app.routers import auth, belegung, calendar, cashier, conversations, employees, guests, llm, locations, offers, public
 
 
 # ── Logging ──────────────────────────────────────────────────────────────────
@@ -86,7 +89,15 @@ app.include_router(llm.router, prefix="/api")
 app.include_router(conversations.router, prefix="/api")
 app.include_router(calendar.router, prefix="/api")
 app.include_router(cashier.router, prefix="/api")
+app.include_router(locations.router, prefix="/api")
 app.include_router(public.router, prefix="/api")
+
+
+# ── Static assets (floor-plan PNGs / SVGs extracted from `docs/_reference/floorplans/*.pdf`) ──
+# `/static/floorplans/<slug>.png` and `.svg` are the URLs stored in `map_layers.image_url`.
+_STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+if _STATIC_DIR.is_dir():
+    app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
 
 @app.get("/api/health")

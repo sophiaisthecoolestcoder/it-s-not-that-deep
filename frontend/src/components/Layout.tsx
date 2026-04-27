@@ -5,9 +5,17 @@ import Sidebar from './Sidebar';
 
 interface LayoutProps {
   children: React.ReactNode;
+  /**
+   * Skip the page-level ScrollView and the surrounding padding so the screen
+   * can take over the full content area. Needed for screens whose primary
+   * surface is a self-managed canvas (the floor-plan viewer, the polygon
+   * editor) where a child `flex: 1` must resolve against a real viewport
+   * height — inside a ScrollView's content container, flex:1 collapses to 0.
+   */
+  fullBleed?: boolean;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, fullBleed = false }: LayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -25,13 +33,17 @@ export default function Layout({ children }: LayoutProps) {
           ) : null}
         </View>
         {/* Page content */}
-        <ScrollView
-          style={s.scroll}
-          contentContainerStyle={s.scrollContent}
-          showsVerticalScrollIndicator={true}
-        >
-          {children}
-        </ScrollView>
+        {fullBleed ? (
+          <View style={s.fullBleed}>{children}</View>
+        ) : (
+          <ScrollView
+            style={s.scroll}
+            contentContainerStyle={s.scrollContent}
+            showsVerticalScrollIndicator={true}
+          >
+            {children}
+          </ScrollView>
+        )}
       </View>
     </View>
   );
@@ -65,5 +77,10 @@ const s = StyleSheet.create({
   scrollContent: {
     padding: 24,
     paddingBottom: 48,
+  },
+  fullBleed: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 0,
   },
 });
