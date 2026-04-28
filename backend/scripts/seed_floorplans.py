@@ -1,21 +1,20 @@
 """Seed the default "Bleiche Resort" map with one layer per rendered floor-plan
-SVG that lives in `backend/static/floorplans/`.
+PNG that lives in `backend/static/floorplans/`.
 
 Idempotent: re-running updates layer metadata (width/height/image_url) but
 leaves polygon shapes untouched. Shapes drawn by staff in the editor are
 keyed by `(layer_id, location_id)` and survive re-seeds.
 
-`width`/`height` come from the SVG's `viewBox` attribute, which PyMuPDF
-emits in PDF points (1 pt = 1/72 inch). Polygon coordinates the editor
-stores live in this same point-space, so they round-trip pixel-correct
-between editor and viewer regardless of the user's zoom level.
+Each layer's `image_url` carries a `?v=<mtime>` cache-buster so the browser
+refetches the new PNG immediately after a re-render — without it, `<img>`
+caching can hide the new render behind the old one.
 
-Prerequisite: `python -m scripts.extract_floor_plans` has rendered the SVGs.
+Prerequisite: `python -m scripts.extract_floor_plans` has rendered the PNGs.
 
 Run: python -m scripts.seed_floorplans
 """
 import os
-import re
+import struct
 import sys
 from pathlib import Path
 
@@ -38,32 +37,25 @@ FLOORS = [
 ]
 
 
-_VIEWBOX_RE = re.compile(
-    r'viewBox="\s*[\d.\-]+\s+[\d.\-]+\s+([\d.]+)\s+([\d.]+)\s*"'
-)
+def read_png_dimensions(path: Path) -> tuple[int, int]:
+    """Return (width, height) of a PNG by parsing the header — no decode needed."""
+    with path.open("rb") as f:
+        sig = f.read(8)
+        if sig != b"\x89PNG\r\n\x1a\n":
+            raise ValueError(f"{path} is not a PNG")
+        f.read(4)  # IHDR length
+        if f.read(4) != b"IHDR":
+            raise ValueError(f"{path} missing IHDR")
+        width, height = struct.unpack(">II", f.read(8))
+    return width, height
 
 
-def read_svg_dimensions(path: Path) -> tuple[int, int]:
-    """Return (width, height) from the SVG's viewBox, rounded to integers.
-
-    Reads only the first 4 KB to avoid pulling a 20+ MB file into memory just
-    to grab the header — the viewBox always lives near the top.
-    """
-    with path.open("r", encoding="utf-8") as f:
-        head = f.read(4096)
-    m = _VIEWBOX_RE.search(head)
-    if not m:
-        raise ValueError(f"Could not find viewBox in {path}")
-    return int(round(float(m.group(1)))), int(round(float(m.group(2))))
-
-
-def find_svg(floor_token: str) -> Path | None:
+def find_png(floor_token: str) -> Path | None:
     """Match filenames produced by extract_floor_plans.slugify() — they end with the token."""
     token = floor_token.lower()
-    for candidate in STATIC_DIR.glob("*.svg"):
+    for candidate in STATIC_DIR.glob("*.png"):
         stem = candidate.stem.lower()
         parts = stem.split("-")
-        # The slug ends with the floor token, e.g. "ubersichtsplan-grundriss-1og"
         if parts and parts[-1] == token:
             return candidate
     return None
@@ -76,11 +68,10 @@ def seed_floorplans() -> int:
 
     session = SessionLocal()
     try:
-        # Get or create the default map
         map_name = "Bleiche Resort"
         m = session.query(Map).filter(Map.name == map_name).first()
         if m is None:
-            m = Map(name=map_name, description="Hotel floor plans (vector SVG, rendered server-side from the source PDFs)", sort_order=0)
+            m = Map(name=map_name, description="Hotel floor plans (rendered server-side at high DPI from the source PDFs)", sort_order=0)
             session.add(m)
             session.flush()
             print(f"[seed_floorplans] created map '{map_name}' (id={m.id})")
@@ -88,18 +79,13 @@ def seed_floorplans() -> int:
             print(f"[seed_floorplans] map '{map_name}' already exists (id={m.id})")
 
         for token, display_name, order in FLOORS:
-            svg = find_svg(token)
-            if svg is None:
-                print(f"[seed_floorplans]   !! no SVG matches token '{token}' — skipping")
+            png = find_png(token)
+            if png is None:
+                print(f"[seed_floorplans]   !! no PNG matches token '{token}' — skipping")
                 continue
-            width, height = read_svg_dimensions(svg)
-            # Append the file's mtime as a cache-buster: when the SVG is
-            # re-rendered (theme change, OCG cleanup change), the URL also
-            # changes and the browser refetches instead of serving a stale
-            # `<img>` cache. The static asset itself is unchanged URL-wise
-            # at the filesystem; the query string just bypasses HTTP cache.
-            mtime = int(svg.stat().st_mtime)
-            image_url = f"{URL_PREFIX}/{svg.name}?v={mtime}"
+            width, height = read_png_dimensions(png)
+            mtime = int(png.stat().st_mtime)
+            image_url = f"{URL_PREFIX}/{png.name}?v={mtime}"
 
             layer = (
                 session.query(MapLayer)
@@ -117,13 +103,13 @@ def seed_floorplans() -> int:
                     sort_order=order,
                 )
                 session.add(layer)
-                print(f"[seed_floorplans]   + created layer '{display_name}' ({width}x{height} pt) -> {image_url}")
+                print(f"[seed_floorplans]   + created layer '{display_name}' ({width}x{height} px) -> {image_url}")
             else:
                 layer.image_url = image_url
                 layer.width = width
                 layer.height = height
                 layer.sort_order = order
-                print(f"[seed_floorplans]   ~ updated layer '{display_name}' ({width}x{height} pt) -> {image_url}")
+                print(f"[seed_floorplans]   ~ updated layer '{display_name}' ({width}x{height} px) -> {image_url}")
 
         session.commit()
         return 0

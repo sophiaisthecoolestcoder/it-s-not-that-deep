@@ -25,6 +25,13 @@ frontend/web/pdf.worker.min.mjs
 frontend/web/pdfjs-standard-fonts/
 frontend/web/pdfjs-cmaps/
 
+# Local-only floor-plan inspector tool. Run with:
+#   python -m scripts.floorplan_inspector
+# It edits docs/_reference/floorplans/floorplan_overrides.json (which IS
+# tracked — that's the canonical theme config the team shares). The
+# inspector itself is dev-only and not part of the shipped product.
+backend/scripts/floorplan_inspector.py
+
 # iOS
 frontend/ios/Pods/
 frontend/ios/build/

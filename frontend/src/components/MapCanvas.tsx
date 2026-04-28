@@ -61,6 +61,11 @@ interface Props {
   onSelectShape?: (id: number | null) => void;
   onMoveVertex?: (shapeId: number, vertexIndex: number, next: Point) => void;
   onMoveShape?: (shapeId: number, dx: number, dy: number) => void;
+  /** Insert a new vertex into a surface partway along an edge. Fired when
+   *  the user double-clicks the selected surface's outline. */
+  onSplitEdge?: (shapeId: number, edgeIndex: number, point: Point) => void;
+  /** Remove a vertex. Fired when the user shift-clicks a vertex handle. */
+  onDeleteVertex?: (shapeId: number, vertexIndex: number) => void;
 }
 
 const MIN_ZOOM = 0.05;
@@ -103,6 +108,34 @@ function distance(a: Point, b: Point): number {
   return Math.hypot(a[0] - b[0], a[1] - b[1]);
 }
 
+// Project `p` onto the segment a→b, returning the projected point + the
+// distance from `p` to that projection. Used to find which edge of a polygon
+// is closest to a click so we know where to insert a new vertex.
+function projectOntoSegment(p: Point, a: Point, b: Point): { point: Point; distance: number } {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const len2 = dx * dx + dy * dy;
+  if (len2 === 0) {
+    return { point: a, distance: distance(p, a) };
+  }
+  const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2));
+  const proj: Point = [a[0] + t * dx, a[1] + t * dy];
+  return { point: proj, distance: distance(p, proj) };
+}
+
+function nearestEdge(points: Point[], p: Point): { edgeIndex: number; point: Point; distance: number } | null {
+  let best: { edgeIndex: number; point: Point; distance: number } | null = null;
+  for (let i = 0; i < points.length; i++) {
+    const a = points[i];
+    const b = points[(i + 1) % points.length];
+    const r = projectOntoSegment(p, a, b);
+    if (best == null || r.distance < best.distance) {
+      best = { edgeIndex: i, point: r.point, distance: r.distance };
+    }
+  }
+  return best;
+}
+
 function getWebSvgPoint(clientX: number, clientY: number, svg: SVGSVGElement): Point {
   const pt = svg.createSVGPoint();
   pt.x = clientX;
@@ -139,10 +172,40 @@ function WebCanvas({
   onSelectShape,
   onMoveVertex,
   onMoveShape,
+  onSplitEdge,
+  onDeleteVertex,
 }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const overlaySvgRef = useRef<SVGSVGElement>(null);
   const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 });
+
+  // Dynamic GPU compositing: turn `will-change: transform` ON during active
+  // pan/zoom so the browser composites the floor plan as a cached texture
+  // (smooth, but vector content stretches), then turn it OFF 200ms after
+  // the last interaction so the browser re-rasterises the SVG at the final
+  // zoom (crisp). This is the "fast while moving, sharp when settled"
+  // pattern used by image viewers — needed because a 24 MB SVG with ~50k
+  // paths is too heavy for the browser to repaint per frame without
+  // compositing help.
+  const idleTimer = useRef<number | null>(null);
+  const markInteracting = useCallback(() => {
+    const el = innerRef.current;
+    if (el && el.style.willChange !== 'transform') {
+      el.style.willChange = 'transform';
+    }
+    if (idleTimer.current != null) {
+      clearTimeout(idleTimer.current);
+    }
+    idleTimer.current = window.setTimeout(() => {
+      const elNow = innerRef.current;
+      if (elNow) elNow.style.willChange = 'auto';
+      idleTimer.current = null;
+    }, 200) as unknown as number;
+  }, []);
+  useEffect(() => () => {
+    if (idleTimer.current != null) clearTimeout(idleTimer.current);
+  }, []);
 
   // Active pointer tracking — keyed by pointerId. Used to distinguish
   // single-pointer drag (pan / vertex / shape) from two-pointer pinch.
@@ -210,6 +273,7 @@ function WebCanvas({
     (e: WheelEvent) => {
       if (!wrapperRef.current) return;
       e.preventDefault();
+      markInteracting();
       const rect = wrapperRef.current.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
@@ -225,7 +289,7 @@ function WebCanvas({
         };
       });
     },
-    [],
+    [markInteracting],
   );
 
   useEffect(() => {
@@ -325,6 +389,7 @@ function WebCanvas({
       const localY = (startSy - startV.y) / startV.zoom;
       const sx = midX - rect.left;
       const sy = midY - rect.top;
+      markInteracting();
       setViewport({
         zoom: nextZoom,
         x: sx - localX * nextZoom,
@@ -337,6 +402,7 @@ function WebCanvas({
       const start = panStart.current;
       const dx = e.clientX - start.x;
       const dy = e.clientY - start.y;
+      markInteracting();
       setViewport((v) => ({ zoom: v.zoom, x: start.vx + dx, y: start.vy + dy }));
       return;
     }
@@ -394,6 +460,12 @@ function WebCanvas({
   const onVertexDown = (e: React.PointerEvent, shapeId: number, vertexIndex: number) => {
     if (tool !== 'select') return;
     e.stopPropagation();
+    // Shift-click on a vertex removes it (provided the shape stays a valid
+    // polygon — the editor refuses to drop below 3 points).
+    if (e.shiftKey) {
+      onDeleteVertex?.(shapeId, vertexIndex);
+      return;
+    }
     (e.currentTarget as unknown as { setPointerCapture?: (id: number) => void }).setPointerCapture?.(e.pointerId);
     setVertexDrag({ shapeId, vertexIndex });
   };
@@ -407,6 +479,18 @@ function WebCanvas({
       (e.currentTarget as unknown as { setPointerCapture?: (id: number) => void }).setPointerCapture?.(e.pointerId);
       setShapeDrag({ shapeId: shape.id, last: pt });
     }
+  };
+
+  // Double-click on an *already-selected* surface inserts a new vertex
+  // partway along the nearest edge. The first click selects, the second
+  // (within the dblclick window) splits — that's the standard polygon-
+  // editor convention.
+  const onShapeDoubleClick = (e: React.MouseEvent, shape: DraftShape) => {
+    if (tool !== 'select' || shape.id !== selectedShapeId || !overlaySvgRef.current) return;
+    e.stopPropagation();
+    const pt = getWebSvgPoint(e.clientX, e.clientY, overlaySvgRef.current);
+    const hit = nearestEdge(shape.points, pt);
+    if (hit) onSplitEdge?.(shape.id, hit.edgeIndex, hit.point);
   };
 
   // ── Render ──────────────────────────────────────────────────────────────
@@ -445,7 +529,10 @@ function WebCanvas({
             width: '100%',
             height: '100%',
             overflow: 'hidden',
-            background: colors.dark100,
+            // Same brand cream the SVG bakes into its own `<rect>`
+            // background, so the canvas surround blends seamlessly with
+            // the floor plan when zoomed out.
+            background: colors.brand50,
             position: 'relative',
             cursor,
             userSelect: 'none',
@@ -454,6 +541,7 @@ function WebCanvas({
         }
       >
         <div
+          ref={innerRef}
           style={
             {
               position: 'absolute',
@@ -464,14 +552,13 @@ function WebCanvas({
               width: layer.width,
               height: layer.height,
               pointerEvents: 'none',
-              // Deliberately NO `will-change: transform` / `translate3d` /
-              // `backface-visibility: hidden`. All three promote this
-              // subtree to a GPU texture layer cached at the *current*
-              // rasterised size. When the user zooms in, the browser
-              // stretches that cached texture instead of re-rasterising
-              // the SVG — that's exactly what causes the pixelation we
-              // saw. Plain 2D transforms let the browser re-rasterise on
-              // every scale change.
+              // `will-change: transform` is set DYNAMICALLY by
+              // `markInteracting()` during pan/zoom and unset 200ms after
+              // the last interaction. While set, the browser composites
+              // this subtree as a GPU texture (smooth panning of the 24
+              // MB / ~50k-path SVG). When unset, the browser re-rasterises
+              // the SVG at the current scale → vector-crisp again. That's
+              // why this style intentionally has no `willChange` here.
             } as unknown as React.CSSProperties
           }
         >
@@ -540,6 +627,7 @@ function WebCanvas({
                     strokeWidth={selected ? 3 / viewport.zoom : 2 / viewport.zoom}
                     opacity={applied.opacity ?? 1}
                     onPointerDown={(e) => onShapePointerDown(e, s)}
+                    onDoubleClick={(e) => onShapeDoubleClick(e, s)}
                   />
                   {selected && tool === 'select' &&
                     s.points.map((p, i) => (

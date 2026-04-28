@@ -152,8 +152,9 @@ function AppContent() {
   }
 
   // Screens whose primary surface is a self-sized canvas need to bypass the
-  // page-level ScrollView so `flex: 1` resolves against the real viewport.
-  const fullBleed = screen.name === 'floor-plans';
+  // page-level ScrollView so `flex: 1` resolves against the real viewport
+  // (otherwise the left panel's content height pushes the canvas down).
+  const fullBleed = screen.name === 'floor-plans' || screen.name === 'map-editor';
 
   return (
     <Layout fullBleed={fullBleed}>

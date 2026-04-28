@@ -72,12 +72,9 @@ export default function LocationsTreeScreen() {
     load();
   }, [load]);
 
-  // Auto-expand roots on first load so the tree isn't fully collapsed
-  useEffect(() => {
-    if (tree.length && expanded.size === 0) {
-      setExpanded(new Set(tree.map((r) => r.id)));
-    }
-  }, [tree, expanded.size]);
+  // Tree starts fully collapsed — the user expands what they want to see
+  // via the chevrons. Auto-expanding roots used to be the default but
+  // ended up dominating the screen with 9 buildings + their floors.
 
   const flat = useMemo(() => flattenTree(tree), [tree]);
   const visible = useMemo(() => {

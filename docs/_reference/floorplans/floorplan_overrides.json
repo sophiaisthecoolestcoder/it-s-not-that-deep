@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "_comment": "PASSTHROUGH preset: source PDFs render unaltered. Embedded raster blobs are stripped (saves ~5 MB and a lot of parse cost), and a global stroke-width override thins the natural CAD walls so they don't dominate. The cream `<rect>` background blends with the canvas surround. Per-floor `offset_x` / `offset_y` / `scale` align floors that the CAD designer drew at slightly different page positions — start at 0/0/1 and tweak from the inspector or directly in this JSON until floors stack cleanly.",
+  "page_background": "#faf6f1",
+  "default_stroke_width": 0.25,
+  "strip_rasters": true,
+  "strip_text": false,
+  "categories": {},
+  "layer_assignments": {},
+  "global_hide_ids": [],
+  "per_floor": {
+    "eg":  { "hide_ids": [], "offset_x": 0, "offset_y": 0, "scale": 1 },
+    "1og": { "hide_ids": [], "offset_x": 0, "offset_y": 0, "scale": 1 },
+    "2og": { "hide_ids": [], "offset_x": 0, "offset_y": 0, "scale": 1 },
+    "dg":  { "hide_ids": [], "offset_x": 0, "offset_y": 0, "scale": 1 }
+  },
+  "hide_text_globally": false,
+  "hide_raster_images_globally": false
+}

@@ -148,11 +148,38 @@ export default function MapEditorScreen({ layerId }: Props) {
   }, [tool, draftPoints, selectedShapeId]);
 
   const treeRows = useMemo(() => buildIndentedList(locations), [locations]);
+
+  // Locations tree starts fully collapsed (only roots visible). Each row's
+  // chevron toggles expansion; while a filter is active we ignore the
+  // collapse state so search hits aren't hidden.
+  const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
+  const toggleNodeExpansion = useCallback((id: number) => {
+    setExpandedNodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
   const filteredTree = useMemo(() => {
-    if (!filterText.trim()) return treeRows;
-    const q = filterText.trim().toLowerCase();
-    return treeRows.filter((r) => r.name.toLowerCase().includes(q));
-  }, [treeRows, filterText]);
+    if (filterText.trim()) {
+      const q = filterText.trim().toLowerCase();
+      return treeRows.filter((r) => r.name.toLowerCase().includes(q));
+    }
+    // No filter — collapse non-expanded subtrees.
+    const byId = new Map(treeRows.map((r) => [r.id, r]));
+    return treeRows.filter((row) => {
+      let pid: number | null = row.parent_id;
+      while (pid != null) {
+        if (!expandedNodes.has(pid)) return false;
+        const parent = byId.get(pid);
+        if (!parent) break;
+        pid = parent.parent_id;
+      }
+      return true;
+    });
+  }, [treeRows, filterText, expandedNodes]);
 
   const locationById = useMemo(() => {
     const m = new Map<number, Location>();
@@ -225,6 +252,33 @@ export default function MapEditorScreen({ layerId }: Props) {
     setHasUnsaved(true);
   }, []);
 
+  // Insert a new vertex into a surface partway along an edge — fired when
+  // the user double-clicks an already-selected surface's edge.
+  const onSplitEdge = useCallback((shapeId: number, edgeIndex: number, point: Point) => {
+    setShapes((prev) =>
+      prev.map((s) => {
+        if (s.id !== shapeId) return s;
+        const next = [...s.points];
+        next.splice(edgeIndex + 1, 0, point);
+        return { ...s, points: next };
+      }),
+    );
+    setHasUnsaved(true);
+  }, []);
+
+  // Remove a vertex — fired when the user shift-clicks a vertex handle on
+  // the selected surface. We never let a polygon collapse below 3 points.
+  const onDeleteVertex = useCallback((shapeId: number, vertexIndex: number) => {
+    setShapes((prev) =>
+      prev.map((s) => {
+        if (s.id !== shapeId) return s;
+        if (s.points.length <= 3) return s;
+        return { ...s, points: s.points.filter((_, i) => i !== vertexIndex) };
+      }),
+    );
+    setHasUnsaved(true);
+  }, []);
+
   const onSelectShape = (id: number | null) => {
     setSelectedShapeId(id);
     if (id != null) {
@@ -249,8 +303,8 @@ export default function MapEditorScreen({ layerId }: Props) {
     if (unassigned.length) {
       addToast({
         type: 'warning',
-        title: 'Unassigned shapes',
-        message: `${unassigned.length} shape(s) have no location. Assign each before saving.`,
+        title: 'Unassigned surfaces',
+        message: `${unassigned.length} surface(s) have no location. Assign each before saving.`,
       });
       return;
     }
@@ -266,7 +320,7 @@ export default function MapEditorScreen({ layerId }: Props) {
       const saved = await api.replaceLayerShapes(layerId, payload);
       setShapes(saved.map(toDraft));
       setHasUnsaved(false);
-      addToast({ type: 'success', title: 'Saved', message: `${saved.length} shape(s) on this layer.` });
+      addToast({ type: 'success', title: 'Saved', message: `${saved.length} surface(s) on this layer.` });
     } catch (e) {
       addToast({ type: 'error', title: 'Save failed', message: (e as Error).message });
     } finally {
@@ -332,17 +386,33 @@ export default function MapEditorScreen({ layerId }: Props) {
               onPress={() => setSelectedLocationId(null)}
               style={[s.treeRow, selectedLocationId == null && s.treeRowActive]}
             >
+              <View style={s.chevronCell} />
               <Text style={s.treeRowText}>— None —</Text>
             </Pressable>
             {filteredTree.map((row) => {
               const isSelected = selectedLocationId === row.id;
               const count = shapeCountByLocation.get(row.id) ?? 0;
+              const open = expandedNodes.has(row.id);
               return (
                 <Pressable
                   key={row.id}
-                  style={[s.treeRow, { paddingLeft: 10 + row.depth * 12 }, isSelected && s.treeRowActive]}
+                  style={[s.treeRow, { paddingLeft: 6 + row.depth * 14 }, isSelected && s.treeRowActive]}
                   onPress={() => setSelectedLocationId(row.id)}
                 >
+                  {row.hasChildren ? (
+                    <Pressable
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        toggleNodeExpansion(row.id);
+                      }}
+                      style={s.chevronCell}
+                      hitSlop={8}
+                    >
+                      <Text style={s.chevronText}>{open ? '▾' : '▸'}</Text>
+                    </Pressable>
+                  ) : (
+                    <View style={s.chevronCell} />
+                  )}
                   <Text style={[s.treeRowText, isSelected && s.treeRowTextActive]} numberOfLines={1}>{row.name}</Text>
                   {count > 0 && <Text style={s.treeCount}>{count}</Text>}
                 </Pressable>
@@ -351,9 +421,11 @@ export default function MapEditorScreen({ layerId }: Props) {
           </ScrollView>
           <View style={s.hintBox}>
             <Text style={s.hintText}>
-              1. Click a location on the left.{'\n'}
-              2. Use "Draw" (P) to place vertices on the canvas. Press Enter or click near the first vertex to close.{'\n'}
-              3. The new shape is attached to the selected location. Re-assign from the right panel as needed.
+              1. Click a location on the left (use ▸ to expand).{'\n'}
+              2. Use "Draw" (P) to place vertices on the plan. Click the first vertex (or press Enter) to close.{'\n'}
+              3. The new surface attaches to the selected location. One location can carry multiple surfaces.{'\n'}
+              4. Edit: Select (V) a surface, drag vertices, drag the body to move it.{'\n'}
+              5. Double-click an edge to insert a vertex. Shift-click a vertex to remove it.
             </Text>
           </View>
         </View>
@@ -372,15 +444,17 @@ export default function MapEditorScreen({ layerId }: Props) {
             onSelectShape={onSelectShape}
             onMoveVertex={onMoveVertex}
             onMoveShape={onMoveShape}
+            onSplitEdge={onSplitEdge}
+            onDeleteVertex={onDeleteVertex}
           />
         </View>
 
-        {/* Right panel: shape list + properties */}
+        {/* Right panel: surface list + properties */}
         <View style={s.rightPanel}>
-          <Text style={s.panelTitle}>Shapes on this layer ({shapes.length})</Text>
+          <Text style={s.panelTitle}>Surfaces on this layer ({shapes.length})</Text>
           <ScrollView style={s.shapesList}>
             {shapes.length === 0 && (
-              <Text style={s.emptyText}>No shapes yet. Pick a location, switch to Draw (P), and click around the room on the plan.</Text>
+              <Text style={s.emptyText}>No surfaces yet. Pick a location, switch to Draw (P), and click around the room on the plan.</Text>
             )}
             {shapes.map((shape) => {
               const loc = shape.location_id != null ? locationById.get(shape.location_id) : null;
@@ -406,7 +480,7 @@ export default function MapEditorScreen({ layerId }: Props) {
 
           {selectedShape && (
             <View style={s.propsBox}>
-              <Text style={s.panelTitle}>Selected shape</Text>
+              <Text style={s.panelTitle}>Selected surface</Text>
               <Text style={s.label}>Assigned location</Text>
               <ScrollView style={{ maxHeight: 180 }}>
                 <Pressable
@@ -426,7 +500,7 @@ export default function MapEditorScreen({ layerId }: Props) {
                 ))}
               </ScrollView>
               <TouchableOpacity style={[s.dangerBtn, { marginTop: 10 }]} onPress={() => deleteShape(selectedShape.id)}>
-                <Text style={s.dangerBtnText}>Delete shape (Del)</Text>
+                <Text style={s.dangerBtnText}>Delete surface (Del)</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -437,7 +511,7 @@ export default function MapEditorScreen({ layerId }: Props) {
         <View style={s.modalBackdrop}>
           <View style={s.modalCard}>
             <Text style={s.modalTitle}>Unsaved changes</Text>
-            <Text style={s.modalBody}>You have unsaved polygon changes on this layer. Leave anyway?</Text>
+            <Text style={s.modalBody}>You have unsaved surface changes on this layer. Leave anyway?</Text>
             <View style={s.modalButtons}>
               <TouchableOpacity style={s.secondaryBtn} onPress={() => setConfirmLeave(false)}>
                 <Text style={s.secondaryBtnText}>Stay</Text>
@@ -527,13 +601,23 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 6,
-    paddingHorizontal: 10,
+    paddingHorizontal: 6,
     borderBottomWidth: 1,
     borderBottomColor: colors.belSoftBorder,
   },
   treeRowActive: { backgroundColor: colors.brand50 },
   treeRowText: { fontFamily: fonts.sans, fontSize: 12, color: colors.dark700, flex: 1 },
   treeRowTextActive: { color: colors.brand700, fontWeight: '600' },
+  chevronCell: {
+    width: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chevronText: {
+    fontSize: 10,
+    color: colors.dark500,
+    fontFamily: fonts.sans,
+  },
   treeCount: {
     fontFamily: fonts.sans,
     fontSize: 10,
